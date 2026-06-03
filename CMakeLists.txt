@@ -23,6 +23,7 @@ option(BUILD_SHARED_LIBS       "Build Shared Library (OFF for Static)"          
 option(BUILD_TESTS             "Build Tests using the Clar suite"                       ON)
 option(BUILD_CLI               "Build the command-line interface"                       ON)
 option(BUILD_EXAMPLES          "Build library usage example apps"                      OFF)
+option(BUILD_WOC               "Build the WoC custom object-extraction tools"           ON)
 option(BUILD_FUZZERS           "Build the fuzz targets"                                OFF)
 
 # Suggested functionality that may not be available on a per-platform basis
@@ -135,6 +136,10 @@ if(BUILD_FUZZERS)
 		message(FATAL_ERROR "Cannot build the fuzzer and the tests or examples together")
 	endif()
 	add_subdirectory(fuzzers)
+endif()
+
+if(BUILD_WOC)
+	add_subdirectory(woc)
 endif()
 
 
