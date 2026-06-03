@@ -4,13 +4,21 @@ out=${3:-out}
 DT=202605
 base=New$DT$ver
 
-
+. "${WOC_CONFIG:-$HOME/bin/jetstream2.config}" 2>/dev/null
+: "${VOL:=/media/volume}"; : "${TREES:=$VOL/trees}"
+: "${RSYNC_DEST:=da8:/mnt/ordos/data/data/update}"; : "${HASOBJ_HOST:=da5}"
 
 [[ -d $ver.$m ]] || exit
-DST=/media/volume/$out/$ver.$m
+DST=$VOL/$out/$ver.$m
 mkdir -p $DST
 cd $ver.$m
 
+# gate: do not start the grab until the clone/list step (doOtrVer.sh) finished.
+# STAGE lifecycle (this repo folder): cloning -> listed -> grabbing -> rsynced -> verified
+grep -qE '^(listed|grabbing|rsynced|verified)\b' STAGE 2>/dev/null || {
+  echo "$ver.$m: STAGE='$(cat STAGE 2>/dev/null)' -- clone/list not finished; skipping grab" >&2
+  exit 1; }
+echo "grabbing $(date '+%F %T')" > STAGE
 
 cp list$DT.${ver}1.$m  CopyList.${ver}1.$m
 nlines=$(cat CopyList.${ver}1.$m |wc -l);  
@@ -22,7 +30,7 @@ for l in {00..15}
 do 
 (cat CopyList.${ver}1.$m.$l | while read repo; do  [[ -d $repo/ ]] && $HOME/bin/gitListSimp.sh $repo | $HOME/bin/classify $repo 2>> $DST/$base.$m.$l.olist.err
 done | gzip > $DST/$base.$m.$l.olist.gz; \
-zcat $DST/$base.$m.$l.olist.gz | ssh da5 -At '$HOME/lookup/cleanBlb.perl | $HOME/bin/hasObj.perl' | gzip > $DST/todo.$m.$l) & 
+zcat $DST/$base.$m.$l.olist.gz | ssh $HASOBJ_HOST -At '$HOME/lookup/cleanBlb.perl | $HOME/bin/hasObj.perl' | gzip > $DST/todo.$m.$l) & 
 #rsync -av *.$l.olist.gz da5:/data/play/$ver/; \
 #ssh da5 "/data/play/V4/toTodo1.sh $m $l" < /dev/null
 #) &
@@ -65,8 +73,8 @@ done
 wait 2>/dev/null
 $HOME/bin/deOffend.sh $m $ver $out      # final sweep for shards finished between polls
 
-rsync -av list$DT.* $DST/*.olist.gz $DST/*.{blob,commit,tree,tag}.{bin,idx} da8:/mnt/ordos/data/data/update/$ver/ \
-  && echo "rsynced $(date '+%F %T')" > /media/volume/trees/$ver.$m/STAGE
+rsync -av list$DT.* $DST/*.olist.gz $DST/*.{blob,commit,tree,tag}.{bin,idx} $RSYNC_DEST/$ver/ \
+  && echo "rsynced $(date '+%F %T')" > $TREES/$ver.$m/STAGE
 # The repo-folder STAGE marker progresses: rsynced -> verified. This deOffend
 # call confirms no oversized shards remain and upgrades STAGE to "verified ..."
 # -- then it is safe to delete the repo clones and the dumps. (The cron

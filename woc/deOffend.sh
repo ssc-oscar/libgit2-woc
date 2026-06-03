@@ -16,9 +16,11 @@
 #
 #   deOffend.sh <m> <ver> [out]      e.g.  deOffend.sh 030 V2605 out
 m=$1; ver=$2; out=${3:-out}; DT=202605; base=New$DT$ver
-DST=/media/volume/$out/$ver.$m
-REPOS=/media/volume/trees/$ver.$m
-OFF=$HOME/trees/offenders
+. "${WOC_CONFIG:-$HOME/bin/jetstream2.config}" 2>/dev/null
+: "${VOL:=/media/volume}"; : "${TREES:=$VOL/trees}"; : "${OFFENDERS:=$TREES/offenders}"
+DST=$VOL/$out/$ver.$m
+REPOS=$TREES/$ver.$m
+OFF=$OFFENDERS
 SHARD_MIN=100000000000      # 100 GB
 REPO_MIN=30000000000        #  30 GB
 

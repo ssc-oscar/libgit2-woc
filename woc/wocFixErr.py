@@ -21,12 +21,28 @@ Usage:
 """
 import re, os, sys, glob, subprocess, shutil
 
-OUT_ROOTS = ["/media/volume/out", "/media/volume/b"]
-TREES     = "/media/volume/trees"
+def _load_config():
+    """Read KEY=VALUE pairs from jetstream2.config (same file the bash tools source)."""
+    cfg, path = {}, os.environ.get("WOC_CONFIG", os.path.expanduser("~/bin/jetstream2.config"))
+    try:
+        for line in open(path):
+            line = line.split('#', 1)[0].strip()
+            if '=' in line:
+                k, v = line.split('=', 1)
+                cfg[k.strip()] = v.strip().strip('"').strip("'")
+    except FileNotFoundError:
+        pass
+    return cfg
+
+_CFG      = _load_config()
 HOME      = os.path.expanduser("~")
+VOL       = _CFG.get("VOL", "/media/volume")
+TREES     = _CFG.get("TREES", f"{VOL}/trees")
+DUMP_DIRS = _CFG.get("DUMP_DIRS", "out b").split()
+OUT_ROOTS = [f"{VOL}/{d}" for d in DUMP_DIRS]
 GRAB      = f"perl -I {HOME}/lib64/perl5 {HOME}/bin/grabGitIType.perl"
 TREE_BK   = f"{TREES}/woc_tree_backups"            # big tree backups on large disk
-OFFENDERS = f"{TREES}/offenders"                   # running registry: repo;size;summary
+OFFENDERS = _CFG.get("OFFENDERS", f"{TREES}/offenders")   # registry: repo;size;excluded;summary
 
 def record_offender(repo, gb, summary, excluded=""):
     """Append 'repo;size;excluded;summary' to the registry, once per repo.
