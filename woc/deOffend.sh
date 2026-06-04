@@ -1,18 +1,21 @@
 #!/bin/bash
-# Shrink oversized per-shard blob dumps by excluding repos whose blobs dominate.
-# Safe to call repeatedly (e.g. every 30 min) WHILE the grab is still running --
-# grabbing some repos can take days, so we don't wait for the whole shard.
+# Shrink oversized blob dumps by excluding repos whose blobs dominate. Safe to
+# call repeatedly (e.g. every 30 min) WHILE the grab is still running -- some
+# repos take days, so we don't wait for the whole shard.
 #
-# For each shard whose blob.bin > SHARD_MIN, find repos contributing > REPO_MIN
-# of (compressed) blob bytes (from the possibly-partial blob.idx):
-#   * if a grabGitI worker for that shard is still running, kill it and relaunch
-#     the FULL grab excluding the offenders' blobs (in the background);
-#   * if the shard's grab already finished, re-extract its BLOBS only excluding
-#     the offenders and swap in the smaller dump (commit/tree/tag left intact).
-# Each offender is appended once to ~/trees/offenders as
+# Two offender tests:
+#   PER-SHARD : a shard whose blob.bin > SHARD_MIN AND a repo contributing
+#               > REPO_MIN of (compressed) blob bytes in that shard.
+#   AGGREGATE : a repo whose blob bytes summed over ALL shards of the dataset
+#               exceed AGG_REPO_MIN -- catches repos that stay under REPO_MIN in
+#               every shard yet waste a lot in total (blobs spread across shards).
+# For each offending shard: if a grabGitI worker is still running, kill it and
+# relaunch the FULL grab excluding the offenders' blobs; otherwise re-extract
+# the shard's BLOBS only (commit/tree/tag left intact) and swap in the smaller
+# dump. Each offender is appended once to ~/trees/offenders as
 #   repo;size;excluded <date>;summary
-# A per-shard marker (<base>.<l>.excluded) accumulates excluded repos so we do
-# not repeatedly kill the same relaunched grab.
+# A per-shard marker (<base>.<l>.excluded) accumulates excluded repos so a
+# relaunched grab is not re-killed.
 #
 #   deOffend.sh <m> <ver> [out]      e.g.  deOffend.sh 030 V2605 out
 m=$1; ver=$2; out=${3:-out}; DT=202605; base=New$DT$ver
@@ -21,8 +24,9 @@ m=$1; ver=$2; out=${3:-out}; DT=202605; base=New$DT$ver
 DST=$VOL/$out/$ver.$m
 REPOS=$TREES/$ver.$m
 OFF=$OFFENDERS
-SHARD_MIN=100000000000      # 100 GB
-REPO_MIN=30000000000        #  30 GB
+SHARD_MIN=100000000000      # 100 GB - per-shard blob.bin trigger
+REPO_MIN=30000000000        #  30 GB - per-shard repo trigger
+: "${AGG_REPO_MIN:=50000000000}"   # 50 GB - cross-shard (aggregate) repo trigger
 
 # per-dataset lock so the inline runExo loop and the cron watchdog never act on
 # the same dataset at once (non-blocking: if busy, another instance has it)
@@ -34,37 +38,53 @@ cd "$REPOS" || exit 0
 today=$(date +%F)
 killtree(){ local p=$1 c; for c in $(pgrep -P "$p" 2>/dev/null); do killtree "$c"; done; kill -TERM "$p" 2>/dev/null; }
 
+# ---- aggregate offenders (cross-shard), cached by an idx signature ----------
+aggcache=$DST/$base.$m.aggoff; aggsig=$DST/$base.$m.aggsig
+sig=$(stat -c '%n:%s:%Y' $DST/$base.$m.*.blob.idx 2>/dev/null | md5sum | cut -d' ' -f1)
+if [[ ! -s $aggcache || $(cat "$aggsig" 2>/dev/null) != "$sig" ]]; then
+  awk -F';' '
+    FNR==1 { n=split(FILENAME,a,"."); shard=""; for(i=1;i<=n;i++) if(a[i]=="blob"){shard=a[i-1];break} }
+    shard!="" { s[$5]+=$2; k=$5"@"shard; if(!(k in seen)){seen[k]=1; sh[$5]=sh[$5]" "shard} }
+    END { for(r in s) if(s[r]>MIN) print r"\t"sh[r]"\t"s[r] }
+  ' MIN="$AGG_REPO_MIN" $DST/$base.$m.*.blob.idx 2>/dev/null > "$aggcache"
+  echo "$sig" > "$aggsig"
+fi
+
 for l in {00..15}; do
   binf=$DST/$base.$m.$l.blob.bin
   [[ -f $binf ]] || continue
-  sz=$(stat -c%s "$binf"); (( sz > SHARD_MIN )) || continue
+  sz=$(stat -c%s "$binf" 2>/dev/null || echo 0)
 
-  # offenders (bytes;repo) from the (possibly partial) blob.idx, largest first
-  mapfile -t offs < <("$HOME/bin/largest.sh" "$DST/$base.$m.$l.blob" \
-                      | awk -F';' -v t=$REPO_MIN '$1>t{print $1";"$2}')
-  (( ${#offs[@]} )) || continue
+  declare -A cand=()
+  # (a) per-shard offenders -- only when the shard itself is oversized
+  if (( sz > SHARD_MIN )); then
+    while IFS=';' read -r by rp; do [[ -n $rp ]] && cand["$rp"]=$by; done \
+      < <("$HOME/bin/largest.sh" "$DST/$base.$m.$l.blob" | awk -F';' -v t=$REPO_MIN '$1>t{print $1";"$2}')
+  fi
+  # (b) aggregate offenders that appear in this shard -- regardless of shard size
+  while IFS=$'\t' read -r rp shards tot; do
+    [[ -n $rp && " $shards " == *" $l "* ]] && cand["$rp"]=$tot
+  done < "$aggcache"
+  (( ${#cand[@]} )) || continue
 
-  # accumulate excluded repos in a marker; only act if there is a NEW one
+  # accumulate excluded repos in a marker; only act on a NEW one
   mark=$DST/$base.$m.$l.excluded; touch "$mark"; newoff=0
-  for o in "${offs[@]}"; do r=${o#*;}
-    grep -qxF "$r" "$mark" || { echo "$r" >> "$mark"; newoff=1; }
+  for rp in "${!cand[@]}"; do
+    grep -qxF "$rp" "$mark" || { echo "$rp" >> "$mark"; newoff=1; }
   done
-  (( newoff )) || continue          # offenders already being excluded by a relaunch
+  (( newoff )) || continue
   pat=$(paste -sd'|' "$mark")
 
   pid=$(pgrep -f "grabGitI(Type)?\.perl .*/$base\.$m\.$l\$")
   echo "[deOffend $(date '+%F %T')] $base.$m.$l ($((sz/1000000000))GB) exclude=$(paste -sd, "$mark") live=${pid:-none}" >&2
 
   if [[ -n $pid ]]; then
-    # still grabbing: kill the worker subtree, relaunch FULL grab w/o offenders
-    for p in $pid; do killtree "$p"; done
-    sleep 2
+    for p in $pid; do killtree "$p"; done; sleep 2
     nohup bash -c "cd '$REPOS' && gunzip -c '$DST/$base.$m.olist.$l.gz' \
         | grep -Ev '(${pat});blob' \
         | perl -I '$HOME/lib64/perl5' '$HOME/bin/grabGitI.perl' '$DST/$base.$m.$l' \
         2> '$DST/$base.$m.$l.err'" >/dev/null 2>&1 &
   else
-    # shard finished: re-extract blobs only without offenders, swap in
     gunzip -c "$DST/$base.$m.olist.$l.gz" | awk -F';' '$2=="blob"' | grep -Ev "(${pat});blob" \
       | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitIType.perl" "$DST/$base.$m.$l.rb" blob \
       2> "$DST/$base.$m.$l.deoff.err"
@@ -74,13 +94,13 @@ for l in {00..15}; do
     fi
   fi
 
-  # log offenders (dedup by repo) with README/CLAUDE.md summary
-  for o in "${offs[@]}"; do
-    bytes=${o%%;*}; repo=${o#*;}
-    grep -q "^${repo};" "$OFF" 2>/dev/null && continue
-    gb=$(awk "BEGIN{printf \"%.1f\", $bytes/1e9}")
-    summ=$("$HOME/bin/readmeSummary.sh" "$REPOS/$repo")
-    printf '%s;%sGB;excluded %s;%s\n' "$repo" "$gb" "$today" "$summ" >> "$OFF"
+  # log offenders (dedup by repo) with README/CLAUDE.md summary; size shown is
+  # the aggregate (cross-shard) total when known, else the per-shard bytes
+  for rp in "${!cand[@]}"; do
+    grep -q "^${rp};" "$OFF" 2>/dev/null && continue
+    gb=$(awk "BEGIN{printf \"%.1f\", ${cand[$rp]}/1e9}")
+    summ=$("$HOME/bin/readmeSummary.sh" "$REPOS/$rp")
+    printf '%s;%sGB;excluded %s;%s\n' "$rp" "$gb" "$today" "$summ" >> "$OFF"
   done
 done
 
@@ -91,9 +111,11 @@ STAGEF=$REPOS/STAGE
 if [[ -f $STAGEF ]] && grep -q '^rsynced' "$STAGEF" 2>/dev/null; then
   big=0
   for l in {00..15}; do
-    b=$DST/$base.$m.$l.blob.bin
-    [[ -f $b ]] && (( $(stat -c%s "$b" 2>/dev/null || echo 0) > SHARD_MIN )) && { big=1; break; }
+    bb=$DST/$base.$m.$l.blob.bin
+    [[ -f $bb ]] && (( $(stat -c%s "$bb" 2>/dev/null || echo 0) > SHARD_MIN )) && { big=1; break; }
   done
+  # also require no outstanding aggregate offender
+  [[ -s $aggcache ]] && big=1
   if (( ! big )) && ! pgrep -f "grabGitI(Type)?\.perl .*/$base\.$m\." >/dev/null 2>&1; then
     echo "verified $(date '+%F %T') - safe to delete repos/dumps" > "$STAGEF"
   fi
