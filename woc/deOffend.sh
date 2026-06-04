@@ -25,8 +25,8 @@ DST=$VOL/$out/$ver.$m
 REPOS=$TREES/$ver.$m
 OFF=$OFFENDERS
 SHARD_MIN=100000000000      # 100 GB - per-shard blob.bin trigger
-REPO_MIN=20000000000        #  20 GB - per-shard repo trigger
-: "${AGG_REPO_MIN:=20000000000}"   # 20 GB - cross-shard (aggregate) repo trigger
+REPO_MIN=30000000000        #  30 GB - per-shard repo trigger
+: "${AGG_REPO_MIN:=30000000000}"   # 30 GB - cross-shard (aggregate) repo trigger
 
 # per-dataset lock so the inline runExo loop and the cron watchdog never act on
 # the same dataset at once (non-blocking: if busy, another instance has it)
