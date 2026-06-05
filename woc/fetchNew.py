@@ -62,11 +62,13 @@ def _split_auth(url):
 
 def _req(url, data=None, ctype=None):
     clean, userinfo = _split_auth(url)
-    headers = {"Git-Protocol": "version=2", "User-Agent": "fetchNew/0.1"}
+    headers = {"Git-Protocol": "version=2", "User-Agent": "git/2.43.5 fetchNew"}
     if data is not None:
         headers["Content-Type"] = ctype
         headers["Accept"] = "application/x-git-upload-pack-result"
-    if userinfo:
+    # 'a:a' is the WoC pipeline's dummy anonymous marker; real Basic auth of it
+    # makes googlesource 400. Send auth only for genuine credentials.
+    if userinfo and userinfo != "a:a":
         headers["Authorization"] = "Basic " + base64.b64encode(userinfo.encode()).decode()
     return urllib.request.Request(clean, data=data, headers=headers, method=("POST" if data else "GET"))
 
