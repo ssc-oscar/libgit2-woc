@@ -28,6 +28,8 @@ SHARD_MIN=100000000000      # 100 GB - per-shard blob.bin trigger
 REPO_MIN=30000000000        #  30 GB - per-shard repo trigger
 : "${AGG_REPO_MIN:=30000000000}"   # 30 GB - cross-shard (aggregate) repo trigger
 : "${KEEP_FILE:=$TREES/keep}"      # allowlist: repos NEVER excluded (one per line)
+: "${COUNT_MAX:=1000000}"          # max blobs a repo may contribute before count-check
+: "${REVIEW_FILE:=$TREES/review}"  # high-blob-count, not-clearly-data repos flagged here
 touch "$KEEP_FILE" 2>/dev/null
 declare -A KEEP=()
 while read -r _r; do [[ -n $_r && $_r != \#* ]] && KEEP["$_r"]=1; done < "$KEEP_FILE"
@@ -43,16 +45,33 @@ today=$(date +%F)
 killtree(){ local p=$1 c; for c in $(pgrep -P "$p" 2>/dev/null); do killtree "$c"; done; kill -TERM "$p" 2>/dev/null; }
 
 # ---- aggregate offenders (cross-shard), cached by an idx signature ----------
-aggcache=$DST/$base.$m.aggoff; aggsig=$DST/$base.$m.aggsig
+aggcache=$DST/$base.$m.aggoff; aggsig=$DST/$base.$m.aggsig; cands=$DST/$base.$m.aggcand
 sig=$(stat -c '%n:%s:%Y' $DST/$base.$m.*.blob.idx "$KEEP_FILE" 2>/dev/null | md5sum | cut -d' ' -f1)
-if [[ ! -s $aggcache || $(cat "$aggsig" 2>/dev/null) != "$sig" ]]; then
-  # first file is the keep-list; repos in it are skipped (never offenders)
+if [[ ! -s $aggsig || $(cat "$aggsig" 2>/dev/null) != "$sig" ]]; then
+  # candidates exceeding the byte cap OR the blob-count cap (keep-list skipped),
+  # emitting repo<TAB>shards<TAB>bytes<TAB>count
   awk -F';' '
     FNR==NR { keep[$0]=1; next }
     FNR==1 { n=split(FILENAME,a,"."); shard=""; for(i=1;i<=n;i++) if(a[i]=="blob"){shard=a[i-1];break} }
-    shard!="" && !($5 in keep) { s[$5]+=$2; k=$5"@"shard; if(!(k in seen)){seen[k]=1; sh[$5]=sh[$5]" "shard} }
-    END { for(r in s) if(s[r]>MIN) print r"\t"sh[r]"\t"s[r] }
-  ' MIN="$AGG_REPO_MIN" "$KEEP_FILE" $DST/$base.$m.*.blob.idx 2>/dev/null > "$aggcache"
+    shard!="" && !($5 in keep) { s[$5]+=$2; c[$5]++; k=$5"@"shard; if(!(k in seen)){seen[k]=1; sh[$5]=sh[$5]" "shard} }
+    END { for(r in s) if(s[r]>BMIN || c[r]>CMAX) print r"\t"sh[r]"\t"s[r]"\t"c[r] }
+  ' BMIN="$AGG_REPO_MIN" CMAX="$COUNT_MAX" "$KEEP_FILE" $DST/$base.$m.*.blob.idx 2>/dev/null > "$cands"
+  # classify: bytes>cap -> exclude; else count>cap -> content decides (DATA exclude, else review)
+  : > "$aggcache"
+  while IFS=$'\t' read -r rp shards bytes cnt; do
+    [[ -z $rp ]] && continue
+    if (( bytes > AGG_REPO_MIN )); then
+      printf '%s\t%s\t%s\n' "$rp" "$shards" "$bytes" >> "$aggcache"
+    else
+      info=$("$HOME/bin/repoExt.sh" "$REPOS/$rp")
+      if [[ $info == *verdict=DATA* ]]; then
+        printf '%s\t%s\t%s\n' "$rp" "$shards" "$bytes" >> "$aggcache"
+        grep -q "^${rp};" "$REVIEW_FILE" 2>/dev/null || echo "$rp;blobs=$cnt;bytes=$bytes;$info;auto-excluded(count+data)" >> "$REVIEW_FILE"
+      else
+        grep -q "^${rp};" "$REVIEW_FILE" 2>/dev/null || echo "$rp;blobs=$cnt;bytes=$bytes;$info;REVIEW: high blob count, not clearly data -> add to $KEEP_FILE to keep or exclude manually" >> "$REVIEW_FILE"
+      fi
+    fi
+  done < "$cands"
   echo "$sig" > "$aggsig"
 fi
 
