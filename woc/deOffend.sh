@@ -20,6 +20,10 @@
 #   deOffend.sh <m> <ver> [out]      e.g.  deOffend.sh 030 V2605 out
 m=$1; ver=$2; out=${3:-out}; DT=202605; base=New$DT$ver
 . "${WOC_CONFIG:-$HOME/bin/jetstream2.config}" 2>/dev/null
+# TokyoCabinet (libtokyocabinet.so.9) lives in /usr/local/lib; a relaunched grab
+# from cron/watchdog may not inherit LD_LIBRARY_PATH, so grabGitI.perl would abort
+# at BEGIN ("cannot open shared object file"). Set it here so all relaunches load.
+export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 : "${VOL:=/media/volume}"; : "${TREES:=$VOL/trees}"; : "${OFFENDERS:=$TREES/offenders}"
 DST=$VOL/$out/$ver.$m
 REPOS=$TREES/$ver.$m
