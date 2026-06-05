@@ -46,6 +46,12 @@ flock -n 9 || exit 0
 [[ -d $REPOS ]] || exit 0
 cd "$REPOS" || exit 0
 today=$(date +%F)
+
+# sweep stale .rb re-extraction temp files from a prior interrupted run: the
+# blob-only path writes <shard>.rb.blob.{idx,bin} then mv's them into place, so
+# any left behind mean that run died before the swap. The per-dataset flock
+# above guarantees no other deOffend is mid-write here, so these are safe to drop.
+rm -f "$DST"/$base.$m.*.rb.blob.idx "$DST"/$base.$m.*.rb.blob.bin 2>/dev/null
 killtree(){ local p=$1 c; for c in $(pgrep -P "$p" 2>/dev/null); do killtree "$c"; done; kill -TERM "$p" 2>/dev/null; }
 
 # ---- aggregate offenders (cross-shard), cached by an idx signature ----------
