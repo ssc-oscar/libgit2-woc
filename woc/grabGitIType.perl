@@ -60,7 +60,7 @@ while(<STDIN>){
  if ($type eq "blob"){
   # keep the filename (one per sha) so grabf records it in blob.idx
   # instead of "(null)"; grabf already parses its input as sha;filename
-  $cmd{$type}{$sha} = $file;
+  $cmd{$type}{$sha} = $file // "";
  }else{
   $cmd{$type}{$sha}++;
  }
