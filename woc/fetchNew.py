@@ -23,7 +23,25 @@ Usage:
     --list         after indexing, list the new object oids+types+sizes
 Prints a one-line summary: wants/haves/pack-bytes/new-objects.
 """
-import sys, os, argparse, subprocess, tempfile, urllib.request, base64, urllib.parse
+import sys, os, argparse, subprocess, tempfile, urllib.request, urllib.error, base64, urllib.parse
+
+# ---- WoC P2tips helpers ------------------------------------------------------
+def repo_to_url(repo):
+    """WoC repo name -> upstream URL: replace the FIRST '_' with '/'.
+    e.g. 0-shelder-0_aspnetcore -> https://github.com/0-shelder-0/aspnetcore"""
+    return "https://github.com/" + repo.replace("_", "/", 1)
+
+def read_p2tips(path, repo):
+    """Read a P2tips file (lines 'repo;tip_sha') and return tip SHAs for `repo`."""
+    tips = []
+    for ln in open(path):
+        ln = ln.strip()
+        if not ln or ";" not in ln:
+            continue
+        r, sha = ln.split(";", 1)
+        if r == repo and sha:
+            tips.append(sha.strip())
+    return tips
 
 # ---- pkt-line ----------------------------------------------------------------
 FLUSH = b"0000"; DELIM = b"0001"
@@ -142,24 +160,44 @@ def fetch(url, objfmt, wants, haves, thin=False):
 # ---- main --------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("url")
+    ap.add_argument("url", nargs="?",
+                    help="repo URL; optional if --repo is given (URL derived from WoC name)")
+    ap.add_argument("--repo", help="WoC repo name (first '_' -> '/'); derives the GitHub URL")
+    ap.add_argument("--p2tips", help="P2tips file ('repo;sha' lines); haves auto-selected for --repo")
     ap.add_argument("--haves-file"); ap.add_argument("--haves", default="")
     ap.add_argument("--out"); ap.add_argument("--thin", action="store_true")
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
 
+    # Resolve URL: explicit positional wins; else derive from --repo.
+    url = a.url or (repo_to_url(a.repo) if a.repo else None)
+    if not url:
+        sys.exit("error: provide a URL or --repo NAME")
+
     haves = []
+    if a.p2tips:
+        if not a.repo:
+            sys.exit("error: --p2tips requires --repo to select that repo's tips")
+        haves += read_p2tips(a.p2tips, a.repo)
     if a.haves_file:
         haves += [l.strip() for l in open(a.haves_file) if l.strip()]
     if a.haves:
         haves += [h for h in a.haves.split(",") if h]
+    # de-dupe haves, keep order
+    seen = set(); haves = [h for h in haves if not (h in seen or seen.add(h))]
 
-    caps = discover(a.url)
-    objfmt = caps.get("object-format", "sha1")
-    wants = ls_refs(a.url, objfmt)
-    if not wants:
-        sys.exit("no refs advertised")
-    pack, nbytes = fetch(a.url, objfmt, wants, haves, thin=a.thin)
+    try:
+        caps = discover(url)
+        objfmt = caps.get("object-format", "sha1")
+        wants = ls_refs(url, objfmt)
+        if not wants:
+            sys.exit(f"error: no refs advertised (empty or inaccessible repo): {url}")
+        pack, nbytes = fetch(url, objfmt, wants, haves, thin=a.thin)
+    except urllib.error.HTTPError as e:
+        # gone/renamed/private repos: GitHub answers 401/404 -> fail cleanly, not a traceback
+        sys.exit(f"error: HTTP {e.code} for {url} (repo gone, renamed, or private?)")
+    except urllib.error.URLError as e:
+        sys.exit(f"error: cannot reach {url}: {e.reason}")
 
     outdir = a.out or tempfile.mkdtemp(prefix="fetchNew.")
     subprocess.run(["git", "init", "-q", "--bare", outdir], check=True)
