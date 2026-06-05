@@ -24,7 +24,7 @@ WORK=$(mktemp -d); export dir WORK
 cd "$dir" || exit 1
 
 # URL -> directory name (same scheme as doOtrVer.sh, fully flattened)
-mangle(){ perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;s|/|_|g;print'; }
+mangle(){ perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'; }
 mkurl(){ sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'; }
 
 # clone phase: add newly-listed projects that are absent (all their objects new)
@@ -32,10 +32,15 @@ if [ -n "$LIST" ]; then
   while read -r u; do
     [ -z "$u" ] && continue
     j=$(printf '%s' "$u" | mangle); r=$(printf '%s' "$u" | mkurl)
-    if [ ! -d "$j/objects" ]; then
-      if git clone --mirror "$r" "$j" >/dev/null 2>&1; then : > "$WORK/$j.NEW"; echo "cloned NEW $j"
-      else echo "CLONEFAIL $u" >&2; fi
-    fi
+    git --git-dir="$j" rev-parse --is-bare-repository >/dev/null 2>&1 \
+      && [ -n "$(git --git-dir="$j" for-each-ref --count=1 2>/dev/null)" ] && continue
+    # init+fetch (works when $j holds nested child subrepos; --mirror clone cannot)
+    mkdir -p "$j"; git init -q --bare "$j" >/dev/null 2>&1 || { echo "CLONEFAIL $u" >&2; continue; }
+    git --git-dir="$j" config remote.origin.url "$r"
+    git --git-dir="$j" config remote.origin.mirror true
+    git --git-dir="$j" config remote.origin.fetch '+refs/*:refs/*'
+    if git --git-dir="$j" remote update >/dev/null 2>&1; then : > "$WORK/${j//\//_}.NEW"; echo "cloned NEW $j"
+    else echo "CLONEFAIL $u" >&2; fi
   done < "$LIST"
 fi
 
@@ -58,7 +63,8 @@ worker(){
 }
 export -f worker
 
-for d in */; do [ -d "${d}objects" ] && echo "${d%/}"; done \
+# discover bare repos at ANY depth (deep paths nest as subfolders), repo = dir holding objects/
+find . -type d -name objects -prune 2>/dev/null | sed 's#/objects$##; s#^\./##' \
   | xargs -P "$PAR" -I{} bash -c 'worker "$@"' _ {}
 
 cat "$WORK"/*.olist > "$OUT" 2>/dev/null
