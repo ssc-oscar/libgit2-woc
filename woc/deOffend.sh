@@ -27,6 +27,10 @@ OFF=$OFFENDERS
 SHARD_MIN=100000000000      # 100 GB - per-shard blob.bin trigger
 REPO_MIN=30000000000        #  30 GB - per-shard repo trigger
 : "${AGG_REPO_MIN:=30000000000}"   # 30 GB - cross-shard (aggregate) repo trigger
+: "${KEEP_FILE:=$TREES/keep}"      # allowlist: repos NEVER excluded (one per line)
+touch "$KEEP_FILE" 2>/dev/null
+declare -A KEEP=()
+while read -r _r; do [[ -n $_r && $_r != \#* ]] && KEEP["$_r"]=1; done < "$KEEP_FILE"
 
 # per-dataset lock so the inline runExo loop and the cron watchdog never act on
 # the same dataset at once (non-blocking: if busy, another instance has it)
@@ -40,13 +44,15 @@ killtree(){ local p=$1 c; for c in $(pgrep -P "$p" 2>/dev/null); do killtree "$c
 
 # ---- aggregate offenders (cross-shard), cached by an idx signature ----------
 aggcache=$DST/$base.$m.aggoff; aggsig=$DST/$base.$m.aggsig
-sig=$(stat -c '%n:%s:%Y' $DST/$base.$m.*.blob.idx 2>/dev/null | md5sum | cut -d' ' -f1)
+sig=$(stat -c '%n:%s:%Y' $DST/$base.$m.*.blob.idx "$KEEP_FILE" 2>/dev/null | md5sum | cut -d' ' -f1)
 if [[ ! -s $aggcache || $(cat "$aggsig" 2>/dev/null) != "$sig" ]]; then
+  # first file is the keep-list; repos in it are skipped (never offenders)
   awk -F';' '
+    FNR==NR { keep[$0]=1; next }
     FNR==1 { n=split(FILENAME,a,"."); shard=""; for(i=1;i<=n;i++) if(a[i]=="blob"){shard=a[i-1];break} }
-    shard!="" { s[$5]+=$2; k=$5"@"shard; if(!(k in seen)){seen[k]=1; sh[$5]=sh[$5]" "shard} }
+    shard!="" && !($5 in keep) { s[$5]+=$2; k=$5"@"shard; if(!(k in seen)){seen[k]=1; sh[$5]=sh[$5]" "shard} }
     END { for(r in s) if(s[r]>MIN) print r"\t"sh[r]"\t"s[r] }
-  ' MIN="$AGG_REPO_MIN" $DST/$base.$m.*.blob.idx 2>/dev/null > "$aggcache"
+  ' MIN="$AGG_REPO_MIN" "$KEEP_FILE" $DST/$base.$m.*.blob.idx 2>/dev/null > "$aggcache"
   echo "$sig" > "$aggsig"
 fi
 
@@ -58,7 +64,7 @@ for l in {00..15}; do
   declare -A cand=()
   # (a) per-shard offenders -- only when the shard itself is oversized
   if (( sz > SHARD_MIN )); then
-    while IFS=';' read -r by rp; do [[ -n $rp ]] && cand["$rp"]=$by; done \
+    while IFS=';' read -r by rp; do [[ -n $rp && -z ${KEEP[$rp]} ]] && cand["$rp"]=$by; done \
       < <("$HOME/bin/largest.sh" "$DST/$base.$m.$l.blob" | awk -F';' -v t=$REPO_MIN '$1>t{print $1";"$2}')
   fi
   # (b) aggregate offenders that appear in this shard -- regardless of shard size
