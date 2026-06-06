@@ -102,10 +102,16 @@ for l in {00..15}; do
   done < "$aggcache"
   (( ${#cand[@]} )) || continue
 
-  # accumulate excluded repos in a marker; only act on a NEW one
-  mark=$DST/$base.$m.$l.excluded; touch "$mark"; newoff=0
+  # accumulate excluded repos in a marker; act on a NEW one, OR on a marked one
+  # whose blobs are STILL present (a prior removal was interrupted/raced/failed
+  # -- otherwise that offender stays stuck forever and blocks verify).
+  mark=$DST/$base.$m.$l.excluded; touch "$mark"; newoff=0; idxf=$DST/$base.$m.$l.blob.idx
   for rp in "${!cand[@]}"; do
-    grep -qxF "$rp" "$mark" || { echo "$rp" >> "$mark"; newoff=1; }
+    if grep -qxF "$rp" "$mark"; then
+      [[ -f $idxf ]] && awk -F';' -v o="$rp" '$5==o{f=1;exit} END{exit !f}' "$idxf" && newoff=1
+    else
+      echo "$rp" >> "$mark"; newoff=1
+    fi
   done
   (( newoff )) || continue
   pat=$(paste -sd'|' "$mark")
