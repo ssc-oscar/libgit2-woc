@@ -28,9 +28,13 @@ cat CopyList.${ver}1.$m | split -l $part --numeric-suffixes - CopyList.${ver}1.$
 
 for l in {00..15}
 do 
-(cat CopyList.${ver}1.$m.$l | while read repo; do  [[ -d $repo/ ]] && $HOME/bin/gitListSimp.sh $repo | $HOME/bin/classify $repo 2>> $DST/$base.$m.$l.olist.err
-done | gzip > $DST/$base.$m.$l.olist.gz; \
-zcat $DST/$base.$m.$l.olist.gz | ssh $HASOBJ_HOST -At '$HOME/lookup/cleanBlb.perl | $HOME/bin/hasObj.perl' | gzip > $DST/todo.$m.$l) & 
+# fast object enumeration: cat-file --batch-all-objects (no tree walk, ~6x faster
+# than gitListSimp's rev-list --objects --all + classify). No paths (blob content
+# is dumped by sha; WoC rebuilds filenames from the dumped trees) -> olist is
+# repo;type;sha; . Also works for partial tip-fetch repos (lists present objects).
+(cat CopyList.${ver}1.$m.$l | while read repo; do  [[ -d $repo/ ]] && git --git-dir="$repo" cat-file --batch-all-objects --unordered --batch-check='%(objectname) %(objecttype)' 2>> $DST/$base.$m.$l.olist.err | awk -v R="$repo" '$2~/^(blob|tree|commit|tag)$/{print R";"$2";"$1";"}'
+done | pigz > $DST/$base.$m.$l.olist.gz; \
+pigz -dc $DST/$base.$m.$l.olist.gz | ssh $HASOBJ_HOST -At '$HOME/lookup/cleanBlb.perl | $HOME/bin/hasObj.perl' | pigz > $DST/todo.$m.$l) &
 #rsync -av *.$l.olist.gz da5:/data/play/$ver/; \
 #ssh da5 "/data/play/V4/toTodo1.sh $m $l" < /dev/null
 #) &
@@ -48,16 +52,16 @@ wait
 #wait
 #rsync -av da5:/data/play/$ver/todo.$m.* .
 
-zcat $DST/todo.$m.[0-2][0-9] | gzip > $DST/todo.$m
+pigz -dc $DST/todo.$m.[0-2][0-9] | pigz > $DST/todo.$m
 
 
-nlines=$(zcat $DST/todo.$m |wc -l)
+nlines=$(pigz -dc $DST/todo.$m |wc -l)
 part=$(echo "$nlines/16 + 1"|bc)
-zcat $DST/todo.$m | split -l $part -a2 -d  --filter='gzip > $FILE.gz' - $DST/$base.$m.olist.
+pigz -dc $DST/todo.$m | split -l $part -a2 -d  --filter='pigz > $FILE.gz' - $DST/$base.$m.olist.
 
 
 for l in {00..15} 
-do gunzip -c $DST/$base.$m.olist.$l.gz | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err &
+do pigz -dc $DST/$base.$m.olist.$l.gz | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err &
 done
 
 # Some repos take days to grab; de-offend oversized shards every ~30 min while
