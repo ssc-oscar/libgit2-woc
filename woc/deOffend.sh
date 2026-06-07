@@ -100,6 +100,14 @@ for l in {00..15}; do
   while IFS=$'\t' read -r rp shards tot; do
     [[ -n $rp && " $shards " == *" $l "* ]] && cand["$rp"]=$tot
   done < "$aggcache"
+  # (c) registry offenders (manually-added or logged) whose blobs are still
+  # present in this shard -- so the offenders list actively excludes blobs of
+  # any flagged repo, regardless of size/count. One pass over blob.idx.
+  if [[ -s $OFF && -f $DST/$base.$m.$l.blob.idx ]]; then
+    while read -r rp; do [[ -n $rp && -z ${KEEP[$rp]} ]] && cand["$rp"]=registry; done \
+      < <(awk -F';' 'NR==FNR{o[$1]=1;next} ($5 in o){s[$5]=1} END{for(k in s)print k}' \
+            <(cut -d';' -f1 "$OFF") "$DST/$base.$m.$l.blob.idx")
+  fi
   (( ${#cand[@]} )) || continue
 
   # accumulate excluded repos in a marker; act on a NEW one, OR on a marked one
