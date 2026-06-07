@@ -60,8 +60,14 @@ part=$(echo "$nlines/16 + 1"|bc)
 pigz -dc $DST/todo.$m | split -l $part -a2 -d  --filter='pigz > $FILE.gz' - $DST/$base.$m.olist.
 
 
-for l in {00..15} 
-do pigz -dc $DST/$base.$m.olist.$l.gz | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err &
+# offenders blob-exclude: drop blob lines of repos listed in the offenders
+# registry (keep their commit/tree/tag), so flagged repos never contribute blob
+# content -- same effect as deOffend's per-shard exclusion, applied globally.
+cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.offrepos
+for l in {00..15}
+do pigz -dc $DST/$base.$m.olist.$l.gz \
+   | awk -F';' 'NR==FNR{o[$1]=1;next} !(o[$1] && $2=="blob")' $DST/.offrepos - \
+   | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err &
 done
 
 # Some repos take days to grab; de-offend oversized shards every ~30 min while
