@@ -9,6 +9,9 @@
 #      da8, deOffend verify; sets STAGE rsynced->verified.
 set -u
 m=${1:?usage: fetchExo.sh <m> <ver> <DT> [out]}; ver=${2:?}; DT=${3:?}; out=${4:-out}
+# doOtrVerFetch.sh and runExo.sh cd into "$ver.$m" relatively, so we must run
+# from the trees root regardless of the caller's cwd.
+cd "${TREES:-/media/volume/trees}" || { echo "[fetchExo $ver.$m] cannot cd to trees root"; exit 1; }
 S="/media/volume/trees/$ver.$m/STAGE"
 echo "[fetchExo $ver.$m] clone/fetch start $(date '+%F %T')"
 /home/exouser/bin/doOtrVerFetch.sh "$m" "$ver" "$DT" || { echo "[fetchExo $ver.$m] doOtrVerFetch FAILED $(date '+%F %T')"; exit 1; }
