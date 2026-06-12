@@ -172,6 +172,13 @@ if [[ -f $STAGEF ]] && grep -q '^rsynced' "$STAGEF" 2>/dev/null; then
   done
   # also require no outstanding aggregate offender
   [[ -s $aggcache ]] && big=1
+  # NEVER verify a failed grab (silent data loss): (1) grab* loader errors, or
+  # (2) a non-empty olist that produced ZERO dumped objects (grab crashed).
+  grep -lqE 'error while loading shared libraries' $DST/$base.$m.*.err 2>/dev/null && big=1
+  if ls $DST/$base.$m.olist.*.gz >/dev/null 2>&1 \
+     && [[ -z $(cat $DST/$base.$m.*.{blob,commit,tree,tag}.idx 2>/dev/null | head -c1) ]]; then
+    echo "[deOffend] $base.$m: olist present but ALL dumps empty -- grab failed; NOT verifying" >&2; big=1
+  fi
   if (( ! big )) && ! pgrep -f "grabGitI(Type)?\.perl .*/$base\.$m\." >/dev/null 2>&1; then
     echo "verified $(date '+%F %T') - safe to delete repos/dumps" > "$STAGEF"
   fi
