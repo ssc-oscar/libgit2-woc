@@ -74,7 +74,7 @@ pigz -dc "$DST/todo" | split -l "$part" -a2 -d --filter='pigz > $FILE.gz' - "$DS
 cut -d';' -f1 "${OFFENDERS:-$VOL/trees/offenders}" 2>/dev/null | sort -u > "$DST/.offrepos"
 for n in $(ls "$DST/$base".olist.*.gz 2>/dev/null | sed 's/.*olist\.//;s/\.gz//'); do
   pigz -dc "$DST/$base.olist.$n.gz" \
-    | awk -F';' 'NR==FNR{o[$1]=1;next} !(o[$1] && $2=="blob")' "$DST/.offrepos" - \
+    | awk -F';' 'NR==FNR{o[$1]=1;next} !(o[$1] && ($2=="blob" || $2=="tree"))' "$DST/.offrepos" - \
     | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitI.perl" "$DST/$base.$n" 2> "$DST/$base.$n.err" &
 done
 wait

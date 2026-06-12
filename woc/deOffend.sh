@@ -51,7 +51,7 @@ today=$(date +%F)
 # blob-only path writes <shard>.rb.blob.{idx,bin} then mv's them into place, so
 # any left behind mean that run died before the swap. The per-dataset flock
 # above guarantees no other deOffend is mid-write here, so these are safe to drop.
-rm -f "$DST"/$base.$m.*.rb.blob.idx "$DST"/$base.$m.*.rb.blob.bin 2>/dev/null
+rm -f "$DST"/$base.$m.*.rb.blob.idx "$DST"/$base.$m.*.rb.blob.bin "$DST"/$base.$m.*.rb.tree.idx "$DST"/$base.$m.*.rb.tree.bin 2>/dev/null
 killtree(){ local p=$1 c; for c in $(pgrep -P "$p" 2>/dev/null); do killtree "$c"; done; kill -TERM "$p" 2>/dev/null; }
 
 # ---- aggregate offenders (cross-shard), cached by an idx signature ----------
@@ -100,23 +100,28 @@ for l in {00..15}; do
   while IFS=$'\t' read -r rp shards tot; do
     [[ -n $rp && " $shards " == *" $l "* ]] && cand["$rp"]=$tot
   done < "$aggcache"
-  # (c) registry offenders (manually-added or logged) whose blobs are still
-  # present in this shard -- so the offenders list actively excludes blobs of
-  # any flagged repo, regardless of size/count. One pass over blob.idx.
-  if [[ -s $OFF && -f $DST/$base.$m.$l.blob.idx ]]; then
-    while read -r rp; do [[ -n $rp && -z ${KEEP[$rp]} ]] && cand["$rp"]=registry; done \
-      < <(awk -F';' 'NR==FNR{o[$1]=1;next} ($5 in o){s[$5]=1} END{for(k in s)print k}' \
-            <(cut -d';' -f1 "$OFF") "$DST/$base.$m.$l.blob.idx")
+  # (c) registry offenders (manually-added or logged) whose blobs OR trees are
+  # still present in this shard -- the offenders list actively excludes blob AND
+  # tree content of any flagged repo, regardless of size/count (e.g. image/data
+  # dumps whose bloat is in trees, not blobs). One pass over blob.idx + tree.idx.
+  if [[ -s $OFF ]]; then
+    for _ix in blob tree; do
+      _f=$DST/$base.$m.$l.$_ix.idx; [[ -f $_f ]] || continue
+      while read -r rp; do [[ -n $rp && -z ${KEEP[$rp]} ]] && cand["$rp"]=registry; done \
+        < <(awk -F';' 'NR==FNR{o[$1]=1;next} ($5 in o){s[$5]=1} END{for(k in s)print k}' \
+              <(cut -d';' -f1 "$OFF") "$_f")
+    done
   fi
   (( ${#cand[@]} )) || continue
 
   # accumulate excluded repos in a marker; act on a NEW one, OR on a marked one
   # whose blobs are STILL present (a prior removal was interrupted/raced/failed
   # -- otherwise that offender stays stuck forever and blocks verify).
-  mark=$DST/$base.$m.$l.excluded; touch "$mark"; newoff=0; idxf=$DST/$base.$m.$l.blob.idx
+  mark=$DST/$base.$m.$l.excluded; touch "$mark"; newoff=0
   for rp in "${!cand[@]}"; do
     if grep -qxF "$rp" "$mark"; then
-      [[ -f $idxf ]] && awk -F';' -v o="$rp" '$5==o{f=1;exit} END{exit !f}' "$idxf" && newoff=1
+      for _ix in blob tree; do _f=$DST/$base.$m.$l.$_ix.idx
+        [[ -f $_f ]] && awk -F';' -v o="$rp" '$5==o{f=1;exit} END{exit !f}' "$_f" && newoff=1; done
     else
       echo "$rp" >> "$mark"; newoff=1
     fi
@@ -130,17 +135,19 @@ for l in {00..15}; do
   if [[ -n $pid ]]; then
     for p in $pid; do killtree "$p"; done; sleep 2
     nohup bash -c "cd '$REPOS' && gunzip -c '$DST/$base.$m.olist.$l.gz' \
-        | grep -Ev '(${pat});blob' \
+        | grep -Ev '(${pat});(blob|tree)' \
         | perl -I '$HOME/lib64/perl5' '$HOME/bin/grabGitI.perl' '$DST/$base.$m.$l' \
         2> '$DST/$base.$m.$l.err'" >/dev/null 2>&1 &
   else
-    gunzip -c "$DST/$base.$m.olist.$l.gz" | awk -F';' '$2=="blob"' | grep -Ev "(${pat});blob" \
-      | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitIType.perl" "$DST/$base.$m.$l.rb" blob \
+    gunzip -c "$DST/$base.$m.olist.$l.gz" | awk -F';' '$2=="blob"||$2=="tree"' | grep -Ev "(${pat});(blob|tree)" \
+      | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitIType.perl" "$DST/$base.$m.$l.rb" blob,tree \
       2> "$DST/$base.$m.$l.deoff.err"
-    if [[ -s $DST/$base.$m.$l.rb.blob.idx ]]; then
-      mv -f "$DST/$base.$m.$l.rb.blob.idx" "$DST/$base.$m.$l.blob.idx"
-      mv -f "$DST/$base.$m.$l.rb.blob.bin" "$DST/$base.$m.$l.blob.bin"
-    fi
+    for _t in blob tree; do
+      if [[ -s $DST/$base.$m.$l.rb.$_t.idx ]]; then
+        mv -f "$DST/$base.$m.$l.rb.$_t.idx" "$DST/$base.$m.$l.$_t.idx"
+        mv -f "$DST/$base.$m.$l.rb.$_t.bin" "$DST/$base.$m.$l.$_t.bin"
+      fi
+    done
   fi
 
   # log offenders (dedup by repo) with README/CLAUDE.md summary; size shown is
