@@ -143,9 +143,14 @@ for l in {00..15}; do
       | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitIType.perl" "$DST/$base.$m.$l.rb" blob,tree \
       2> "$DST/$base.$m.$l.deoff.err"
     for _t in blob tree; do
-      if [[ -s $DST/$base.$m.$l.rb.$_t.idx ]]; then
-        mv -f "$DST/$base.$m.$l.rb.$_t.idx" "$DST/$base.$m.$l.$_t.idx"
-        mv -f "$DST/$base.$m.$l.rb.$_t.bin" "$DST/$base.$m.$l.$_t.bin"
+      _rb=$DST/$base.$m.$l.rb.$_t.idx; _real=$DST/$base.$m.$l.$_t.idx
+      if [[ -s $_rb ]]; then
+        mv -f "$_rb" "$_real"; mv -f "${_rb%.idx}.bin" "${_real%.idx}.bin"
+      elif [[ -f $_real ]] && ! awk -F';' 'NR==FNR{o[$1]=1;next} !($5 in o){exit 1}' "$mark" "$_real"; then
+        # the shard's $_t objects are ALL excluded offenders -> correct result is an
+        # empty dump; the -s guard alone would leave the offender forever (seen on
+        # 055: shards 05-09 were 100% one count-offender). Truncate to remove it.
+        : > "$_real"; : > "${_real%.idx}.bin"; rm -f "$_rb" "${_rb%.idx}.bin"
       fi
     done
   fi
