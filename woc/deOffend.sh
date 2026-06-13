@@ -25,6 +25,7 @@ m=$1; ver=$2; out=${3:-out}; DT=202605; base=New$DT$ver
 # at BEGIN ("cannot open shared object file"). Set it here so all relaunches load.
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 : "${VOL:=/media/volume}"; : "${TREES:=$VOL/trees}"; : "${OFFENDERS:=$TREES/offenders}"
+: "${RSYNC_DEST:=da8:/mnt/ordos/data/data/update}"   # must match runExo.sh
 DST=$VOL/$out/$ver.$m
 REPOS=$TREES/$ver.$m
 OFF=$OFFENDERS
@@ -84,6 +85,11 @@ if [[ ! -s $aggsig || $(cat "$aggsig" 2>/dev/null) != "$sig" ]]; then
   done < "$cands"
   echo "$sig" > "$aggsig"
 fi
+
+# shards whose dumps this run re-extracted/truncated -- if the dataset was
+# already rsynced, da8 still holds the pre-cull (offender-laden) copy, so we
+# must re-rsync just these shards before upgrading STAGE to verified.
+declare -A DIRTY=()
 
 for l in {00..15}; do
   binf=$DST/$base.$m.$l.blob.bin
@@ -153,6 +159,7 @@ for l in {00..15}; do
         : > "$_real"; : > "${_real%.idx}.bin"; rm -f "$_rb" "${_rb%.idx}.bin"
       fi
     done
+    DIRTY[$l]=1   # offline re-extract completed synchronously -- shard's dumps changed
   fi
 
   # log offenders (dedup by repo) with README/CLAUDE.md summary; size shown is
@@ -171,6 +178,21 @@ done
 STAGEF=$REPOS/STAGE
 if [[ -f $STAGEF ]] && grep -q '^rsynced' "$STAGEF" 2>/dev/null; then
   big=0
+  # re-propagate shards this run culled: deOffend changed the dump locally but
+  # the prior rsync left the offender-laden copy on da8. A post-rsync cull (late
+  # registry/aggregate offender, or the all-offender truncate) would otherwise
+  # verify with stale bloated data still on da8 (seen on 055 and 088).
+  if (( ${#DIRTY[@]} )); then
+    rfiles=()
+    for l in "${!DIRTY[@]}"; do
+      for f in $DST/$base.$m.$l.{blob,commit,tree,tag}.{bin,idx}; do [[ -f $f ]] && rfiles+=("$f"); done
+    done
+    if (( ${#rfiles[@]} )); then
+      echo "[deOffend $(date '+%F %T')] $base.$m: re-rsync culled shards ${!DIRTY[*]} to da8" >&2
+      rsync -a "${rfiles[@]}" "$RSYNC_DEST/$ver/" \
+        || { echo "[deOffend] $base.$m: re-rsync FAILED -- NOT verifying" >&2; big=1; }
+    fi
+  fi
   for l in {00..15}; do
     bb=$DST/$base.$m.$l.blob.bin
     [[ -f $bb ]] && (( $(stat -c%s "$bb" 2>/dev/null || echo 0) > SHARD_MIN )) && { big=1; break; }
