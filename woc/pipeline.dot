@@ -28,6 +28,11 @@ digraph WoC_pipeline {
     WoCDB    [label="WoC object DB (da5)\ncleanBlb.perl | hasObj.perl\n('does WoC already have this sha?')"];
   }
 
+  // ---------------------------------------------------------------- list provenance (separate repo)
+  GatherNew [label="ssc-oscar/gather_new\nmulti-forge new-repo crawl:\nGitHub (GHArchive CreateEvents), GitLab,\nBitbucket, HuggingFace, git ls-remote heads",
+             shape=folder, fillcolor="#ffe0b3"];
+  GatherNew -> ProjList [label="crawl + format\n(github_new_repos.csv, *_repos.csv,\nall_heads.csv → gh:Owner/Repo lists)"];
+
   // ---------------------------------------------------------------- offenders registry (read+write)
   Offenders [label="offenders registry\n/media/volume/trees/offenders\nrepo;size;date;summary  (+ KEEP allowlist)\nblob+tree content of flagged repos excluded",
              fillcolor="#f8d7da"];

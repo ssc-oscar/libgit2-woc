@@ -24,8 +24,27 @@ into WoC):
 | Data | What |
 |------|------|
 | **WoC P2tips** (de-forked) | `p2tipsFull.V2604.N.s` — pigz, `project;commit`, project-sharded by `sHash` (32 shards), `LC_ALL=C` sorted. The commit tips WoC already has per project. |
-| **Project lists** | `list<DT>.<ver>.<k>` — one per residue `k`, entries like `gh:Owner/Repo`. |
+| **Project lists** | `list<DT>.<ver>.<k>` — one per residue `k`, entries like `gh:Owner/Repo`. Produced upstream by [`ssc-oscar/gather_new`](https://github.com/ssc-oscar/gather_new) (see below). |
 | **WoC object DB (da5)** | queried via `cleanBlb.perl \| hasObj.perl` — "does WoC already have this sha?" |
+
+### Where the project lists come from — `ssc-oscar/gather_new`
+
+The `list<DT>.<ver>.<k>` inputs are not produced here; they originate from the
+separate [`ssc-oscar/gather_new`](https://github.com/ssc-oscar/gather_new) repo,
+which crawls new/updated repositories across forges (`update.sh`):
+
+- **GitHub** — GHArchive hourly `CreateEvents` (`gharchive_download.pl`,
+  `gharchive_extract.pl`) → `data/github_new_repos.csv`
+- **GitLab** — gitlab.com API plus other instances (gnome, debian/salsa,
+  drupalcode) (`crawl_gitlab_repos.py`, `gitlab_to_csv.pl`) → `data/*_repos.csv`
+- **Bitbucket** — `list_bitbucket_workspaces.py`, `crawl_bitbucket_repos.py`
+- **HuggingFace** — Parquet snapshots + API for models/datasets/spaces
+  (`hf_refresh.py`) → `data/hf_*.ndjson.gz`
+- **Git heads** — `git ls-remote` across hosts (`heads_prepare.sh`,
+  `heads_run.sh`) → `data/all_heads.csv` (`gh:repo;sha;ref`)
+
+These crawl outputs are turned into the per-residue `gh:Owner/Repo` lists that
+this pipeline consumes.
 
 ## offenders registry (read + write)
 
