@@ -146,7 +146,7 @@ for l in {00..15}; do
       _rb=$DST/$base.$m.$l.rb.$_t.idx; _real=$DST/$base.$m.$l.$_t.idx
       if [[ -s $_rb ]]; then
         mv -f "$_rb" "$_real"; mv -f "${_rb%.idx}.bin" "${_real%.idx}.bin"
-      elif [[ -f $_real ]] && ! awk -F';' 'NR==FNR{o[$1]=1;next} !($5 in o){exit 1}' "$mark" "$_real"; then
+      elif [[ -f $_real ]] && awk -F';' 'NR==FNR{o[$1]=1;next} !($5 in o){exit 1}' "$mark" "$_real"; then
         # the shard's $_t objects are ALL excluded offenders -> correct result is an
         # empty dump; the -s guard alone would leave the offender forever (seen on
         # 055: shards 05-09 were 100% one count-offender). Truncate to remove it.
