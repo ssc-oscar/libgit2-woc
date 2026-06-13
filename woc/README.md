@@ -7,6 +7,9 @@ alongside it.
 
 Built by default; disable with `-DBUILD_WOC=OFF`.
 
+See [`PIPELINE.md`](PIPELINE.md) for the end-to-end data flow (inputs, stages,
+and outputs) and [`pipeline.dot`](pipeline.dot) for the graph.
+
 ## Tools
 
 | Tool | Purpose |

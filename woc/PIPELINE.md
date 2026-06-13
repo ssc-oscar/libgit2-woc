@@ -1,0 +1,93 @@
+# WoC git-object extraction pipeline
+
+End-to-end data flow for the Jetstream2 extraction run: from upstream WoC
+inputs and remote repositories to the per-shard object dumps loaded back into
+WoC. **Nodes are data artifacts; edges are processing steps** (the script/tool
+that consumes the source and produces the target).
+
+See [`pipeline.dot`](pipeline.dot) for the graph source.
+
+```
+dot -Tpng pipeline.dot -o pipeline.png      # or -Tsvg
+```
+
+![pipeline](pipeline.svg)
+
+Two ingest fronts feed the same sink (the da8 update area, which is loaded back
+into WoC):
+
+- **(A) per-residue crawl** — `fetchExo.sh` = `doOtrVerFetch.sh` + `runExo.sh`
+- **(B) kept large mirrors** — `runExoMirror.sh` (Mozilla, Chromium-Gerrit; hg+git)
+
+## Upstream inputs (read-only)
+
+| Data | What |
+|------|------|
+| **WoC P2tips** (de-forked) | `p2tipsFull.V2604.N.s` — pigz, `project;commit`, project-sharded by `sHash` (32 shards), `LC_ALL=C` sorted. The commit tips WoC already has per project. |
+| **Project lists** | `list<DT>.<ver>.<k>` — one per residue `k`, entries like `gh:Owner/Repo`. |
+| **WoC object DB (da5)** | queried via `cleanBlb.perl \| hasObj.perl` — "does WoC already have this sha?" |
+
+## offenders registry (read + write)
+
+`/media/volume/trees/offenders` (`repo;size;date;summary`, plus a `KEEP`
+allowlist). Blob **and** tree content of flagged repos is excluded from dumps —
+both at grab time (`runExo`/`runExoMirror` `.offrepos` filter) and after the
+fact (`deOffend.sh`). `deOffend.sh` also appends newly-detected offenders.
+
+## (A) Per-residue crawl — `fetchExo.sh`
+
+1. **Tips alignment** — `mkTipsFilesJoin.sh` joins P2tips against the list:
+   normalize each list entry to a p2tips key → `splitSecCh` into shards → per-shard
+   sort-merge `join` → re-split and re-order back to list order. Produces
+   **`tips<DT>.<ver>.<k>`**, line-aligned to the list (comma-separated WoC commit
+   SHAs; blank line = repo new to WoC).
+2. **Clone / partial fetch** — `doOtrVerFetch.sh`:
+   - repo WoC already knows (has tips) → `fetchNew.py --haves <tips> --write-refs`
+     (no-thin protocol-v2 partial fetch: only objects beyond the tips; full
+     `git clone --mirror` fallback on `FETCHFAIL`),
+   - new repo → `git clone --mirror`.
+   Produces **local bare repos** under `<ver>.<k>/<mangled-name>/` plus the
+   present-repo list `list<DT>.<ver>1.<k>` and a `packed-refs` cpio.
+   STAGE: `cloning → listed`.
+3. **Enumerate** — `runExo.sh`: `git cat-file --batch-all-objects --unordered
+   --batch-check='%(objectname) %(objecttype)'` (16-way; ~6× faster than
+   `rev-list --objects --all` and works on partial-fetch repos). Produces the
+   **olist** `<base>.<m>.<l>.olist.gz` — lines `repo;type;sha;` (no paths; WoC
+   rebuilds filenames from the dumped tree objects).
+4. **WoC dedup** — `ssh da5 'cleanBlb.perl | hasObj.perl'` drops objects WoC
+   already has, leaving the **new-objects work list** `todo.<m>` →
+   `<base>.<m>.olist.NN.gz`.
+5. **Grab / dump** — `grabGitI.perl` (16-way) drives the C tools
+   `grabc/grabf/grabft/grabtag` to read raw object content from the repos. The
+   offenders blob+tree exclusion is applied first. Produces **per-shard dumps**
+   `<base>.<m>.<l>.{blob,commit,tree,tag}.{bin,idx}` — `.bin` = raw zlib content,
+   `.idx` = `offset;lenC;sec;sha;repo`.
+
+## (B) Kept mirrors — `runExoMirror.sh`
+
+Mirror collections that are kept locally (Mozilla, Chromium-Gerrit) contain
+git-cinnabar (hg) plus native git bare repos. `enumRepo` is **cinnabar-aware**:
+for cinnabar repos it enumerates only objects reachable from the real converted
+refs, excluding `refs/cinnabar/*` and `refs/notes/cinnabar` (hg bookkeeping, not
+source). The converted objects carry standard git content/tree hashes, so they
+dedup against WoC's git objects across VCS — a file's git blob SHA is the same
+whether it came from git or hg. From there the flow matches Front A: enumerate →
+`cleanBlb|hasObj` dedup → `grabGitI` dump → the same per-shard dumps.
+
+## De-offend — `deOffend.sh`
+
+Runs periodically during the grab and as a final sweep. On the dumps it culls
+(a) per-shard size offenders, (b) cross-shard aggregate offenders, and (c)
+registry offenders — removing blob **and** tree content. Mixed shards are
+re-extracted with `grabGitIType.perl`; shards that are 100% offender are
+truncated. It logs new offenders to the registry, and — once a dataset is
+already rsynced — re-rsyncs just the shards it culled to da8 before upgrading
+STAGE to `verified` (so a post-rsync cull never leaves stale data on da8).
+
+## Sink — da8 update area
+
+`rsync` (post-grab in `runExo`/`runExoMirror`, plus `deOffend`'s re-rsync of
+culled shards) writes the `.bin/.idx` dumps and `olist.gz` to
+`da8:/mnt/ordos/data/data/update/<ver>/`, which is loaded back into WoC. Repo
+STAGE lifecycle: `cloning → listed → grabbing → rsynced → verified` (verified =
+safe to delete the local clones and dumps).

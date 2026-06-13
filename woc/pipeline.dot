@@ -1,0 +1,109 @@
+// WoC git-object-extraction pipeline (Jetstream2)
+// NODES = data artifacts (boxes).  EDGES = processing steps (labelled with the
+// script / tool that consumes the source node and produces the target node).
+//
+// Two ingest fronts feed the same sink (da8 update area, which is loaded back
+// into WoC):
+//   (A) per-residue web crawl     : fetchExo.sh  = doOtrVerFetch.sh + runExo.sh
+//   (B) kept large mirrors (hg+git): runExoMirror.sh  (Mozilla, Chromium-Gerrit)
+//
+// Render:  dot -Tpng pipeline.dot -o pipeline.png   (or -Tsvg)
+
+digraph WoC_pipeline {
+  rankdir=TB;
+  labelloc="t";
+  fontname="Helvetica";
+  label="WoC git-object extraction pipeline — data (nodes) & processing (edges)";
+  node  [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, fillcolor="#eef4ff"];
+  edge  [fontname="Helvetica", fontsize=9, color="#444444"];
+
+  // ---------------------------------------------------------------- external/upstream WoC data
+  subgraph cluster_woc {
+    label="Upstream WoC data (read-only inputs)";
+    style="rounded,dashed"; color="#888888"; fontname="Helvetica";
+    node [fillcolor="#fff2cc"];
+
+    P2tips   [label="WoC P2tips (de-forked)\np2tipsFull.V2604.N.s\npigz, 'project;commit',\nproject-sharded (sHash, 32 shards),\nLC_ALL=C sorted"];
+    ProjList [label="Project lists\nlist<DT>.<ver>.<k>\n(gh:Owner/Repo …, one per residue k)"];
+    WoCDB    [label="WoC object DB (da5)\ncleanBlb.perl | hasObj.perl\n('does WoC already have this sha?')"];
+  }
+
+  // ---------------------------------------------------------------- offenders registry (read+write)
+  Offenders [label="offenders registry\n/media/volume/trees/offenders\nrepo;size;date;summary  (+ KEEP allowlist)\nblob+tree content of flagged repos excluded",
+             fillcolor="#f8d7da"];
+
+  // ================================================================ FRONT A: per-residue crawl
+  subgraph cluster_A {
+    label="(A) Per-residue crawl  —  fetchExo.sh";
+    style="rounded"; color="#3b6ea5"; fontname="Helvetica";
+
+    // ---- tips alignment
+    TipsFiles [label="Per-folder tips\ntips<DT>.<ver>.<k>\n(line-aligned to the list,\ncomma-sep WoC commit SHAs; blank = new repo)"];
+
+    // ---- local clones / partial fetches
+    LocalRepos [label="Local bare repos\n<ver>.<k>/<mangled-name>/\nfull `git clone --mirror`  OR\npartial pack of objects beyond tips\n(+ packed-refs)"];
+    PresentList [label="Present-repo list + refs\nlist<DT>.<ver>1.<k>  ,  <pre>.<k>.cpio.gz\nSTAGE: cloning→listed"];
+
+    // ---- enumerate & dedup
+    Olist [label="Object listing\n<base>.<m>.<l>.olist.gz\n'repo;type;sha;'  (no paths)\ncat-file --batch-all-objects"];
+    Todo  [label="New-objects work list\ntodo.<m>(.l)  →  <base>.<m>.olist.NN.gz\n(survivors NOT already in WoC)"];
+  }
+
+  // ================================================================ FRONT B: kept mirrors
+  subgraph cluster_B {
+    label="(B) Kept mirrors  —  runExoMirror.sh";
+    style="rounded"; color="#7a5195"; fontname="Helvetica";
+    node [fillcolor="#efe6ff"];
+
+    MirrorColl [label="Kept mirror collections\nMozilla, Chromium-Gerrit, …\ngit-cinnabar (hg) + native git bare repos"];
+    OlistM [label="Object listing (cinnabar-aware)\n<base>.<n>.olist.gz  'repo;type;sha;'\nexcludes refs/cinnabar/*, refs/notes/cinnabar"];
+    TodoM  [label="New-objects work list\ntodo.<n> → <base>.olist.NN.gz\n(survivors not in WoC; hg blobs\ncarry standard git content hashes)"];
+  }
+
+  // ---------------------------------------------------------------- shared dump + sink
+  Dumps [label="Per-shard object dumps\n<base>.<m>.<l>.{blob,commit,tree,tag}.{bin,idx}\nbin = raw zlib content;  idx = offset;lenC;sec;sha;repo",
+         fillcolor="#d4edda"];
+
+  Da8 [label="da8 update area\nda8:/mnt/ordos/data/data/update/<ver>/\n.bin/.idx + olist.gz\n(loaded back into WoC)",
+       shape=box3d, fillcolor="#cfe2ff"];
+
+  // ================================================================ EDGES = processing
+  // --- tips alignment
+  P2tips   -> TipsFiles [label="mkTipsFilesJoin.sh\n(normalize list keys → splitSecCh\n→ sort-merge join per shard → re-split, re-order)"];
+  ProjList -> TipsFiles [label="(supplies every list line,\nkeeps alignment)"];
+
+  // --- clone / partial fetch  (doOtrVerFetch.sh)
+  ProjList   -> LocalRepos [label="doOtrVerFetch.sh\nnew repo → git clone --mirror"];
+  TipsFiles  -> LocalRepos [label="known repo → fetchNew.py\n--haves tips --write-refs\n(no-thin protocol-v2 partial fetch;\nfull-clone fallback on FETCHFAIL)"];
+  LocalRepos -> PresentList [label="mangled-name dirs that exist\n+ cpio of packed-refs"];
+
+  // --- enumerate (runExo.sh)
+  LocalRepos -> Olist [label="runExo.sh: git cat-file\n--batch-all-objects --unordered\n(16-way; handles partial repos)"];
+
+  // --- WoC dedup
+  Olist -> Todo [label="ssh da5: cleanBlb.perl | hasObj.perl\n(drop objects WoC already has)"];
+  WoCDB -> Todo [label="dedup lookup", style=dashed];
+
+  // --- grab / dump (runExo.sh → grabGitI.perl → C grabc/grabf/grabft/grabtag)
+  Todo       -> Dumps [label="grabGitI.perl  (16-way)\ngrabc/grabf/grabft/grabtag\nread object content from repos"];
+  LocalRepos -> Dumps [label="(content source for grab)", style=dashed];
+  Offenders  -> Dumps [label="blob+tree exclude\n(awk on .offrepos before grab)", color="#c0392b"];
+
+  // --- de-offend
+  Dumps     -> Dumps     [label="deOffend.sh: cull oversized/registry/aggregate\noffenders (blob+tree); truncate all-offender shards;\nre-extract mixed shards (grabGitIType)", color="#c0392b"];
+  Dumps     -> Offenders [label="log newly-flagged repos", color="#c0392b", style=dashed];
+
+  // --- rsync to sink
+  Dumps -> Da8 [label="runExo.sh rsync (post-grab)  +\ndeOffend.sh re-rsync of culled shards\nSTAGE: grabbing→rsynced→verified"];
+
+  // === FRONT B edges ===
+  MirrorColl -> OlistM [label="runExoMirror.sh: enumRepo\n(cinnabar-aware cat-file, 16-way)"];
+  OlistM -> TodoM [label="ssh da5: cleanBlb.perl | hasObj.perl"];
+  WoCDB  -> TodoM [label="dedup lookup", style=dashed];
+  TodoM  -> Dumps [label="grabGitI.perl  (per chunk)"];
+  Offenders -> Dumps [label="blob+tree exclude", color="#c0392b", style=dashed];
+  MirrorColl -> Dumps [label="(content source)", style=dashed];
+
+  // keep upstream sources at top
+  { rank=same; P2tips; ProjList; WoCDB; }
+}
