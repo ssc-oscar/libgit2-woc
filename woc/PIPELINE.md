@@ -152,6 +152,11 @@ filter: in `treeSkip` → `tree:0` (commits only); else in `blobSkip` → `blob:
 aren't listed yet, so they still clone fully. `fetchExo.sh`/`fetchExoP1.sh`
 refresh the lists (best-effort) before cloning. Absent lists ⇒ unchanged behavior.
 
+Verified (2026-06-14, deployed code, scratch dataset): offender
+`anton2423_didactic-broccoli` → 1,496,559 commits, **0 trees, 0 blobs**
+(`tree:0` applied — activity kept, garbage skipped); non-listed control
+`octocat/Hello-World` → full clone (commits+trees+blobs).
+
 Building blocks (also opt-in / additive, default behavior unchanged):
 `fetchNew.py --filter <spec>` (honored only if the server advertises the `fetch`
 `filter` sub-capability; else degrades to full and reports `filter_applied=0`),
