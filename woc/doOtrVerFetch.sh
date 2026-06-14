@@ -26,6 +26,13 @@ export ver pre
 # TokyoCabinet etc. live in /usr/local/lib; make sure children can load them.
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
+# Optional partial-clone filter (phase-1 of deferred-blob extraction). Empty by
+# default => unchanged full-object behavior. Set e.g. FILTER=blob:none to fetch
+# only commits+trees now and defer blobs (see fetchExoP1.sh / backfillExo.sh).
+# Most valuable on the tips (updated-repo) branch: haves + blob:none = only the
+# new commits/trees beyond WoC, no blobs.
+FILTER=${FILTER:-}
+
 do_one(){
   local i=$1 t=$2 j r url
   j=$(printf '%s' "$i" | perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print')
@@ -34,19 +41,19 @@ do_one(){
   if [ -n "$t" ]; then
     # incremental partial fetch: only objects beyond the WoC tips (haves)
     url=$(printf '%s' "$i" | perl -ane 's|^gh:|https://github.com/|;s|^bb:|https://bitbucket.org/|;s|^gl:|https://gitlab.com/|;s|^dr:|https://drupal.com/|;print')
-    if ! python3 "$HOME/bin/fetchNew.py" "$url" --haves "$t" --write-refs --out "$j" >/dev/null 2>>fetch.err; then
+    if ! python3 "$HOME/bin/fetchNew.py" "$url" --haves "$t" --write-refs ${FILTER:+--filter "$FILTER"} --out "$j" >/dev/null 2>>fetch.err; then
       # partial fetch failed (e.g. server sent a thin pack despite no-thin -> unresolved
       # deltas, or repo gone). Fall back to a full mirror clone: self-contained, and
       # runExo's hasObj dedups the redundancy. (Gone repos fail the clone too -> absent.)
       echo "FETCHFAIL $i" >> fetch.err; rm -rf "$j"
       r=$(printf '%s' "$i" | sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|')
-      git clone --mirror "$r" "$j" 2>>clone.err
+      git clone ${FILTER:+--filter="$FILTER"} --mirror "$r" "$j" 2>>clone.err
     fi
   else
     # new project (no tips) -> full mirror clone, exactly like doOtrVer.sh
     r=$(printf '%s' "$i" | sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|')
     rmdir "$j" 2>/dev/null                   # let git clone create it
-    git clone --mirror "$r" "$j" 2>>clone.err
+    git clone ${FILTER:+--filter="$FILTER"} --mirror "$r" "$j" 2>>clone.err
   fi
 }
 export -f do_one

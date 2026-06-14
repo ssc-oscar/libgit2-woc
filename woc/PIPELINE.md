@@ -110,3 +110,34 @@ culled shards) writes the `.bin/.idx` dumps and `olist.gz` to
 `da8:/mnt/ordos/data/data/update/<ver>/`, which is loaded back into WoC. Repo
 STAGE lifecycle: `cloning → listed → grabbing → rsynced → verified` (verified =
 safe to delete the local clones and dumps).
+
+## Optional: two-phase deferred-blob extraction (opt-in)
+
+A separate, **opt-in** path fetches commits+trees now and defers blob content,
+for an up-to-date view of activity (messages, authors, filenames) without paying
+for content up front. Most valuable for huge **updated** repos: with WoC tips as
+haves, `filter blob:none` fetches only the *new* commits/trees beyond WoC and no
+blobs. The normal full path (`fetchExo.sh`) is unchanged; these tools are only
+used when invoked explicitly.
+
+- **`fetchExoP1.sh <m> <ver> <DT> [out] [filter]`** — phase 1. Runs
+  `doOtrVerFetch.sh` with `FILTER` set (default `blob:none`), then **persists the
+  per-repo blob backfill want-list** (`backfill.<m>.gz`, deduped vs WoC) and a
+  `urls.<m>.gz` map *before* repos are deleted, dumps/rsyncs the commits/trees,
+  and marks `PHASE=blobs-pending`. (Repos can then be removed — there isn't disk
+  to keep them, which is why the want-list must be computed in phase 1.)
+- **`backfillExo.sh <m> <ver> <DT> [out]`** — phase 2. Works purely from
+  `backfill.<m>.gz` + `urls.<m>.gz` (repos gone): re-dedups vs current WoC,
+  optionally restricts to `SELECT=<repo-list>` (metadata-driven deep-extraction
+  selection), fetches each repo's blob OIDs (`fetchNew.py --want-file`, **no
+  haves** so the server can't drop reachable blobs), dumps them into `.bf.`
+  shards, rsyncs, and marks `PHASE=blobs-done`.
+
+Building blocks (also opt-in / additive, default behavior unchanged):
+`fetchNew.py --filter <spec>` (honored only if the server advertises the `fetch`
+`filter` sub-capability; else degrades to full and reports `filter_applied=0`),
+`fetchNew.py --want-file <oids>` (phase-2 explicit-OID fetch), and
+`backfillList.sh <repo>` (lists blob OIDs referenced by trees but absent after a
+`blob:none` fetch). `doOtrVerFetch.sh` honors `$FILTER` (empty = unchanged).
+Because objects are content-addressed and `hasObj` dedups, the two phases
+converge automatically — the eventual full WoC just backfills.

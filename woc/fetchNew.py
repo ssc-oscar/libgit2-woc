@@ -119,25 +119,29 @@ def ls_refs(url, objfmt):
     body += pkt_str("peel\n") + pkt_str("ref-prefix refs/heads/\n") \
           + pkt_str("ref-prefix refs/tags/\n") + FLUSH
     resp = post(url, body)
-    wants = []
+    refs = []                                   # [(oid, refname)]
     while True:
         kind, pl = read_pkt(resp)
         if kind == "eof": break
         if kind != "data": continue
-        oid = pl.split(b" ", 1)[0].decode()
-        if len(oid) in (40, 64): wants.append(oid)
-    # de-dupe, keep order
-    seen=set(); out=[]
-    for w in wants:
-        if w not in seen: seen.add(w); out.append(w)
-    return out
+        parts = pl.rstrip(b"\n").split(b" ")
+        oid = parts[0].decode()
+        name = parts[1].decode() if len(parts) > 1 else None
+        if len(oid) in (40, 64): refs.append((oid, name))
+    return refs
 
-def fetch(url, objfmt, wants, haves, thin=False):
+def fetch(url, objfmt, wants, haves, thin=False, filt=None):
     body  = pkt_str("command=fetch\n") + pkt_str(f"object-format={objfmt}\n") + DELIM
     for w in wants: body += pkt_str(f"want {w}\n")
     for h in haves: body += pkt_str(f"have {h}\n")
     body += pkt_str("ofs-delta\n") + pkt_str("no-progress\n")
     if thin: body += pkt_str("thin-pack\n")     # omitted by default => no-thin
+    # partial-clone filter (e.g. blob:none = commits+trees only, tree:0 = commits
+    # only). Composes with haves: with WoC tips as haves, 'filter blob:none'
+    # fetches ONLY the new commits/trees beyond WoC and NO blobs -- the cheap,
+    # fast path for huge UPDATED repos. Caller verifies the server advertised
+    # the 'filter' capability before passing filt.
+    if filt: body += pkt_str(f"filter {filt}\n")
     body += pkt_str("done\n") + FLUSH
     resp = post(url, body)
     section, packparts, nbytes = None, [], 0
@@ -167,6 +171,20 @@ def main():
     ap.add_argument("--haves-file"); ap.add_argument("--haves", default="")
     ap.add_argument("--out"); ap.add_argument("--thin", action="store_true")
     ap.add_argument("--list", action="store_true")
+    ap.add_argument("--filter", default=None,
+                    help="partial-clone filter, e.g. 'blob:none' (commits+trees, "
+                         "no blobs) or 'tree:0' (commits only). Applied only if the "
+                         "server advertises the 'filter' capability; otherwise the "
+                         "fetch degrades to unfiltered and the summary reports applied=0.")
+    ap.add_argument("--want-file",
+                    help="file of explicit object OIDs (one per line) to request as "
+                         "wants instead of the repo's ref tips -- used for the phase-2 "
+                         "blob backfill. Skips ls-refs/--write-refs. Do NOT combine "
+                         "with haves (the server would exclude reachable blobs).")
+    ap.add_argument("--write-refs", action="store_true",
+                    help="write packed-refs for advertised refs whose tip is present in the "
+                         "partial pack -- so the bare repo is enumerable by "
+                         "`git rev-list --objects --all --missing=allow-any` (gitListSimp)")
     a = ap.parse_args()
 
     # Resolve URL: explicit positional wins; else derive from --repo.
@@ -186,13 +204,38 @@ def main():
     # de-dupe haves, keep order
     seen = set(); haves = [h for h in haves if not (h in seen or seen.add(h))]
 
+    # phase-2 backfill: wants come from an explicit OID list, no refs/haves.
+    want_oids = None
+    if a.want_file:
+        seen = set(); want_oids = []
+        for l in open(a.want_file):
+            o = l.strip()
+            if o and o not in seen and len(o) in (40, 64):
+                seen.add(o); want_oids.append(o)
+        haves = []   # never send haves with explicit wants -> server keeps the blobs
+
     try:
         caps = discover(url)
         objfmt = caps.get("object-format", "sha1")
-        wants = ls_refs(url, objfmt)
-        if not wants:
-            sys.exit(f"error: no refs advertised (empty or inaccessible repo): {url}")
-        pack, nbytes = fetch(url, objfmt, wants, haves, thin=a.thin)
+        # filter is honored only if the server advertised it. In protocol v2 it
+        # is a sub-feature of the 'fetch' command capability (e.g.
+        # 'fetch=shallow wait-for-done filter ...'), NOT a top-level key.
+        filt = None
+        if a.filter:
+            if "filter" in caps.get("fetch", "").split(): filt = a.filter
+            else: sys.stderr.write(f"warning: server does not advertise fetch 'filter'; "
+                                   f"fetching {url} unfiltered\n")
+        if want_oids is not None:
+            refs = []                              # backfill mode: no ref negotiation
+            wants = want_oids
+        else:
+            refs = ls_refs(url, objfmt)
+            if not refs:
+                sys.exit(f"error: no refs advertised (empty or inaccessible repo): {url}")
+            seen=set(); wants=[]                   # unique want oids, order-preserving
+            for o,_ in refs:
+                if o not in seen: seen.add(o); wants.append(o)
+        pack, nbytes = fetch(url, objfmt, wants, haves, thin=a.thin, filt=filt)
     except urllib.error.HTTPError as e:
         # gone/renamed/private repos: GitHub answers 401/404 -> fail cleanly, not a traceback
         sys.exit(f"error: HTTP {e.code} for {url} (repo gone, renamed, or private?)")
@@ -216,7 +259,24 @@ def main():
         if a.list:
             subprocess.run(["git", "-C", outdir, "cat-file", "--batch-all-objects",
                             "--batch-check"])
+        if a.write_refs:
+            # write packed-refs for advertised refs whose tip object is present in
+            # the partial pack (skip wants already in WoC -> absent here, would dangle)
+            chk = subprocess.run(["git", "-C", outdir,
+                                  "cat-file", "--batch-check=%(objectname) %(objecttype)"],
+                                 input="\n".join(o for o, _ in refs).encode(),
+                                 capture_output=True)
+            present = set()
+            for line in chk.stdout.decode().splitlines():
+                f = line.split()
+                if len(f) >= 2 and f[1] != "missing": present.add(f[0])
+            rows = [(o, n) for o, n in refs if n and o in present]
+            if rows:
+                with open(os.path.join(outdir, "packed-refs"), "w") as fh:
+                    fh.write("# pack-refs with: peeled fully-peeled sorted\n")
+                    for o, n in rows: fh.write(f"{o} {n}\n")
     print(f"wants={len(wants)} haves={len(haves)} thin={a.thin} "
+          f"filter={a.filter or '-'} filter_applied={int(filt is not None)} "
           f"pack_bytes={nbytes} new_objects={nobj} out={outdir}")
 
 if __name__ == "__main__":
