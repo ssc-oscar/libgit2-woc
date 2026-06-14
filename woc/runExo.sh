@@ -25,11 +25,12 @@ nlines=$(cat CopyList.${ver}1.$m |wc -l);
 part=$(echo "$nlines/16 + 1"|bc);
 cat CopyList.${ver}1.$m | split -l $part --numeric-suffixes - CopyList.${ver}1.$m.
 
-# record the grab/collection date per repo (mangled name -> bare-repo dir mtime,
-# epoch seconds): when we actually obtained this repo's objects. Captured now,
-# before repos are deleted post-verify, and rsynced to da8 with the dumps.
+# record the CLONE date per repo (mangled name -> bare-repo dir mtime, epoch):
+# when the repo was cloned/fetched -- the as-of date of the captured objects
+# (NOT the grab/extraction run, which only reads). Captured before repos are
+# deleted post-verify, and rsynced to da8 with the dumps.
 while read -r r; do [ -d "$r" ] && printf '%s;%s\n' "$r" "$(stat -c %Y "$r" 2>/dev/null)"; done \
-  < CopyList.${ver}1.$m | pigz > $DST/$base.$m.p2gt.gz
+  < CopyList.${ver}1.$m | pigz > $DST/$base.$m.p2cd.gz
 
 
 for l in {00..15}
@@ -89,7 +90,7 @@ done
 wait 2>/dev/null
 $HOME/bin/deOffend.sh $m $ver $out      # final sweep for shards finished between polls
 
-rsync -av list$DT.* $DST/*.olist.gz $DST/$base.$m.p2gt.gz $DST/*.{blob,commit,tree,tag}.{bin,idx} $RSYNC_DEST/$ver/ \
+rsync -av list$DT.* $DST/*.olist.gz $DST/$base.$m.p2cd.gz $DST/*.{blob,commit,tree,tag}.{bin,idx} $RSYNC_DEST/$ver/ \
   && echo "rsynced $(date '+%F %T')" > $TREES/$ver.$m/STAGE
 # The repo-folder STAGE marker progresses: rsynced -> verified. This deOffend
 # call confirms no oversized shards remain and upgrades STAGE to "verified ..."
