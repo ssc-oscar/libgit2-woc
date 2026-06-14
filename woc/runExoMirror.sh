@@ -37,6 +37,11 @@ cd "$COLL" || exit 1
 find . -type d -name objects -prune 2>/dev/null | sed 's#/objects$##; s#^\./##' | sort > "$DST/repos.list"
 echo "repos: $(wc -l < "$DST/repos.list")  -> dumps in $DST"
 
+# grab/collection date per repo (repo -> objects-dir mtime, epoch): when these
+# objects were last (re)synced into the kept mirror. Rsynced to da8 with dumps.
+while read -r r; do [ -d "$r/objects" ] && printf '%s;%s\n' "$r" "$(stat -c %Y "$r/objects" 2>/dev/null)"; done \
+  < "$DST/repos.list" | pigz > "$DST/$base.p2gt.gz"
+
 # enumerate one repo's objects as repo;type;sha; (cinnabar-aware, see header)
 enumRepo(){
   local repo=$1
@@ -81,5 +86,5 @@ wait
 echo "grab done. dump sizes:"; du -ch "$DST"/$base.*.{blob,commit,tree,tag}.bin 2>/dev/null | tail -1
 
 # 4. rsync dumps to da8
-rsync -a "$DST"/$base.olist.*.gz "$DST"/$base.*.{blob,commit,tree,tag}.{bin,idx} "$RSYNC_DEST/$rsub/" \
+rsync -a "$DST"/$base.olist.*.gz "$DST"/$base.p2gt.gz "$DST"/$base.*.{blob,commit,tree,tag}.{bin,idx} "$RSYNC_DEST/$rsub/" \
   && echo "rsynced $(date '+%F %T') -> $RSYNC_DEST/$rsub/" || echo "rsync FAILED"

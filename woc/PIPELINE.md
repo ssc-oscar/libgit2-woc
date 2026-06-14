@@ -111,6 +111,12 @@ culled shards) writes the `.bin/.idx` dumps and `olist.gz` to
 STAGE lifecycle: `cloning → listed → grabbing → rsynced → verified` (verified =
 safe to delete the local clones and dumps).
 
+Alongside the dumps, `runExo`/`runExoMirror` also emit a per-repo **grab-date**
+map `<base>.<m>.p2gt.gz` (lines `repo;epoch`) — the bare-repo / objects-dir
+mtime, i.e. when we actually obtained that repo's objects. Captured before the
+clones are deleted and rsynced to da8 with the dumps, so WoC can record data
+recency per repo.
+
 ## Optional: two-phase deferred-blob extraction (opt-in)
 
 A separate, **opt-in** path fetches commits+trees now and defers blob content,
