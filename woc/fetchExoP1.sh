@@ -29,6 +29,9 @@ cd "$TREES" || { echo "[p1 $ver.$m] cannot cd $TREES"; exit 1; }
 DST=$VOL/$out/$ver.$m; mkdir -p "$DST"
 pre=list$DT.$ver
 
+# refresh per-repo offender filter lists from woc.pm (known garbage repos get
+# tree:0/blob:none even though the run-wide FILTER below also applies)
+/home/exouser/bin/genOffenderFilter.sh >/dev/null 2>&1 || true
 echo "[p1 $ver.$m] FILTER=$FILTER clone/fetch start $(date '+%F %T')"
 /home/exouser/bin/doOtrVerFetch.sh "$m" "$ver" "$DT" || { echo "[p1 $ver.$m] doOtrVerFetch FAILED"; exit 1; }
 

@@ -133,6 +133,18 @@ used when invoked explicitly.
   haves** so the server can't drop reachable blobs), dumps them into `.bf.`
   shards, rsyncs, and marks `PHASE=blobs-done`.
 
+### Clone-stage offender filter (consume the exclusion list at fetch)
+
+`doOtrVerFetch.sh` also consults the offender exclusion list so known garbage
+repos are never fully re-cloned — even in the normal full run. `genOffenderFilter.sh`
+materializes two lists from `woc.pm` (the authoritative source, which imports the
+deOffend offenders registry): `offenders.treeSkip` (`keys %largeTreePrj`) and
+`offenders.blobSkip` (`keys %largeBlobPrj`). Per repo, `doOtrVerFetch` picks the
+filter: in `treeSkip` → `tree:0` (commits only); else in `blobSkip` → `blob:none`
+(commits+trees); else the run-wide `FILTER` (empty by default). New projects
+aren't listed yet, so they still clone fully. `fetchExo.sh`/`fetchExoP1.sh`
+refresh the lists (best-effort) before cloning. Absent lists ⇒ unchanged behavior.
+
 Building blocks (also opt-in / additive, default behavior unchanged):
 `fetchNew.py --filter <spec>` (honored only if the server advertises the `fetch`
 `filter` sub-capability; else degrades to full and reports `filter_applied=0`),

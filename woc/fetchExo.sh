@@ -13,6 +13,9 @@ m=${1:?usage: fetchExo.sh <m> <ver> <DT> [out]}; ver=${2:?}; DT=${3:?}; out=${4:
 # from the trees root regardless of the caller's cwd.
 cd "${TREES:-/media/volume/trees}" || { echo "[fetchExo $ver.$m] cannot cd to trees root"; exit 1; }
 S="/media/volume/trees/$ver.$m/STAGE"
+# refresh the clone-stage offender filter lists from woc.pm so known garbage
+# repos are fetched filtered (tree:0 / blob:none) instead of fully cloned
+/home/exouser/bin/genOffenderFilter.sh >/dev/null 2>&1 || true
 echo "[fetchExo $ver.$m] clone/fetch start $(date '+%F %T')"
 /home/exouser/bin/doOtrVerFetch.sh "$m" "$ver" "$DT" || { echo "[fetchExo $ver.$m] doOtrVerFetch FAILED $(date '+%F %T')"; exit 1; }
 echo "[fetchExo $ver.$m] listed $(date '+%F %T'); extract start"

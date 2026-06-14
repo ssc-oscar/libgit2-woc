@@ -33,27 +33,44 @@ export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib64${LD_LIBRARY_PATH:+:$LD_LI
 # new commits/trees beyond WoC, no blobs.
 FILTER=${FILTER:-}
 
+# Per-repo offender filter from woc.pm (via genOffenderFilter.sh): known garbage
+# repos are fetched filtered even in a normal full run, so we never re-clone a
+# known data-dump's content. treeSkip (large/garbage trees) -> tree:0 (commits
+# only); blobSkip (garbage blobs) -> blob:none (commits+trees). Absent lists =>
+# no per-repo filtering (pure current behavior). New projects aren't listed yet,
+# so they still clone fully. The forked worker subshells inherit these arrays.
+declare -A TREESKIP BLOBSKIP
+OFFTREE=${OFFTREE:-$HOME/bin/offenders.treeSkip}
+OFFBLOB=${OFFBLOB:-$HOME/bin/offenders.blobSkip}
+[ -s "$OFFTREE" ] && while read -r _r; do [ -n "$_r" ] && TREESKIP[$_r]=1; done < "$OFFTREE"
+[ -s "$OFFBLOB" ] && while read -r _r; do [ -n "$_r" ] && BLOBSKIP[$_r]=1; done < "$OFFBLOB"
+
 do_one(){
-  local i=$1 t=$2 j r url
+  local i=$1 t=$2 j r url filt
   j=$(printf '%s' "$i" | perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print')
   [ -z "$j" ] && return
+  # offender override: tree-garbage -> tree:0, else blob-garbage -> blob:none,
+  # else the run-wide FILTER (empty by default).
+  filt=$FILTER
+  if [ -n "${TREESKIP[$j]:-}" ]; then filt=tree:0
+  elif [ -n "${BLOBSKIP[$j]:-}" ]; then filt=blob:none; fi
   mkdir "$j" 2>/dev/null || return          # atomic claim; already present/in-progress -> skip
   if [ -n "$t" ]; then
     # incremental partial fetch: only objects beyond the WoC tips (haves)
     url=$(printf '%s' "$i" | perl -ane 's|^gh:|https://github.com/|;s|^bb:|https://bitbucket.org/|;s|^gl:|https://gitlab.com/|;s|^dr:|https://drupal.com/|;print')
-    if ! python3 "$HOME/bin/fetchNew.py" "$url" --haves "$t" --write-refs ${FILTER:+--filter "$FILTER"} --out "$j" >/dev/null 2>>fetch.err; then
+    if ! python3 "$HOME/bin/fetchNew.py" "$url" --haves "$t" --write-refs ${filt:+--filter "$filt"} --out "$j" >/dev/null 2>>fetch.err; then
       # partial fetch failed (e.g. server sent a thin pack despite no-thin -> unresolved
       # deltas, or repo gone). Fall back to a full mirror clone: self-contained, and
       # runExo's hasObj dedups the redundancy. (Gone repos fail the clone too -> absent.)
       echo "FETCHFAIL $i" >> fetch.err; rm -rf "$j"
       r=$(printf '%s' "$i" | sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|')
-      git clone ${FILTER:+--filter="$FILTER"} --mirror "$r" "$j" 2>>clone.err
+      git clone ${filt:+--filter="$filt"} --mirror "$r" "$j" 2>>clone.err
     fi
   else
     # new project (no tips) -> full mirror clone, exactly like doOtrVer.sh
     r=$(printf '%s' "$i" | sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|')
     rmdir "$j" 2>/dev/null                   # let git clone create it
-    git clone ${FILTER:+--filter="$FILTER"} --mirror "$r" "$j" 2>>clone.err
+    git clone ${filt:+--filter="$filt"} --mirror "$r" "$j" 2>>clone.err
   fi
 }
 export -f do_one
