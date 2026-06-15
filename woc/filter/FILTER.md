@@ -59,7 +59,8 @@ then `ArrayLength` fingerprint bytes — mmap'd directly by `hasObjBF`.
 
 ## Status / next
 
-- Blob filters: building all 128 on da5 → `/fast/blobFilters/` (~28 GB).
+- Blob filters: **done** — 128 on da5 `/fast/blobFilters/` (27 GB, 9.01 b/key).
+- Commit filters: **building** all 128 from `commit_<sec>.idx` → `/fast/commitFilters/` (4-field idx, single sha).
 - Trees: build from `/data/All.blobs/tree_<sec>.idx` once da5 ingest settles
   (`.tch` are mid-write); same extractor/builder.
 - Wire `hasObjBF` into the dedup pipe (front the existing `ssh da5 hasObj`):
