@@ -74,7 +74,7 @@ digraph WoC_pipeline {
 
   // ================================================================ EDGES = processing
   // --- tips alignment
-  P2tips   -> TipsFiles [label="mkTipsFilesJoin.sh\n(normalize list keys → splitSecCh\n→ sort-merge join per shard → re-split, re-order)"];
+  P2tips   -> TipsFiles [label="mkTipsFiles.sh\n(one streaming pass over p2tips shards;\nnormalized list keys → line-aligned tips)"];
   ProjList -> TipsFiles [label="(supplies every list line,\nkeeps alignment)"];
 
   // --- clone / partial fetch  (doOtrVerFetch.sh)
