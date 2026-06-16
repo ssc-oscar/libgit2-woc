@@ -57,10 +57,47 @@ Filter file format: `"BF8\1"` magic, `Seed`(u64), 6×u32
 (`Size,SegmentLength,SegmentLengthMask,SegmentCount,SegmentCountLength,ArrayLength`),
 then `ArrayLength` fingerprint bytes — mmap'd directly by `hasObjBF`.
 
+## Local-RAM pinning (only if running filters locally, not on da5)
+
+Local volumes are rotational; an unpinned mmap'd filter gets evicted by the
+pipeline's page-cache churn → HDD random reads (catastrophic). `pin_filters.c`
+mmap+`mlock`s all `<type>_<sec>.bf` to keep them resident. Non-root `mlock` of
+59 GB needs the limit raised: `sudo setcap cap_ipc_lock+ep ~/bin/pin_filters`
+(per-binary capability; `ulimit -l` is otherwise capped at 8 MB and a
+`limits.conf` change only reaches fresh login sessions). On **da5** none of this
+is needed — its 1.26 TB RAM keeps the 59 GB page-cache-resident on its own.
+
+## Experiment: A (local) vs B (da5) — 1 M-line olist dedup
+
+| path | total time | da5 `.tch` lookups |
+|---|---|---|
+| baseline `cleanBlb \| hasObj` (da5 tch) | **346 s** | 867 K (all) |
+| A — local pinned filter + da5 confirm | **12 s** | 34.5 K |
+| B — da5 filter + da5 confirm | **15 s** | 34.5 K |
+
+~**25× faster, A ≈ B**. The bottleneck was the `.tch` random reads, not the
+network, so **B (run on da5) is the chosen deployment** — no mlock/eviction
+fight, filters in da5 RAM. Pipe order is `… | hasObjBF | cleanBlb` (BF is
+constant-memory; `cleanBlb` accumulates a unique-sha hash, so feed it the
+smaller post-BF stream).
+
+## Pitfall (fixed): 20-byte stream framing
+
+`extract_sha.pl` MUST `chomp` before `pack("H*",...)`. The sha is the **last**
+`.idx` field in the 4-field format (all commit/tree records + new blob records),
+so without `chomp` its trailing `\n` makes `pack` emit **21 bytes**, misaligning
+`build_bf`'s fixed 20-byte record stream → corrupted keys → ~47 % false-absent
+("over-keep"). `bench_bf` self-validates against the same mis-extracted keys, so
+it does **not** catch this — verify against the real tch (`hasObjBF` survivors
+vs `hasObj` survivors should match, modulo small freshness). A correct shard's
+key count matches the corresponding `sha1.<type>_<sec>.tch` `rnum`.
+
 ## Status / next
 
-- Blob filters: **done** — 128 on da5 `/fast/blobFilters/` (27 GB, 9.01 b/key).
-- Commit filters: **done** — 128 on `/fast/commitFilters/` (6.9 GB; 4-field idx, single sha).
-- Tree filters: **building** all 128 from `tree_<sec>.idx` → `/fast/treeFilters/` (4-field idx, single sha; ingest settled).
-- Wire `hasObjBF` into the dedup pipe (front the existing `ssh da5 hasObj`):
-  `hasObjBF <dir> defer.gz < olist > survivors; pigz -dc defer.gz | ssh da5 hasObj >> survivors`.
+- All 384 filters **rebuilding** on da5 with the fixed extractor
+  (`build_all_type.sh commit|blob|tree`, P=3, resumable; log `/tmp/rebuild_all.log`)
+  → `/fast/{blob,commit,tree}Filters/` (~62 GB).
+- After rebuild: re-copy local (if A), re-verify over-keep ≈ 0, then wire
+  `hasObjBF` (3-type) into the dedup pipe, fronting the exact `hasObj` for the
+  deferred maybe-present: `… | hasObjBF <dir> defer ; defer | hasObj`.
+- `build_all_blob.sh` is superseded by `build_all_type.sh` (kept for reference).
