@@ -61,8 +61,7 @@ fact (`deOffend.sh`). `deOffend.sh` also appends newly-detected offenders.
    line-aligned to the list (line i = comma-separated WoC commit SHAs for list
    line i, or blank if that repo is new to WoC), so `doOtrVerFetch` reads
    list+tips together. The key is the normalized p2tips form (lowercase, protocol
-   dropped, first two `/`→`_`, leading `github.com_` dropped). (`fetchTips.sh` is
-   a batch variant that joins + partial-fetches in one step.)
+   dropped, first two `/`→`_`, leading `github.com_` dropped).
 2. **Clone / partial fetch** — `doOtrVerFetch.sh`:
    - repo WoC already knows (has tips) → `fetchNew.py --haves <tips> --write-refs`
      (no-thin protocol-v2 partial fetch: only objects beyond the tips; full
