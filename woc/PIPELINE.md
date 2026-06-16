@@ -79,7 +79,9 @@ fact (`deOffend.sh`). `deOffend.sh` also appends newly-detected offenders.
    rebuilds filenames from the dumped tree objects).
 4. **WoC dedup** — `ssh da5 'cleanBlb.perl | hasObj.perl'` drops objects WoC
    already has, leaving the **new-objects work list** `todo.<m>` →
-   `<base>.<m>.olist.NN.gz`.
+   `<base>.<m>.olist.NN.gz`. (A faster RAM-resident binary-fuse alternative,
+   `hasObjBF`, lives with `hasObj`/`cleanBlb` in the **lookup** repo
+   `ssc-oscar/lookup` — see its `FILTER.md`.)
 5. **Grab / dump** — `grabGitI.perl` (16-way) drives the C tools
    `grabc/grabf/grabft/grabtag` to read raw object content from the repos. The
    offenders blob+tree exclusion is applied first. Produces **per-shard dumps**
