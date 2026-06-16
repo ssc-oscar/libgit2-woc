@@ -55,11 +55,15 @@ fact (`deOffend.sh`). `deOffend.sh` also appends newly-detected offenders.
 
 ## (A) Per-residue crawl — `fetchExo.sh`
 
-1. **Tips alignment** — `mkTipsFilesJoin.sh` joins P2tips against the list:
-   normalize each list entry to a p2tips key → `splitSecCh` into shards → per-shard
-   sort-merge `join` → re-split and re-order back to list order. Produces
-   **`tips<DT>.<ver>.<k>`**, line-aligned to the list (comma-separated WoC commit
-   SHAs; blank line = repo new to WoC).
+1. **Tips alignment** — `mkTipsFiles.sh` joins P2tips against the list in one
+   streaming pass over the (huge, compressed) p2tips shards, holding only the
+   lists' normalized keys in memory. Produces **`tips<DT>.<ver>.<k>`**,
+   line-aligned to the list (line i = comma-separated WoC commit SHAs for list
+   line i, or blank if that repo is new to WoC), so `doOtrVerFetch` reads
+   list+tips together. The key is the normalized p2tips form (lowercase, protocol
+   dropped, first two `/`→`_`, leading `github.com_` dropped). (`fetchTips.sh` is
+   a batch variant that joins + partial-fetches in one step; the older
+   `mkTipsFilesJoin.sh` `splitSecCh`/sort-merge approach is superseded.)
 2. **Clone / partial fetch** — `doOtrVerFetch.sh`:
    - repo WoC already knows (has tips) → `fetchNew.py --haves <tips> --write-refs`
      (no-thin protocol-v2 partial fetch: only objects beyond the tips; full
