@@ -41,7 +41,11 @@ do
 # repo;type;sha; . Also works for partial tip-fetch repos (lists present objects).
 (cat CopyList.${ver}1.$m.$l | while read repo; do  [[ -d $repo/ ]] && git --git-dir="$repo" cat-file --batch-all-objects --unordered --batch-check='%(objectname) %(objecttype)' 2>> $DST/$base.$m.$l.olist.err | awk -v R="$repo" '$2~/^(blob|tree|commit|tag)$/{print R";"$2";"$1";"}'
 done | pigz > $DST/$base.$m.$l.olist.gz; \
-pigz -dc $DST/$base.$m.$l.olist.gz | ssh $HASOBJ_HOST -At '$HOME/lookup/cleanBlb.perl | $HOME/bin/hasObj.perl' | pigz > $DST/todo.$m.$l) &
+# dedup: cleanBlb (intra-shard) | hasObjBF (binary-fuse, da5 RAM; resolves
+# definitely-new objects locally) ; only the maybe-present defer to the exact
+# hasObj (.tch). ~4x faster, identical survivors, 0 false negatives. Filters
+# (all types) live on da5 /fast/objFilters (rebuild via lookup/build_all_type.sh).
+pigz -dc $DST/$base.$m.$l.olist.gz | ssh $HASOBJ_HOST -At 'd=$(mktemp); $HOME/lookup/cleanBlb.perl | $HOME/bin/hasObjBF /fast/objFilters "$d"; $HOME/bin/hasObj.perl < "$d"; rm -f "$d"' | pigz > $DST/todo.$m.$l) &
 #rsync -av *.$l.olist.gz da5:/data/play/$ver/; \
 #ssh da5 "/data/play/V4/toTodo1.sh $m $l" < /dev/null
 #) &
