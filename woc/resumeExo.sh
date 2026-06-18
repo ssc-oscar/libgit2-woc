@@ -68,4 +68,4 @@ echo "[$ver.$m] rsync new shards + p2cd -> $RSYNC_DEST/$ver/ $(date '+%T')"
 files=("$DST/$base.$m.p2cd.gz")
 for o in "${outs[@]}"; do files+=("$DST/$base.$m.$o".{commit,tree,blob,tag}.{bin,idx}); done
 rsync -av "${files[@]}" "$RSYNC_DEST/$ver/" \
-  && echo "[$ver.$m] rsynced OK; shards: ${outs[*]} (existing da8 shards untouched)"
+  && echo "[$ver.$m] rsynced OK; wrote shards: ${outs[*]} + p2cd to da8 (a shard reusing an original name REPLACES it; a fresh name is added alongside the existing shards)"
