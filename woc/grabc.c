@@ -31,19 +31,22 @@ static void print_signature(const char *header, const git_signature *sig)
 
 
 // This is the output on which sha is calculated: prepending commit %n\0
+// Emit the EXACT raw object bytes from the ODB rather than reconstructing from
+// raw_header + "\n" + message. The reconstruction added a spurious "\n" for
+// non-canonical commits lacking the trailing blank-line separator / message
+// (e.g. message-less commits), yielding the wrong length/sha so grabGitI's
+// dump_commit rejected a valid commit. Raw bytes reproduce any commit shape.
 static void show_commit_body (git_commit *commit)
 {
-  unsigned int i, max_i;
-  char oidstr[GIT_OID_HEXSZ + 1];
-  git_oid_tostr(oidstr, sizeof(oidstr), git_commit_tree_id(commit));
-  max_i = (unsigned int)git_commit_parentcount(commit);
-  for (i = 0; i < max_i; ++i) {
-    git_oid_tostr(oidstr, sizeof(oidstr), git_commit_parent_id(commit, i));
+  git_repository *repo = git_commit_owner(commit);
+  git_odb *odb = NULL;
+  git_odb_object *o = NULL;
+  if (git_repository_odb(&odb, repo) == 0 &&
+      git_odb_read(&o, odb, git_commit_id(commit)) == 0) {
+    fwrite(git_odb_object_data(o), 1, git_odb_object_size(o), stdout);
+    git_odb_object_free(o);
   }
-  printf("%s", git_commit_raw_header(commit));
-  if (git_commit_message_raw(commit))
-    printf("\n%s", git_commit_message_raw(commit));
-
+  if (odb) git_odb_free(odb);
 }
 
 /** Helper to print a commit object. */
