@@ -246,7 +246,10 @@ sub dump_commit {
 
  my $hshaFull = sha1_hex ("commit $len\0$code");
 
- if ($hsha1 ne $hshaFull){ print STDERR "sha do not match: $dir: $hsha1 vs $hshaFull, $len\n$code"; }
+ # skip-on-mismatch guard: if the reconstructed content does not hash to the
+ # expected sha, DO NOT store it (storing would put wrong bytes under $hsha1 --
+ # silent corruption). Log and bail so a bad object is dropped, never written.
+ if ($hsha1 ne $hshaFull){ print STDERR "sha do not match (SKIPPED): $dir: $hsha1 vs $hshaFull, $len\n$code"; return; }
 
  my $codeC = safeComp ($code);
  my $lenC = length($codeC);
