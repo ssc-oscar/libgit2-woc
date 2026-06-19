@@ -235,7 +235,8 @@ sub dump_tree {
 
  my $hshaFull = sha1_hex ("tree $len\0$code");
 
- if ($hsha1 ne $hshaFull){ print STDERR "sha do not match: $dir: $hsha1 vs $hshaFull, $len\n$code"; }
+ # skip-on-mismatch guard: never store wrong bytes under $hsha1 (silent corruption).
+ if ($hsha1 ne $hshaFull){ print STDERR "sha do not match (SKIPPED): $dir: $hsha1 vs $hshaFull, $len\n$code"; return; }
 
  my $codeC = safeComp ($code);
  my $lenC = length($codeC);
@@ -261,7 +262,8 @@ sub dump_commit {
 
  my $hshaFull = sha1_hex ("commit $len\0$code");
 
- if ($hsha1 ne $hshaFull){ print STDERR "sha do not match: $dir: $hsha1 vs $hshaFull, $len\n$code"; }
+ # skip-on-mismatch guard: never store wrong bytes under $hsha1 (silent corruption).
+ if ($hsha1 ne $hshaFull){ print STDERR "sha do not match (SKIPPED): $dir: $hsha1 vs $hshaFull, $len\n$code"; return; }
 
  my $codeC = safeComp ($code);
  my $lenC = length($codeC);
@@ -287,7 +289,8 @@ sub dump_tag {
 
  my $hshaFull = sha1_hex ("tag $len\0$code");
 
- if ($hsha1 ne $hshaFull){ print STDERR "sha do not match: $hsha1 vs $hshaFull, $len\n$dir\n$code"; }
+ # skip-on-mismatch guard: never store wrong bytes under $hsha1 (silent corruption).
+ if ($hsha1 ne $hshaFull){ print STDERR "sha do not match (SKIPPED): $hsha1 vs $hshaFull, $len\n$dir\n$code"; return; }
 
  my $codeC = safeComp ($code);
  my $lenC = length($codeC);
