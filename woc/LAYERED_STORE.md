@@ -37,6 +37,32 @@ Per shard/type: `{blob,tree,commit}_<sec>.bin` (LZF objects concatenated) + `.id
   A sha lives in exactly one generation; its `global_off` routes the read to the
   right segment.
 
+## Generation 0 = current import state; batches → generations
+"Frozen base" means **whatever each section shard already holds** — freezing is just
+a policy (stop appending; route new objects to generations), no data moves. The base
+may sit at **different batch levels per type**, which is fine because generation
+numbering is per type:
+
+| type | section shard | gen 0 (frozen base) = imported batches | generations = |
+|---|---|---|---|
+| commit | `commit_<sec>` | e.g. **000–079** | batches 080, 081, … |
+| tree | `tree_<sec>` | e.g. **000–039** | batches 040, 041, … |
+| blob | `blob_<sec>` | current contents (often empty for the new round) | every new blob batch |
+
+**Batch → generation mapping.** Each dataset batch `V2605.<NNN>` is grabbed into per-type
+`.bin`/`.idx` (sharded 00–15 internally by the grab; regrouped by `sec` on ingest).
+Instead of `AllUpdateObj` appending those objects into the multi-TB section base and
+updating its index object-by-object, **each batch contributes one new generation per
+`(type, sec)`**: register the batch's content as `*_<sec>.bin.gen<N>` (or adopt the
+grab `.bin` directly), build its frozen `.sidx`, append to that section's
+`segments.json`. The 3 TB base is never touched until compaction.
+
+So **no need to realign types** before adopting this: trees can stay at batch 039 in
+the base while commits are at 079 — batches 040+ simply become tree generations.
+Because the new round's **blobs are un-imported**, the blob store adopts the layered
+scheme from the start (V2605 blobs land as generations, never appended into the 3 TB
+blob base — the largest single win).
+
 ## Ingest = register + batch (near-instant)
 Per ingest: write the new segment (or adopt the grab `.bin`), build its frozen
 `.sidx` (one sort + batched write), append one line to `segments.json`. **No base
