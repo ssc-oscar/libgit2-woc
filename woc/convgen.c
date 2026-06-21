@@ -1,16 +1,20 @@
-/* convgen.c -- converter: fold an un-split grab batch into per-sec main-store
- * shards, in the EXISTING {type}_<sec>.{bin,idx} format (id;offset;len;sha).
+/* convgen.c -- converter: fold un-split grab batches into per-sec main-store
+ * shards {type}_<sec>.{bin,idx} (id;offset;len;sha), copying the compressed LZF
+ * slices VERBATIM (no recompress). DEDUP-ON-WRITE: a locally-cached seen-set of
+ * 20-byte shas ensures each object is written (and the offset advanced) at most
+ * once -> the final segments are clean (no duplicates), across all batches.
  *
- * Reads a grab batch .idx (offset;lenC;sec;sha;dir...) + .bin (concatenated
- * Compress::LZF-compressed objects) and APPENDS each object's compressed bytes
- * VERBATIM onto <out>/<type>_<sec>.bin, appending "id;offset;lenC;sha" to
- * <out>/<type>_<sec>.idx. Seeds id/offset from any existing per-sec files, so it
- * appends onto a base shard copy (or starts a fresh generation if <out> empty).
- * No (de)compression -- the byte slice is copied as-is, so the output is
- * consumable by the existing WoC read path unchanged. BF / existence index are
- * rebuilt from the .idx AFTERWARD (decoupled), not maintained here.
+ * All batches are processed in ONE invocation so the seen-set persists across
+ * them. On start the set is SEEDED from any existing gen .idx files (so a re-run
+ * is idempotent / resumable and never re-appends what is already there). An
+ * optional sec band (--secmin/--secmax) bounds RAM for huge types (e.g. blobs):
+ * run two bands instead of one giant table.
  *
- *   convgen <type> <batch.idx> <batch.bin> <outdir>
+ *   convgen <type> <outdir> [--capbits B] [--secmin A] [--secmax Z] \
+ *           ( -L <listfile-of-prefixes> | <prefix> ... )
+ *   prefix: "<...>/New<MAP>V<VER>.<NNN>.<SS>" -> "<prefix>.<type>.{idx,bin}" read.
+ *   --capbits B : seen-set has 2^B slots (20 B each; 2^31 -> 40 GB). Pick so
+ *                 2^B*0.55 > #distinct objects in the band. Default 28.
  *   build: cc -O2 -o convgen convgen.c
  */
 #include <stdio.h>
@@ -22,66 +26,103 @@
 #include <sys/stat.h>
 
 #define NSEC 128
-static FILE *fbin[NSEC], *fidx[NSEC];
-static long long off[NSEC], id[NSEC];   /* next offset / next id, per sec */
-static int opened[NSEC];
 
-static void open_sec(const char *out, const char *type, int sec){
-  char p[600];
-  snprintf(p,sizeof p,"%s/%s_%d.bin",out,type,sec);
-  struct stat st;
-  off[sec] = (stat(p,&st)==0) ? st.st_size : 0;     /* append offset = current bin size */
-  fbin[sec] = fopen(p,"ab");
-  if(!fbin[sec]){ perror(p); exit(1);}              
-  snprintf(p,sizeof p,"%s/%s_%d.idx",out,type,sec);
-  /* seed id = (last existing idx record's id)+1, read cheaply from the file tail
-   * (nothing downstream keys on id -- it is a row counter -- so O(1) is enough). */
-  long long n=0; int fd=open(p,O_RDONLY); struct stat si;
-  if(fd>=0 && fstat(fd,&si)==0 && si.st_size>0){
-    off_t back = si.st_size>4096 ? 4096 : si.st_size;
-    char tb[4097]; ssize_t k=pread(fd,tb,back,si.st_size-back);
-    if(k>0){ tb[k]=0;
-      char *nl=tb+k-1; if(*nl=='\n') *nl=0;          /* drop trailing newline */
-      char *ls=strrchr(tb,'\n'); ls = ls?ls+1:tb;    /* start of last record */
-      n = strtoll(ls,NULL,10) + 1;                    /* last id + 1 */
-    }
+/* ---- open-addressing seen-set of 20-byte keys (empty slot = all zero) ---- */
+static unsigned char *SLOT; static uint64_t MASK, CNT; static int HAS_ZERO;
+static int is_zero(const unsigned char*p){ for(int i=0;i<20;i++) if(p[i]) return 0; return 1; }
+static void set_init(int bits){
+  uint64_t cap=(uint64_t)1<<bits;
+  SLOT=calloc(cap,20);
+  if(!SLOT){ fprintf(stderr,"convgen: cannot alloc seen-set 2^%d (%lluGB)\n",bits,(unsigned long long)(cap*20ULL>>30)); exit(1);}
+  MASK=cap-1; CNT=0; HAS_ZERO=0;
+}
+static int set_add(const unsigned char*k){     /* 1 = newly inserted, 0 = already present */
+  if(is_zero(k)){ if(HAS_ZERO) return 0; HAS_ZERO=1; return 1; }
+  uint64_t h; memcpy(&h,k,8); h&=MASK;
+  for(;;){
+    unsigned char*p=SLOT+h*20;
+    if(is_zero(p)){ memcpy(p,k,20);
+      if(++CNT > (MASK>>1)+(MASK>>2)){ fprintf(stderr,"convgen: seen-set >75%% full (%llu) -- raise --capbits or add a band\n",(unsigned long long)CNT); exit(1);}
+      return 1; }
+    if(memcmp(p,k,20)==0) return 0;
+    h=(h+1)&MASK;
   }
-  if(fd>=0) close(fd);
+}
+static int hexb(const char*h,unsigned char*o){
+  for(int i=0;i<20;i++){ int a=h[2*i],b=h[2*i+1];
+    a=(a<='9')?a-'0':(a|32)-'a'+10; b=(b<='9')?b-'0':(b|32)-'a'+10;
+    if(a<0||a>15||b<0||b>15) return 0; o[i]=(a<<4)|b; } return 1; }
+
+static FILE *fbin[NSEC], *fidx[NSEC]; static long long off[NSEC], id[NSEC]; static int opened[NSEC];
+static const char *OUT, *TYPE; static int SECMIN=0, SECMAX=127;
+
+static void open_sec(int sec){
+  char p[700]; struct stat st;
+  snprintf(p,sizeof p,"%s/%s_%d.bin",OUT,TYPE,sec);
+  off[sec]=(stat(p,&st)==0)?st.st_size:0;
+  fbin[sec]=fopen(p,"ab"); if(!fbin[sec]){perror(p);exit(1);}
+  snprintf(p,sizeof p,"%s/%s_%d.idx",OUT,TYPE,sec);
+  long long n=0; FILE*r=fopen(p,"rb");        /* seed seen-set + id from existing gen idx */
+  if(r){ char*l=NULL; size_t c=0; unsigned char k[20];
+    while(getline(&l,&c,r)>0){ char*q=strrchr(l,';'); if(!q)continue; q++;
+      char*e=q; while(*e&&*e!='\n')e++;
+      if(e-q>=40&&hexb(q,k)) set_add(k); n++; }
+    free(l); fclose(r); }
   id[sec]=n;
-  fidx[sec]=fopen(p,"ab");
-  if(!fidx[sec]){ perror(p); exit(1);}              
+  fidx[sec]=fopen(p,"ab"); if(!fidx[sec]){perror(p);exit(1);}
   opened[sec]=1;
 }
 
-int main(int argc,char**argv){
-  if(argc!=5){ fprintf(stderr,"usage: convgen <type> <batch.idx> <batch.bin> <outdir>\n"); return 2; }
-  const char *type=argv[1], *bidx=argv[2], *bbin=argv[3], *out=argv[4];
-  int bf=open(bbin,O_RDONLY); if(bf<0){ perror(bbin); return 1; }
-  FILE *fi=fopen(bidx,"rb"); if(!fi){ perror(bidx); return 1; }
-  mkdir(out,0775);
-
-  char *line=NULL; size_t cap=0; ssize_t L;
-  char *buf=NULL; size_t bufcap=0;
-  long long n=0, bytes=0;
-  while((L=getline(&line,&cap,fi))>0){
-    /* offset;lenC;sec;sha;... */
-    char *p=line;
-    long long o = strtoll(p,&p,10); if(*p!=';') continue; p++;
-    long long lc= strtoll(p,&p,10); if(*p!=';') continue; p++;
-    int sec     = (int)strtol(p,&p,10); if(*p!=';') continue; p++;
-    char *sha=p; char *e=strchr(p,';'); if(!e) e=strchr(p,'\n'); if(!e) continue;
-    size_t shalen=e-sha;
-    if(sec<0||sec>=NSEC||shalen!=40||lc<=0) continue;
-    if(!opened[sec]) open_sec(out,type,sec);
+static void do_batch(const char*pref){
+  char ip[800],bp[800];
+  snprintf(ip,sizeof ip,"%s.%s.idx",pref,TYPE);
+  snprintf(bp,sizeof bp,"%s.%s.bin",pref,TYPE);
+  int bf=open(bp,O_RDONLY); if(bf<0){ fprintf(stderr,"skip (no bin) %s\n",bp); return; }
+  FILE*fi=fopen(ip,"rb"); if(!fi){ fprintf(stderr,"skip (no idx) %s\n",ip); close(bf); return; }
+  char*line=NULL; size_t cap=0; char*buf=NULL; size_t bufcap=0;
+  long long stored=0,dup=0; unsigned char sha[20];
+  while(getline(&line,&cap,fi)>0){
+    char*p=line;                                  /* offset;lenC;sec;sha;... */
+    long long o=strtoll(p,&p,10); if(*p!=';')continue; p++;
+    long long lc=strtoll(p,&p,10); if(*p!=';')continue; p++;
+    int sec=(int)strtol(p,&p,10); if(*p!=';')continue; p++;
+    char*s=p; char*e=strchr(p,';'); if(!e)e=strchr(p,'\n'); if(!e)continue;
+    if(sec<SECMIN||sec>SECMAX) continue;
+    if(e-s!=40||lc<=0||!hexb(s,sha)) continue;
+    if(!set_add(sha)){ dup++; continue; }         /* seen -> no write, no offset advance */
+    if(!opened[sec]) open_sec(sec);
     if((size_t)lc>bufcap){ bufcap=lc; buf=realloc(buf,bufcap); }
-    ssize_t r=pread(bf,buf,lc,o);
-    if(r!=lc){ fprintf(stderr,"short read sec %d off %lld len %lld got %zd\n",sec,o,lc,r); continue; }
+    if(pread(bf,buf,lc,o)!=lc){ fprintf(stderr,"short read %s off %lld len %lld\n",bp,o,lc); continue; }
     fwrite(buf,1,lc,fbin[sec]);
-    fprintf(fidx[sec],"%lld;%lld;%lld;%.*s\n", id[sec], off[sec], lc, (int)shalen, sha);
-    off[sec]+=lc; id[sec]++; n++; bytes+=lc;
+    fprintf(fidx[sec],"%lld;%lld;%lld;%.*s\n", id[sec], off[sec], lc, 40, s);
+    off[sec]+=lc; id[sec]++; stored++;
   }
-  for(int s=0;s<NSEC;s++){ if(opened[s]){ fclose(fbin[s]); fclose(fidx[s]); } }
-  close(bf); fclose(fi);
-  fprintf(stderr,"[convgen %s] objects=%lld bytes=%lld\n",type,n,bytes);
+  free(line); free(buf); fclose(fi); close(bf);
+  fprintf(stderr,"[convgen %s] %s stored=%lld dup=%lld\n",TYPE,pref,stored,dup);
+}
+
+int main(int argc,char**argv){
+  if(argc<3){ fprintf(stderr,"usage: convgen <type> <outdir> [--capbits B][--secmin A][--secmax Z] (-L list | <prefix>...)\n"); return 2; }
+  TYPE=argv[1]; OUT=argv[2]; int capbits=28; const char*listf=NULL;
+  char **prefs=NULL; int npref=0;
+  for(int i=3;i<argc;i++){
+    if(!strcmp(argv[i],"--capbits")) capbits=atoi(argv[++i]);
+    else if(!strcmp(argv[i],"--secmin")) SECMIN=atoi(argv[++i]);
+    else if(!strcmp(argv[i],"--secmax")) SECMAX=atoi(argv[++i]);
+    else if(!strcmp(argv[i],"-L")) listf=argv[++i];
+    else { prefs=realloc(prefs,sizeof(char*)*(npref+1)); prefs[npref++]=argv[i]; }
+  }
+  mkdir(OUT,0775);
+  set_init(capbits);
+  fprintf(stderr,"[convgen %s] outdir=%s capbits=%d secs=%d..%d\n",TYPE,OUT,capbits,SECMIN,SECMAX);
+  if(listf){
+    FILE*f=fopen(listf,"rb"); if(!f){perror(listf);return 1;}
+    char*l=NULL; size_t c=0;
+    while(getline(&l,&c,f)>0){ char*nl=strchr(l,'\n'); if(nl)*nl=0; if(*l) do_batch(l); }
+    free(l); fclose(f);
+  } else for(int k=0;k<npref;k++) do_batch(prefs[k]);
+  for(int s=0;s<NSEC;s++) if(opened[s]){ fclose(fbin[s]); fclose(fidx[s]); }
+  fprintf(stderr,"[convgen %s] distinct stored (run incl seed) ~ %llu\n",TYPE,(unsigned long long)CNT);
+  free(prefs);
   return 0;
 }
