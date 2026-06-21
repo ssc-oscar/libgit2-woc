@@ -1,120 +1,129 @@
-# Layered (generational) content store for the full-clone pipeline
+# Layered content store — bounded L1 + rotation
 
-A design to replace per-ingest mutation of the multi-TB WoC content shards with an
-**immutable base + append-only generations** in a continuous offset space. It makes
-ingest near-instant, keeps the base un-mutable (so a failed update can never harm
-it), and — for the first time — makes the ~3 PB store **incrementally rsync-backable**.
+Replace per-ingest mutation of the multi-TB WoC section shards with an
+**immutable base + a bounded, append-only L1 overlay that rotates into frozen
+generations under disk pressure**. Result: near-instant ingest, an immutable base
+(a bad update can't harm the ~3 PB store), a **bounded file count**, and a store
+that is finally **incrementally rsync-backable**.
 
-Status: **prototype validated** (`/media/volume/trees/ovp_proto/overlay_proto.py`,
-on a 2.5 GB slice of `tree_0`, read-only on the live base). Not yet productized.
+Status: core mechanics prototyped (`overlay_proto.py`, validated on a `tree_0`
+slice — byte-exact reads across segment boundaries, frozen sorted indexes,
+hardlinked incremental backups). `layered.py` implements ingest/rotate/read.
 
 ## Problem with the current store
-Per shard/type: `{blob,tree,commit}_<sec>.bin` (LZF objects concatenated) + `.idx`
-(`id;offset;len;sha`) read via `seek(offset);read(len);decompress`. A blob shard is
-**> 3 TB**. Ingest (`AllUpdateObj`) appends new objects and updates the index
-**object-by-object**. Three pains:
-1. **Index update is slow & fragile** — inserting into a multi-GB TokyoCabinet/`.idx`
-   for a 3 TB shard on every ingest; `.tch` is corruption-prone under heavy update.
-2. **Mutating a 3 TB file is risky** — a bad ingest can damage the canonical store.
-3. **Backup-hostile** — appending to a 3 TB `.bin` forces rsync to re-scan the whole
-   file; the `.tch` scatters changes throughout → near-full re-transfer per ingest.
-   This is a big reason the store is effectively un-backed-up.
+Per section/type: `{blob,tree,commit}_<sec>.bin` (LZF objects concatenated) +
+`.idx` (`id;offset;len;sha`), read via `seek(off);read(len);decompress`; `sec =
+sha[0..1] % 128`. A blob section is **> 3 TB**. Ingest (`AllUpdateObj`) appends new
+objects and updates that section's index **object-by-object**. Pains: (1) updating
+a multi-GB index for a 3 TB shard every ingest is slow and `.tch`-corruption-prone;
+(2) mutating a 3 TB canonical file is risky; (3) it's **backup-hostile** — appending
+forces a full re-scan, and `.tch` updates scatter throughout → near-full re-transfer
+per ingest. That's a big reason the store is effectively un-backed-up.
 
-## Design: immutable base + frozen generations, continuous offset space
-- **Content = immutable segments.** The current shards are *generation 0* (frozen).
-  Each ingest's new objects become a **new generation** `*_<sec>.bin.gen<N>` — or,
-  cheapest, **the grab's own `.bin` files just *become* generations** (no rewrite).
-- **Continuous global offset.** `global_off = cumulative_segment_base + relative_off`.
-  A small `segments.json` lists `(name, bin, base, size)`; a read finds the segment
-  with `base ≤ goff < base+size` and `seek(goff − base)`. Generalizes to N segments;
-  for one new layer it is exactly "if `goff ≥ old_size`, use the new file."
-- **Index = the only new artifact, and it is FROZEN per generation.** Each generation
-  gets its own immutable index — a sorted `sha[20] | global_off[u64] | len[u32]`
-  file (`.sidx`, bsearch) — built once, never updated. (A *frozen* per-gen LMDB works
-  too; a single *growing* LMDB does NOT — see "Backup".) The **base index stays
-  frozen**; new objects only ever touch the newest gen's index.
-- **Lookup / `hasObj`:** **BF (negative cache) → gen indexes (newest→oldest) → base.**
-  A sha lives in exactly one generation; its `global_off` routes the read to the
-  right segment.
+## Layers
+Per `(type, sec)` there are three layers; a read is **BF → L1 → frozen gens → base**:
 
-## Generation 0 = current import state; batches → generations
-"Frozen base" means **whatever each section shard already holds** — freezing is just
-a policy (stop appending; route new objects to generations), no data moves. The base
-may sit at **different batch levels per type**, which is fine because generation
-numbering is per type:
+- **base** — the current section shard `{type}_{sec}.bin/.idx`, **frozen** (gen 0).
+  Lives on da5. Never mutated except by (rare) compaction.
+- **frozen generations** `gen<N>/{type}_{sec}.bin` + `.sidx` — immutable; created by
+  rotating the L1. Archived to da8.
+- **L1** `L1/{type}_{sec}.bin` (append-only) + a per-sec index — the single active
+  overlay every ingest appends into. **Bounded** (see rotation).
 
-| type | section shard | gen 0 (frozen base) = imported batches | generations = |
-|---|---|---|---|
-| commit | `commit_<sec>` | e.g. **000–079** | batches 080, 081, … |
-| tree | `tree_<sec>` | e.g. **000–039** | batches 040, 041, … |
-| blob | `blob_<sec>` | current contents (often empty for the new round) | every new blob batch |
+Addressing is **per-layer**: the index value is `(layer, offset, len)`; each layer's
+`.bin` has its own offset space. (Within one layer the offsets are contiguous; no
+global continuous-offset needed once there are multiple layers/gens.)
 
-**Batch → generation mapping.** Each dataset batch `V2605.<NNN>` is grabbed into per-type
-`.bin`/`.idx` (sharded 00–15 internally by the grab; regrouped by `sec` on ingest).
-Instead of `AllUpdateObj` appending those objects into the multi-TB section base and
-updating its index object-by-object, **each batch contributes one new generation per
-`(type, sec)`**: register the batch's content as `*_<sec>.bin.gen<N>` (or adopt the
-grab `.bin` directly), build its frozen `.sidx`, append to that section's
-`segments.json`. The 3 TB base is never touched until compaction.
+## Grab-server topology (where things live, and rotation)
+Work happens on the **grab server** (clone0), which has limited disk:
+1. Grab **hash-splits** objects by `sec` (it already computes `sec` — `.idx` field 3)
+   and the ingest **appends** each batch's sec-slice into the local `L1/{type}_{sec}.bin`
+   (+ per-sec index). Per-batch sec files are transient — consumed into L1.
+2. **Rotation is triggered by local disk pressure** (L1 size / free space): when the
+   grab server fills, **freeze the current L1** (per sec: the `.bin` + a frozen sorted
+   `.sidx`) into `gen<N>`, **move it to da8**, and start a fresh empty L1.
+3. **Compaction** (rare, offline): fold gens (+ L1) into a **new base generation** per
+   sec, rebuild the base index once, drop the old layers. Produces a fresh immutable
+   base, backed up once.
 
-So **no need to realign types** before adopting this: trees can stay at batch 039 in
-the base while commits are at 079 — batches 040+ simply become tree generations.
-Because the new round's **blobs are un-imported**, the blob store adopts the layered
-scheme from the start (V2605 blobs land as generations, never appended into the 3 TB
-blob base — the largest single win).
+So **generations are rotated by space, not per batch** — that keeps the file count
+bounded: ~512 base files (128 secs × 4 types × {bin,idx}) + ~512 L1 + a handful of
+rotated gens between compactions. **Constant-ish, independent of batch count** — vs.
+the 512 × (#batches) explosion a file-per-batch scheme would cause.
 
-## Ingest = register + batch (near-instant)
-Per ingest: write the new segment (or adopt the grab `.bin`), build its frozen
-`.sidx` (one sort + batched write), append one line to `segments.json`. **No base
-touched, no per-object work.** Prototype: **564,962 index recs in 1.1 s (~508 k/s)**;
-base `.bin` and base index mtimes unchanged.
+## Ingest = demux + append (near-instant, base untouched)
+Per batch, per type: read the batch `.idx` (`offset;len;sec;sha`), and for each
+object append its bytes (from the batch `.bin`) onto `L1/{type}_{sec}.bin`, recording
+`sha → (L1, new_offset, len)` in the per-sec L1 index. No base touched, no per-object
+index churn against a 3 TB file. This **doubles as the converter for the un-split da8
+batches** — their `.bin` is sec-interleaved, but the `.idx` already carries `sec`, so
+the demux is a single sequential pass per batch.
 
 ## Safety
-The base `.bin` *and* base index are immutable. A failed / garbled ingest can only
-damage the newest generation + its index, both of which are re-buildable from the
-grab. The 3 PB base is **never at risk** — "if something goes wrong, it's only a
-problem with the update."
+base `.bin`/index and all frozen gens are immutable. A failed/garbled ingest can only
+damage the current L1, which is rebuildable from the batch. The 3 PB base is never at
+risk — "if something goes wrong, it's only a problem with the update."
 
-## Backup (the big win)
-Every generation (content **and** index) is append-only / immutable:
-- plain incremental rsync **skips all frozen segments** (size+mtime unchanged) and
-  ships only the newest generation;
-- `--link-dest` snapshots **hardlink every old generation at zero extra space**.
+## Backup
+- **base** frozen → rsync skips it (and it's on da5);
+- **frozen gens** immutable → `--link-dest` hardlinks them on da8;
+- **L1** append-only → `rsync --append` ships only the grown tail.
 
-Prototype, 3-segment store (base 2.0 GB + gen1 0.25 GB + gen2 0.25 GB):
-- first backup = 2.31 GB; **incremental snapshot after adding gen2 = 259 MB literal**
-  (just gen2.bin + gen2.sidx + manifest); `base.bin` & `gen1.bin` hardlinked.
-
-NB: a **single growing LMDB index defeats this** — `writemap` pre-allocates `map_size`
-and COW-updates pages throughout, so it re-transfers per ingest. Hence the index must
-be **frozen per generation** (sorted `.sidx`, or a frozen small LMDB per gen).
-
-## Compaction (rare, controlled)
-When generations accumulate (read amplification, or scheduled), merge them into a
-**fresh base generation** + one index rebuild, then drop the old ones. It is a
-copy-on-write file swap → a new immutable artifact, backed up once. Off-line and
-controlled — never an in-place mutation of a live 3 TB shard.
+Prototype (`overlay_proto.py`, `tree_0` slice): incremental snapshot after adding a
+new segment shipped **only the new segment** (259 MB), base + prior gen hardlinked.
+NB: a *single growing LMDB* index defeats this (pre-alloc + COW), so frozen gens use
+a **sorted `.sidx`** (`sha[20] | offset[u64] | len[u32]`, bsearch); the L1's active
+index may be LMDB (fast appends) but is frozen to a `.sidx` on rotation.
 
 ## Read amplification & tuning
-A read may bsearch several gen indexes before hitting. Mitigated by: the BF
-short-circuiting negatives, RAM-resident gen indexes (small), and compaction bounding
-the gen count. Apply to **blobs, trees, and commits** alike.
+A read may consult L1 + a few gens before the base; the BF short-circuits negatives
+and the L1/gen indexes are small/RAM-resident. Compaction bounds gen count. Applies
+to blobs, trees, and commits alike.
 
-## Relation to the real-time track
-Same pattern as the real-time LMDB commit store (`commit_store.py`): immutable
-content + an index over a frozen base. The layered store is its full-clone analogue;
-both can eventually share the BF-as-oracle + eviction loop.
+## Coordination
+Multiple producers (full-clone batches + the real-time track) append to the same L1
+files → serialize per sec (a single ingest writer / per-sec lock / ingest queue),
+which is also where the BF/dedup check lives.
 
-## Verified prototype (reproduce)
-`/media/volume/trees/ovp_proto/` — `overlay_proto.py`:
-- `mksidx <idx> <sidx>` build a frozen sorted index; `stats`; `read|md5 <sha>…`.
-Reads were verified **byte-identical to the live `tree_0`** across both segment
-boundaries (base|gen1 and gen1|gen2). All prototype work was on a copy; the live
-base shards were read-only throughout.
+## Tools (`woc/`)
+The converter + offset index are now **C** (match the `grabGitI`/`hasObjBF`/`build_bf`
+stack; the hot read/ingest paths run at mmap speed). The Python files remain as the
+validated reference spec.
+
+- `convgen.c` — converter: folds an un-split grab batch (`offset;lenC;sec;sha;…` `.idx`
+  + LZF `.bin`) into per-sec `{type}_<sec>.{bin,idx}` in the **existing store format**
+  (`id;offset;len;sha`) by copying the compressed slices **verbatim** (no recompress).
+  Appends onto an existing shard (seeds `offset` from `.bin` size, `id` from the idx
+  tail — O(1)) or starts a fresh generation. Base never mutated.
+- `sidx.c` — frozen sorted offset index `sha[20]|off[u64]|len[u32]` (`build` / `get`,
+  mmap+bsearch). Dependency-free and immutable → backup-friendly, can't corrupt. For a
+  write-once frozen gen this **replaces a per-gen tch/LMDB** (LMDB's crash-safe
+  concurrent write only matters for the live L1, which stays on clone0; da5 has no
+  `lmdb.h`/py-lmdb anyway).
+- `convgen_after.sh` — driver: phase 1 appends all batches (`convgen`), phase 2 builds
+  `.sidx` + `.bf` **once per touched sec** from the final `.idx` (not per batch).
+- `verify.pl` — reads sampled records back through the production `Compress::LZF` and
+  recomputes the git sha (the correctness gate).
+- `layered.py`, `overlay_proto.py` — Python reference spec (ingest/rotate/read,
+  segment/backup mechanics) validated on a `tree_0` slice.
+
+**Validated** (real `commit_0` 300k-object slice + a real 559k-object batch): append
+preserves all base objects and adds new ones byte-exact; `convgen` ≈ I/O-bound
+(285 MB / 559k objs in 1.7 s); every base/appended/fresh-gen record decompresses and
+git-sha-matches; `sidx get` matches the authoritative `.idx` (0 miss / 0 mismatch);
+`.bf` membership has 0 false negatives. Dedup note: da8 batches are already
+BF-deduped **at grab time**, so the converter is append-only by default; BF-only
+dedup at append is unsafe (BF's ~0.4 % false positives would drop real objects), so
+any residual dedup must use an **exact** `.sidx` lookup, not the BF.
 
 ## Migration sketch
-1. Freeze current shards as generation 0 (no change to files).
-2. Point new grabs at new generations (the grab `.bin` becomes a gen; build its
-   `.sidx`); extend the reader to N segments + BF→gen→base lookup.
-3. Schedule compaction (e.g. monthly) to fold gens into a new base generation.
-4. Enable incremental rsync/`--link-dest` backups — now feasible.
+1. Freeze current section shards as gen 0 (no file change); they stay on da5.
+2. New grabs hash-split by sec and **append into L1** on the grab server.
+3. Rotate L1 → frozen gen and **move to da8** when the grab server fills.
+4. Run the **converter (`layered.py ingest`)** over the already-copied-but-un-ingested
+   da8 batches (commits 080+, trees 040+, all blobs) to fold them into L1/gens.
+5. Schedule compaction to fold gens into a fresh base; enable `--append`/`--link-dest`
+   backups — now feasible.
+
+All prototype/impl work is on copies; the live base is read-only and `AllUpdateObj`
+is never run.
