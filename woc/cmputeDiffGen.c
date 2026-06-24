@@ -1,6 +1,13 @@
-/* cmputeDiffGen.c -- C rewrite of cmputeDiff3CT/3TGen layered diff.
+/* cmputeDiffGen.c -- C rewrite of the cmputeDiff3CTGen layered diff (offset path).
  * Reads commit shas (40-hex) from stdin; for each emits the tree diff vs its first
  * parent: "<commit>;<path>;<newblobhex>;<oldblobhex|rename-srcs>".
+ *
+ * SCOPE: this is the 3CT path -- EVERY object (commits, trees) is fetched via the
+ * OFFSET map (sha -> goff,len). It is NOT a drop-in for cmputeDiff3TGen on da5, whose
+ * BASE commits are stored as CONTENT (All.sha1c/commit_<sec>.tch, value = the LZF
+ * commit itself, not a goff/len pair) -- pointing this at a content-commit map misreads
+ * the value as BER. For da5, build base commit offset maps (CmtN2OffGen) or use the
+ * Perl cmputeDiff3TGen. Validated byte-identical (fields 1-3) vs cmputeDiff3CTGen.
  *
  * Layered read: sha -> (goff,len) from offset .tch (TokyoCabinet, Perl "w w" BER),
  * then genlayer-style segment dispatch over base+gen <type>_<sec>.bin (global
