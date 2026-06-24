@@ -34,6 +34,36 @@ Addressing is **per-layer**: the index value is `(layer, offset, len)`; each lay
 `.bin` has its own offset space. (Within one layer the offsets are contiguous; no
 global continuous-offset needed once there are multiple layers/gens.)
 
+## A generation is a version (lifecycle)
+Each frozen generation **is one collection version** (e.g. `V2605`) — the gen chain
+mirrors the version watermark chain (base/gen 0 = all prior frozen versions). Its
+lifecycle:
+- **Collecting (live):** while version `V` is being grabbed, its gen **grows
+  append-only** — new objects, already exact-deduped by `convgen` against
+  base+existing-gen before they are written, are appended as chunks arrive from
+  clone0. Existing objects never move, so every offset already handed out stays valid.
+- **Complete (frozen):** when `V` is declared done, its gen is **frozen** — immutable
+  thereafter, exactly like the base. It then folds into the frozen set for `V+1`.
+
+Because segments are append-only-then-frozen, the sha→offset maps are **extended in
+place**, never rebuilt: `{Cmt,Tree}N2OffGen` add only the new shas (global offset =
+`cumBase + local`; `cumBase` = base/prior-gen sizes, which never change). A read tool
+(`cmputeDiffGen`, `genlayer`) picks up a grown segment automatically — it `stat`s the
+`.bin` size at run time. The one invariant to protect: **never rewrite/compact a
+frozen segment** in place, or every offset above it shifts and the maps are invalidated.
+
+## BF dedup vs. the gen lifecycle (release-completion rebuild)
+The grab-time dedup gate (`hasObjBF` over `/fast/<type>Filters`, see `lookup/FILTER.md`)
+is built from the **frozen** set and is **static** (binary-fuse can't be appended to).
+It is **not** rebuilt mid-version: storage-correctness dedup is guaranteed at **append
+time** by `convgen`'s exact `.sidx`/`.idx` lookup, so a stale grab BF only risks
+**re-fetching** an object already in the live gen — `convgen` drops it before append,
+never duplicating it in the store (and binary-fuse's 0 false negatives mean a needed
+object is never skipped, only pushed to the exact `hasObj` stage). So **rebuilding the
+BF is a release-completion action**: when `V`'s gen freezes, fold it into the frozen
+set and rebuild the affected `{type}` filters (`build_all_type.sh`, after removing the
+old `.bf`) so the next version's grab dedups against it.
+
 ## Grab-server topology (where things live, and rotation)
 Work happens on the **grab server** (clone0), which has limited disk:
 1. Grab **hash-splits** objects by `sec` (it already computes `sec` — `.idx` field 3)
