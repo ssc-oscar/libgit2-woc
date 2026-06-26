@@ -12,9 +12,10 @@ set -u
 [ -s "$REFERENCE_FILE" ] || exit 0
 host=${REF_DEST%%:*}; path=${REF_DEST#*:}
 touch "$REF_MANIFEST"
-grep -v '^[[:space:]]*#' "$REFERENCE_FILE" | cut -d';' -f1 | grep . | while read -r r; do
+mapfile -t REFS < <(grep -v '^[[:space:]]*#' "$REFERENCE_FILE" | cut -d';' -f1 | grep .)
+for r in "${REFS[@]}"; do
   owner=${r%%_*}; repo=${r#*_}; url="https://github.com/$owner/$repo"
-  res=$(ssh "$host" "d='$path/$r.git'
+  res=$(ssh -n "$host" "d='$path/$r.git'
     if [ -d \"\$d\" ]; then git --git-dir=\"\$d\" remote update --prune >/dev/null 2>&1 || exit 3
     else git clone --mirror '$url' \"\$d\" >/dev/null 2>&1 || exit 4; fi
     printf '%s %s' \"\$(git --git-dir=\"\$d\" rev-parse HEAD 2>/dev/null)\" \"\$(du -sb \"\$d\" 2>/dev/null | cut -f1)\"" 2>/dev/null)

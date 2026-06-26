@@ -15,7 +15,8 @@ host=${REF_DEST%%:*}; path=${REF_DEST#*:}
 ssh "$host" "mkdir -p '$path'" 2>/dev/null
 touch "$REF_MANIFEST"
 roots=("$@"); [ ${#roots[@]} -eq 0 ] && roots=("$TREES"/*/)
-grep -v '^[[:space:]]*#' "$REFERENCE_FILE" | cut -d';' -f1 | grep . | while read -r r; do
+mapfile -t REFS < <(grep -v '^[[:space:]]*#' "$REFERENCE_FILE" | cut -d';' -f1 | grep .)
+for r in "${REFS[@]}"; do
   src=""
   for root in "${roots[@]}"; do [ -d "$root/$r" ] && { src="$root/$r"; break; }; done
   if [ -z "$src" ]; then echo "[archiveRef] $r: no local clone -> leave to refreshReference.sh (da8 fetch)"; continue; fi
