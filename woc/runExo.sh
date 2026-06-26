@@ -7,6 +7,7 @@ base=New$DT$ver
 . "${WOC_CONFIG:-$HOME/bin/jetstream2.config}" 2>/dev/null
 : "${VOL:=/media/volume}"; : "${TREES:=$VOL/trees}"
 : "${RSYNC_DEST:=da8:/mnt/ordos/data/data/update}"; : "${HASOBJ_HOST:=da5}"
+: "${REFERENCE_FILE:=$TREES/reference}"   # reference-class repos: archived intact (archiveReference.sh), NOT extracted into WoC
 
 [[ -d $ver.$m ]] || exit
 DST=$VOL/$out/$ver.$m
@@ -75,9 +76,16 @@ pigz -dc $DST/todo.$m | split -l $part -a2 -d  --filter='pigz > $FILE.gz' - $DST
 # registry (keep their commit/tree/tag), so flagged repos never contribute blob
 # content -- same effect as deOffend's per-shard exclusion, applied globally.
 cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.offrepos
+# reference-class repos: curated catalogues archived intact (archiveReference.sh) -> skip
+# ALL their object types here so nothing is ingested into WoC.
+grep -v '^#' "$REFERENCE_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST/.refrepos
 for l in {00..15}
 do pigz -dc $DST/$base.$m.olist.$l.gz \
-   | awk -F';' 'NR==FNR{o[$1]=1;next} !(o[$1] && ($2=="blob" || $2=="tree"))' $DST/.offrepos - \
+   | awk -F';' -v RF="$DST/.refrepos" -v OF="$DST/.offrepos" '
+       BEGIN{ while((getline x < RF)>0) ref[x]=1; while((getline x < OF)>0) off[x]=1 }
+       ref[$1]{next}                                # reference repo -> skip ALL types (archived intact)
+       off[$1] && ($2=="blob"||$2=="tree"){next}    # offender -> skip blob/tree (keep commit/tag)
+       {print}' \
    | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err &
 done
 
