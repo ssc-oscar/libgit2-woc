@@ -1,0 +1,4 @@
+# repos whose COMMITS are also dropped by deOffend (only tags kept).
+# For commit-bloat data repos where neither size triggers nor tree:0/blob:none help.
+# One repo per line (owner_repo form, as in offenders).
+legalize-dev_legalize-uk

@@ -9,13 +9,23 @@
 #   AGGREGATE : a repo whose blob bytes summed over ALL shards of the dataset
 #               exceed AGG_REPO_MIN -- catches repos that stay under REPO_MIN in
 #               every shard yet waste a lot in total (blobs spread across shards).
+#   TREE      : a repo whose TREES dominate by count (>TREE_COUNT_MAX) or bytes
+#               (>TREE_AGG_MIN) across shards -- the blob tests never weigh trees,
+#               so tree-bloat data repos (re-committed corpora, version-controlled
+#               datasets: many trees+commits, few blobs) used to slip through.
 # For each offending shard: if a grabGitI worker is still running, kill it and
 # relaunch the FULL grab excluding the offenders' blobs; otherwise re-extract
-# the shard's BLOBS only (commit/tree/tag left intact) and swap in the smaller
+# the shard's BLOBS+TREES only (commit/tag left intact) and swap in the smaller
 # dump. Each offender is appended once to ~/trees/offenders as
 #   repo;size;excluded <date>;summary
 # A per-shard marker (<base>.<l>.excluded) accumulates excluded repos so a
 # relaunched grab is not re-killed.
+#
+# DROP-COMMIT (keep-tags-only): repos listed in $DROPCOMMIT_FILE additionally have
+# their COMMITS dropped (only their tags survive). Use for commit-bloat data repos
+# (e.g. a corpus re-committed 100k+ times) where the bloat is commits, which neither
+# the size triggers nor tree:0/blob:none clone filters can shrink. Default file empty
+# => no behavior change.
 #
 #   deOffend.sh <m> <ver> [out]      e.g.  deOffend.sh 030 V2605 out
 m=$1; ver=$2; out=${3:-out}; DT=202605; base=New$DT$ver
@@ -35,9 +45,13 @@ REPO_MIN=30000000000        #  30 GB - per-shard repo trigger
 : "${KEEP_FILE:=$TREES/keep}"      # allowlist: repos NEVER excluded (one per line)
 : "${COUNT_MAX:=1000000}"          # max blobs a repo may contribute before count-check
 : "${REVIEW_FILE:=$TREES/review}"  # high-blob-count, not-clearly-data repos flagged here
-touch "$KEEP_FILE" 2>/dev/null
-declare -A KEEP=()
+: "${TREE_COUNT_MAX:=300000}"      # max TREES a repo may contribute (cross-shard) before flagged
+: "${TREE_AGG_MIN:=20000000000}"   # 20 GB - cross-shard repo TREE-bytes trigger (tree-bloat data repos)
+: "${DROPCOMMIT_FILE:=$TREES/dropcommit}"  # repos whose COMMITS are ALSO dropped (keep ONLY tags)
+touch "$KEEP_FILE" "$DROPCOMMIT_FILE" 2>/dev/null
+declare -A KEEP=() DROPC=()
 while read -r _r; do [[ -n $_r && $_r != \#* ]] && KEEP["$_r"]=1; done < "$KEEP_FILE"
+while read -r _r; do [[ -n $_r && $_r != \#* ]] && DROPC["$_r"]=1; done < "$DROPCOMMIT_FILE"
 
 # per-dataset lock so the inline runExo loop and the cron watchdog never act on
 # the same dataset at once (non-blocking: if busy, another instance has it)
@@ -52,12 +66,12 @@ today=$(date +%F)
 # blob-only path writes <shard>.rb.blob.{idx,bin} then mv's them into place, so
 # any left behind mean that run died before the swap. The per-dataset flock
 # above guarantees no other deOffend is mid-write here, so these are safe to drop.
-rm -f "$DST"/$base.$m.*.rb.blob.idx "$DST"/$base.$m.*.rb.blob.bin "$DST"/$base.$m.*.rb.tree.idx "$DST"/$base.$m.*.rb.tree.bin 2>/dev/null
+rm -f "$DST"/$base.$m.*.rb.blob.idx "$DST"/$base.$m.*.rb.blob.bin "$DST"/$base.$m.*.rb.tree.idx "$DST"/$base.$m.*.rb.tree.bin "$DST"/$base.$m.*.rb.commit.idx "$DST"/$base.$m.*.rb.commit.bin "$DST"/$base.$m.*.excludedC 2>/dev/null
 killtree(){ local p=$1 c; for c in $(pgrep -P "$p" 2>/dev/null); do killtree "$c"; done; kill -TERM "$p" 2>/dev/null; }
 
 # ---- aggregate offenders (cross-shard), cached by an idx signature ----------
 aggcache=$DST/$base.$m.aggoff; aggsig=$DST/$base.$m.aggsig; cands=$DST/$base.$m.aggcand
-sig=$(stat -c '%n:%s:%Y' $DST/$base.$m.*.blob.idx "$KEEP_FILE" 2>/dev/null | md5sum | cut -d' ' -f1)
+sig=$(stat -c '%n:%s:%Y' $DST/$base.$m.*.blob.idx $DST/$base.$m.*.tree.idx "$KEEP_FILE" 2>/dev/null | md5sum | cut -d' ' -f1)
 if [[ ! -s $aggsig || $(cat "$aggsig" 2>/dev/null) != "$sig" ]]; then
   # candidates exceeding the byte cap OR the blob-count cap (keep-list skipped),
   # emitting repo<TAB>shards<TAB>bytes<TAB>count
@@ -83,6 +97,15 @@ if [[ ! -s $aggsig || $(cat "$aggsig" 2>/dev/null) != "$sig" ]]; then
       fi
     fi
   done < "$cands"
+  # ---- TREE offenders: a repo whose TREES dominate by count or bytes. Appended to
+  # the SAME aggcache so the per-shard loop excludes the repo's blobs AND trees via
+  # the existing path. (keep-list skipped.) These are flagged regardless of blob size.
+  awk -F';' '
+    FNR==NR { keep[$0]=1; next }
+    FNR==1 { n=split(FILENAME,a,"."); shard=""; for(i=1;i<=n;i++) if(a[i]=="tree"){shard=a[i-1];break} }
+    shard!="" && !($5 in keep) { s[$5]+=$2; c[$5]++; k=$5"@"shard; if(!(k in seen)){seen[k]=1; sh[$5]=sh[$5]" "shard} }
+    END { for(r in s) if(s[r]>TMIN || c[r]>TCMAX) print r"\t"sh[r]"\t"s[r] }
+  ' TMIN="$TREE_AGG_MIN" TCMAX="$TREE_COUNT_MAX" "$KEEP_FILE" $DST/$base.$m.*.tree.idx 2>/dev/null >> "$aggcache"
   echo "$sig" > "$aggsig"
 fi
 
@@ -102,7 +125,7 @@ for l in {00..15}; do
     while IFS=';' read -r by rp; do [[ -n $rp && -z ${KEEP[$rp]} ]] && cand["$rp"]=$by; done \
       < <("$HOME/bin/largest.sh" "$DST/$base.$m.$l.blob" | awk -F';' -v t=$REPO_MIN '$1>t{print $1";"$2}')
   fi
-  # (b) aggregate offenders that appear in this shard -- regardless of shard size
+  # (b) aggregate/tree offenders that appear in this shard -- regardless of shard size
   while IFS=$'\t' read -r rp shards tot; do
     [[ -n $rp && " $shards " == *" $l "* ]] && cand["$rp"]=$tot
   done < "$aggcache"
@@ -117,6 +140,14 @@ for l in {00..15}; do
         < <(awk -F';' 'NR==FNR{o[$1]=1;next} ($5 in o){s[$5]=1} END{for(k in s)print k}' \
               <(cut -d';' -f1 "$OFF") "$_f")
     done
+    # drop-commit repos: also flag when only their COMMITS linger (blobs/trees may
+    # already be culled) so a re-run still removes the commits (tags kept).
+    _f=$DST/$base.$m.$l.commit.idx
+    if [[ -f $_f ]]; then
+      while read -r rp; do [[ -n $rp && -n ${DROPC[$rp]} && -z ${KEEP[$rp]} ]] && cand["$rp"]=registry; done \
+        < <(awk -F';' 'NR==FNR{o[$1]=1;next} ($5 in o){s[$5]=1} END{for(k in s)print k}' \
+              <(cut -d';' -f1 "$OFF") "$_f")
+    fi
   fi
   (( ${#cand[@]} )) || continue
 
@@ -126,7 +157,8 @@ for l in {00..15}; do
   mark=$DST/$base.$m.$l.excluded; touch "$mark"; newoff=0
   for rp in "${!cand[@]}"; do
     if grep -qxF "$rp" "$mark"; then
-      for _ix in blob tree; do _f=$DST/$base.$m.$l.$_ix.idx
+      _ixset="blob tree"; [[ -n ${DROPC[$rp]} ]] && _ixset="blob tree commit"
+      for _ix in $_ixset; do _f=$DST/$base.$m.$l.$_ix.idx
         [[ -f $_f ]] && awk -F';' -v o="$rp" '$5==o{f=1;exit} END{exit !f}' "$_f" && newoff=1; done
     else
       echo "$rp" >> "$mark"; newoff=1
@@ -134,31 +166,46 @@ for l in {00..15}; do
   done
   (( newoff )) || continue
   pat=$(paste -sd'|' "$mark")
+  # drop-commit subset present in this shard: also strip their COMMITS (keep tags).
+  # markc = exclusion set used for the commit truncate check; patc = grep alternation.
+  markc=$DST/$base.$m.$l.excludedC; : > "$markc"; patc=""
+  while read -r _r; do [[ -n $_r && -n ${DROPC[$_r]} ]] && { echo "$_r" >> "$markc"; patc="${patc:+$patc|}$_r"; }; done < "$mark"
 
   pid=$(pgrep -f "grabGitI(Type)?\.perl .*/$base\.$m\.$l\$")
-  echo "[deOffend $(date '+%F %T')] $base.$m.$l ($((sz/1000000000))GB) exclude=$(paste -sd, "$mark") live=${pid:-none}" >&2
+  echo "[deOffend $(date '+%F %T')] $base.$m.$l ($((sz/1000000000))GB) exclude=$(paste -sd, "$mark") dropcommit=${patc:-none} live=${pid:-none}" >&2
 
   if [[ -n $pid ]]; then
     for p in $pid; do killtree "$p"; done; sleep 2
+    # relaunch full grab: drop ALL offenders' blob+tree, and drop-commit subset's
+    # commits too (NOMATCH sentinel keeps the commit grep a no-op when patc empty).
     nohup bash -c "cd '$REPOS' && gunzip -c '$DST/$base.$m.olist.$l.gz' \
         | grep -Ev '(${pat});(blob|tree)' \
+        | grep -Ev '(${patc:-__NOMATCH__});commit' \
         | perl -I '$HOME/lib64/perl5' '$HOME/bin/grabGitI.perl' '$DST/$base.$m.$l' \
         2> '$DST/$base.$m.$l.err'" >/dev/null 2>&1 &
   else
-    gunzip -c "$DST/$base.$m.olist.$l.gz" | awk -F';' '$2=="blob"||$2=="tree"' | grep -Ev "(${pat});(blob|tree)" \
-      | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitIType.perl" "$DST/$base.$m.$l.rb" blob,tree \
+    # offline re-extract: blob+tree always; commit too when there is a drop-commit
+    # subset in this shard. NOMATCH sentinel makes the commit grep a no-op otherwise.
+    seltypes='$2=="blob"||$2=="tree"'; gtype="blob,tree"; swapt="blob tree"
+    if [[ -n $patc ]]; then seltypes='$2=="blob"||$2=="tree"||$2=="commit"'; gtype="blob,tree,commit"; swapt="blob tree commit"; fi
+    gunzip -c "$DST/$base.$m.olist.$l.gz" | awk -F';' "$seltypes" \
+      | grep -Ev "(${pat});(blob|tree)" \
+      | grep -Ev "(${patc:-__NOMATCH__});commit" \
+      | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitIType.perl" "$DST/$base.$m.$l.rb" "$gtype" \
       2> "$DST/$base.$m.$l.deoff.err"
-    for _t in blob tree; do
+    for _t in $swapt; do
       _rb=$DST/$base.$m.$l.rb.$_t.idx; _real=$DST/$base.$m.$l.$_t.idx
+      _exc="$mark"; [[ $_t == commit ]] && _exc="$markc"
       if [[ -s $_rb ]]; then
         mv -f "$_rb" "$_real"; mv -f "${_rb%.idx}.bin" "${_real%.idx}.bin"
-      elif [[ -f $_real ]] && awk -F';' 'NR==FNR{o[$1]=1;next} !($5 in o){exit 1}' "$mark" "$_real"; then
+      elif [[ -f $_real ]] && awk -F';' 'NR==FNR{o[$1]=1;next} !($5 in o){exit 1}' "$_exc" "$_real"; then
         # the shard's $_t objects are ALL excluded offenders -> correct result is an
         # empty dump; the -s guard alone would leave the offender forever (seen on
         # 055: shards 05-09 were 100% one count-offender). Truncate to remove it.
         : > "$_real"; : > "${_real%.idx}.bin"; rm -f "$_rb" "${_rb%.idx}.bin"
       fi
     done
+    rm -f "$markc"
     DIRTY[$l]=1   # offline re-extract completed synchronously -- shard's dumps changed
   fi
 
@@ -166,7 +213,7 @@ for l in {00..15}; do
   # the aggregate (cross-shard) total when known, else the per-shard bytes
   for rp in "${!cand[@]}"; do
     grep -q "^${rp};" "$OFF" 2>/dev/null && continue
-    gb=$(awk "BEGIN{printf \"%.1f\", ${cand[$rp]}/1e9}")
+    gb=$(awk "BEGIN{printf \"%.1f\", ${cand[$rp]}/1e9}" 2>/dev/null)
     summ=$("$HOME/bin/readmeSummary.sh" "$REPOS/$rp")
     printf '%s;%sGB;excluded %s;%s\n' "$rp" "$gb" "$today" "$summ" >> "$OFF"
   done
