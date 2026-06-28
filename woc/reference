@@ -14,3 +14,7 @@ juergen2025sys_abuseipdb-ip-feed;reference; <img src=".github/assets/banner.svg"
 security-alliance_blocklists;reference;# SEAL Blocklists This is a read-only mirror of blocklists maintained by SEAL 
 BlacKSnowDot0_packetsdatabase-db;reference;# 📡 PacketsDatabase.com IP Mirror & Security Feeds (packetsdatabase.com is down :D) ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/BlacKSnowDot0/packetsdatabase-db/update_data.yml?branch=main&style=for-the-badge) ![GitHub last commit](https://img.shields.io/github/la
 artiaassociation2025-spec_CyberIA;reference;## Issue 1 — Mise en place du JSON Schema et Validation ### Fichiers concernés - `schemas/threat_graph.schema.json` - `scripts/validate_json.py` - `tests/fixtures/sample.json` ### Description Cette étape définit la “source de vérité” du projet. Le JSON Schema précise : - Les champs obligatoires (ex 
+fkie-cad_nvd-json-data-feeds;169GB;reference 2026-06-28;NVD CVE JSON feeds - security catalogue, archive intact (was offender)
+arpsyndicate_cvemon;reference 2026-06-28;CVE security catalogue - archive intact (was offender)
+galeax_cve2capec;reference 2026-06-28;CVE security catalogue - archive intact (was offender)
+mthcht_threatintel-reports;reference 2026-06-28;threat-intel reports catalogue, 6G clone - archive intact (was offender)

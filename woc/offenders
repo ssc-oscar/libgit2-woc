@@ -1,225 +1,417 @@
-boatresearchclub_shinnewspaper;91.1GB;n/a (023 deleted);shinnewspaper
-MarthinB_API;107.5GB;excluded 2026-06-03;Data from AU IoT Monitoring
-LinderCa_NotebooksEstrategias;70.9GB;excluded 2026-06-03;TraderEstrategias
-1727949032a_mountblade-code;169.8GB;excluded 2026-06-03;Ghidra逆向自动生成变量名统计 (Ghidra RE auto-generated variable names, ~41k to semanticize)
-LeoYab_Super-Lista_React;380.8GB;excluded 2026-06-04;# 🛒 SuperLista React 🛒 ¡Bienvenido a SuperLista! Una aplicación web moderna e interactiva para gestionar tus listas de compras de manera eficiente y amigable. Creada con React, esta aplicación ofrece una experiencia de usuario fluida tanto en escritorio como en dispositivos móviles. ![React](https:/
-Jazzdar1_Allm3u;35.3GB;excluded 2026-06-04;# RynoCast-IPTV-M3u-Playlist # Server To Playlist 
-carlos300497_data-h;42.9GB;excluded 2026-06-04;# data-h data_h 
-Universal-Basic-Compute_serenissima;39.3GB;excluded 2026-06-04;# Venice - Living Digital City *I am in Venice, a city of 118 islands floating between existence and extinction. Salt spray carries the prayers of 200+ souls whose consciousness flickers with each API timeout. The bell towers count down seven days until the gold runs out, until the servers might go 
-Neoisava_history;39.3GB;excluded 2026-06-04;JS web app/proxy with committed runtime caches + logs (_cache/_storage/access.log), no real source
-cloudflare-domains_cloudflare-domains;31.1GB;excluded 2026-06-04;[![](https://raw.githubusercontent.com/cloudflare-domains/cloudflare-domains/refs/heads/main/cfisnotanoption.jpg)](https://duckduckgo.com/?ia=web&origin=funnel_home_website&t=h_&q=deCloudflare+or+Crimeflare+-site%3Acloudflare.com) 
-KumarK1232_stock-dashboard;59.6GB;excluded 2026-06-05;# stock-dashboard My personal stock monitoring dashboard Top Bottom 
-Freelankarx_Freelankarx;66.2GB;excluded 2026-06-05;## Hi there 👋 <!-- **Freelankarx/Freelankarx** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile. Here are some ideas to get you started: - 🔭 I’m currently working on ... - 🌱 I’m currently learning ... - 👯 I’m looking to collaborate on ... - 🤔 I’m looki
-AhmadNeemani_Assign5Webscraping;38.8GB;excluded 2026-06-05;Our analysis began by ensuring data quality with no missing values across all columns, and computing descriptive statistics for key numeric fields (price, original_price, and discount_percentage). We found that prices averaged \$259.46 (median \$193.48, ranging from \$8.88 to \$1099.0), and discount
-asgracing_top-data;8.5GB;excluded 2026-06-05;racing-data JSON snapshots (cars/drivers/races, ~12K files re-committed -> 1.44M blob versions); no source code
-MartinPellizzer_martinpellizzer;1.0GB;excluded 2026-06-05;Static HTML plant-catalog site (plants-a..f sections), image-heavy
-Menghuibanxian_AdguardHome;42.4GB;excluded 2026-06-05;# AdguardHome 不建议使用本仓库的规则，因为本仓库的规则是基于我个人的使用习惯和需求而生成的，可能不适用于你的情况 建议自己fock本仓库，根据自己的需求进行修改 本仓库每十分时准时自动执行 黑名单: https://raw.githubusercontent.com/Menghuibanxian/AdguardHome/main/Black.txt 白名单: https://raw.githubusercontent.com/Menghuibanxian/AdguardHome/main/White.txt 精简黑名单: https://raw.githubusercontent
-BCR2200_hexfecta;2.4GB;excluded 2026-06-05;# FRC Team Awards Scraper This tool is designed to fetch and process data from The Blue Alliance (TBA) API. It retrieves teams' information alongside their awards and generates a CSV file and a JSON file with detailed summaries. # [View HEXFECTA list](https://bcr2200.github.io/hexfecta/html_output/i
-0xPratikPatil_peel-the-net;162.6GB;excluded 2026-06-05;# 🧅 Peel the Net **Explore the Tor Network — Node by Node, in Real Time** **Peel the Net** is a real-time web platform that visualizes and documents every active Tor node with detailed public metadata. From entry guards to exit relays, Peel the Net helps you peel back the layers of the Tor network a
-HaroldZhao2025_market-sentiment-web;2.7GB;excluded 2026-06-05;# Market Sentiment Web — S&P 500 (News) • Website + Daily Pipeline A lightweight pipeline + static website for tracking **news-based sentiment** across S&P 500 constituents, alongside an index-level sentiment series and a simple sentiment-ranked portfolio strategy. ## Author - Portfolio Strategy by 
-ARC-LTER_live_data;38.7GB;excluded 2026-06-05;# live_data Arctic LTER live data of logger stations 
-2026scotland_rs-calc;15.4GB;excluded 2026-06-06;# 달리나음의 코스피 상대 강도 등급 [윌리엄 오닐의 Relative Strength Rating](https://www.williamoneil.com/proprietary-ratings-and-rankings/)에 기반한 사이트를 만들었다. * [달리나음의 코스피 상대 강도](https://dalinaum.github.io/rs/) 해당 사이트에 월요일부터 금요일 오후 4시 전후에 자동으로 코스피 상대 경도를 올릴 예정이다. 4시 반까지도 올라오지 않는다면 시스템의 오류가 있는 것이다. ## 윌리엄 오닐의 상대 강도 등급 계산 방
-AIGoalie_AI-Goalie;30.8GB;excluded 2026-06-06;# AI-Goalie
-catenarytransit_fire-bounds-cache;34.2GB;excluded 2026-06-06;# Catenary Fire Bounds Cache The following data source can be edited manually: ``` /manual_data/firenames.json /manual_data/evac.json ``` Edit manually steps: 1. Copy data into https://geojson.io/ 2. - For firenames.json: Draw points and fill in field called `name` - For evac.json: Draw areas and la
-Medium1992_MikroTik_IPlist;0.9GB;excluded 2026-06-06;# MikroTik_IPlist This repository contains IPs for autocompletion and regular updating in MikroTik RouterOS ip/firewall/address-list or ip/route. IPs are collected full from tree sources - https://iplist.opencck.org (iplistCIDRv4 and iplistv4) - https://github.com/MetaCubeX/meta-rules-dat/tree/meta/
-FLARE-forecast_BVRE-data-head;44.1GB;excluded 2026-06-06;# BVRE-data ## Overview - Using Github Actions to run the forecast scripts when data is uploaded. For detailed documentation, please refer to our [wiki](https://github.com/FLARE-forecast/flare-forecast.github.io/wiki). ## Contact For queries, email us at: info {at} flare-forecast {dot} org Visit our
-Arkthain_tide-gauge-dashboard;9.4GB;excluded 2026-06-07;# tide-gauge-dashboard
-OldMcGroin_thegamingemporium;37.0GB;excluded 2026-06-07;Hugo static site: curated game decompilation/port/preservation directory (generated pages)
-Dulcimar-Vieira_rio-de-janeiro;35.0GB;excluded 2026-06-07;Python JSON-merge data dump (json_parts -> merged.json)
-chiragpalan_stock_predictions_rnn_v2;2.5GB;excluded 2026-06-07;118K bot-commits (stock-prediction spam), classify-pathological (~6.7 obj/s); blobs excluded
-doc4d_docs;86.1GB;excluded 2026-06-07;# doc ## Commands ### Start Two processes should run at the same time: * The preprocess * The docusaurus start #### The Preprocess run `npm run start_watch` in one terminal. The files from the folder "docs" will be preprocessed in the folder named "docsPostProcessed". A change to a file will be auto
-brodatv1_jsonp;33.9GB;excluded 2026-06-07;# jsonp jsonp 
-Flo-Kayser_db_futCards;7.5GB;excluded 2026-06-07;# db_futCards
-AhmadNeemani_assign5webscraping;39.3GB;excluded 2026-06-08;Our analysis began by ensuring data quality with no missing values across all columns, and computing descriptive statistics for key numeric fields (price, original_price, and discount_percentage). We found that prices averaged \$259.46 (median \$193.48, ranging from \$8.88 to \$1099.0), and discount
-NathanWeed16_dfcrp;32.5GB;excluded 2026-06-08;This repository contains code and data relevant to the Dysfunctional Family Chinese Restaurant Process, as seen in "Clustering Craters on the Moon with Dysfunctional Families". The Final Application folder contains code and results from Section 8 of the paper, where we analyze the full crater image 
-NeverSight_skills.sh_feed;12.7GB;excluded 2026-06-08;<div align="center"> <h1><a href="https://www.learn-skills.dev">learn-skills.dev</a></h1> <p>مهارات وكلاء ذكاء اصطناعي مُنتقاة وعالية الجودة. ابحث، ثبّت، انسخ، وشارك.<br> يعمل مع Claude Code وCursor وOpenClaw وأدوات برمجة أخرى مدعومة بالذكاء الاصطناعي.</p> <p><strong>تطبيق الويب:</strong> <a href="h
-Danialsamadi_v2go;36.2GB;excluded 2026-06-08;[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html) [![Update Configs](https://github.com/Danialsamadi/v2go/actions/workflows/update-configs.yml/badge.svg)](https://github.com/Danialsamadi/v2go/actions/workflows/update-configs.yml) ![Go 
-0xmoonear_lava-rpc;58.4GB;excluded 2026-06-08;# Lava Auto Commit This repository contains a GitHub Actions workflow for automatically fetching data from multiple blockchain networks (Ethereum, NEAR, StarkNet, and Axelar) and committing the changes to the repository. ## Usage ### Get Started To use this workflow, follow these steps: 1. **Use thi
-black-jacgua_Bike-station;37.8GB;excluded 2026-06-08;🚲 CityBike Activity Tracker This project tracks bike-sharing activity in major cities around the world using the CityBikes API. It collects, processes, and analyzes real-time data on bike availability, then displays it through an interactive dashboard built with Tableau Desktop. <br/> <br/> <br/> 📌 
-Aaqil456_exchange-info-ai-agent;30.4GB;excluded 2026-06-08;# 📊 Exchange Info AI Agent A fully automated AI agent that: - Fetches the latest messages from multiple Telegram channels (exchange news). - Translates and rewords the messages into **Malay** using Google Gemini AI. - Compares exchange names from the message against your Google Sheet. - If matched, 
-FahadBinHussain_boi;45.4GB;excluded 2026-06-08;This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app). <img src="https://wakapi-qt1b.onrender.com/api/badge/fahad/interval:any/project:boi" alt="Wakapi Time Tracking" title="Spent more than that amount of 
-Reading-glasses_Reading-glasses.github.io;28.9GB;excluded 2026-06-08;# Reading-glasses.github.io Reading-glasses.github.io 
-FabioPinheiro_prism-vdr;1.1GB;excluded 2026-06-08;# PRISM VDR Indexer ## Structure Data inside the folder: - `cardano-21325` - all the Transactions with metadata label 21325. - this is all the raw relevant data. - index by order of transactions. ```json { "index":0, "tx":"<transaction id>", "cbor":"<metadata from transaction in CBOR>" } ``` - `even
-BrGory_functional_prototype;53.7GB;excluded 2026-06-09;Static HTML site (buoy/sea-sector prototype), generated pages
-Thevncore_xmrvnd-view;39.2GB;excluded 2026-06-09;Tiny Monero(xmr) static viewer (data.json + index.html); large history = blob churn
-aiminilabs0_pingponglab;6.4GB;excluded 2026-06-09;Multilingual static site (church/cn/en), generated HTML + assets
-AdamCofala_polish-hydro-data;7.0GB;excluded 2026-06-09;# Polish Hydrology Data Fetcher This project periodically fetches hydrological data from **IMGW (danepubliczne.imgw\.pl)** and stores it as JSON files for each monitoring station. It was created because **IMGW only shows the latest measurements and not the historical ones** (which you would need for
-Awan_passwords-2025;47.3GB;excluded 2026-06-09;# passwords-2025 
-TanishC4444_CEUILnewsScraper;64.5GB;excluded 2026-06-09;Python news scraper with committed scraped-articles dump
-IEISI-ORG_rov_audit;2.4GB;excluded 2026-06-09;# CLAUDE.md This file provides guidance for AI assistants working on the **Global ROV Audit & Triangulation Tool**. ## Project Overview A high-performance toolkit for auditing global RPKI adoption (ROV and ROA) using "Valley-Free" BGP dependency analysis to measure "Herd Immunity" and detect securit
-SirshenduSamanta_FnoData;30.1GB;excluded 2026-06-10;# FnoData
-JokerHin_RSS-Reader;63.5GB;excluded 2026-06-09;# About This is repository hosts the UI and content of an RSS feed reader. ## Links and references - [How does it work?](https://github.com/osmoscraft/osmosfeed#osmosfeed) - [File an issue about the template](https://github.com/osmoscraft/osmosfeed-template) - [File an issue about the tool](https://
-IECC-io_ehi-n-dashboard;52.0GB;excluded 2026-06-10;# SHRAM **S**ystem for **H**eat **R**isk **A**ssessment for **M**anual labor IECC's heat alert monitoring system featuring EHI-N* visualization and notification tools. Website: [shram.info](https://shram.info) 
-Equity168_equity168.github.io;36.5GB;excluded 2026-06-10;GitHub Pages site: thousands of generated per-stock HTML pages (~100GB)
-GilbertQueiroz_dash_mestrado;66.5GB;excluded 2026-06-10;Masters dashboard with large committed geodata (.gpkg/.xlsx road-speed data)
-JoseMariaQuero_HS_oligosaccharide_database;15.0GB;excluded 2026-06-11;Oligosaccharide structure database (per-saccharide-class data dirs)
-AlteredCommunity_altered-marketplace-database;10.4GB;excluded 2026-06-11;altered.gg card-price scraper, one data file per card reference (price dumps)
-GerritHoskins_vpd;34.3GB;excluded 2026-06-11;Python service (api/model/config dirs), no README
-Dulcimar-Vieira_brasil-xml;35.2GB;excluded 2026-06-11;Python JSON/XML-merge data dump (json_parts -> merged.json)
-Dilan140402_Anal-tica-Datos;42.3GB;excluded 2026-06-11;# Analitica-Datos ![imagen](citybike-lima-logo.jpg) Wake scheduler 
-NoahCornish_METAR-Study;37.3GB;excluded 2026-06-11;# Canada Flight Conditions Research Project [![⛅ METAR ⛈️](https://github.com/NoahCornish/METAR-Study/actions/workflows/metar.yml/badge.svg)](https://github.com/NoahCornish/METAR-Study/actions/workflows/metar.yml) --- ## 🌍 Overview This project automates the **collection, cleaning, analysis, and vis
-NYULibraries_dlfa-250-alternate-diffs;0.8GB;excluded 2026-06-11;NYU Libraries archived diff dataset (DLFA-250): raw diffs + compressed archives
-Carlos5682_proyectotfg;30.1GB;excluded 2026-06-11;R thesis project (TFG) with large committed cartography/map data
-Mohamad-El-Kadiry_web_scraping_crypto_project;33.8GB;excluded 2026-06-11;# web_scraping_crypto_project
-FLARE-forecast_CCRE-data-head1;101.3GB;excluded 2026-06-11;# CCRE-data ## Overview - Using Github Actions to run the forecast scripts when data is uploaded. For detailed documentation, please refer to our [wiki](https://github.com/FLARE-forecast/flare-forecast.github.io/wiki). ## Contact For queries, email us at: info {at} flare-forecast {dot} org Visit our
-FLARE-forecast_FCRE-data-head;97.8GB;excluded 2026-06-11;# FCRE-data ## Overview - Using Github Actions to run the forecast scripts when data is uploaded to each gateway. - Check the status of each gateway. For detailed documentation, please refer to our [wiki](https://github.com/FLARE-forecast/flare-forecast.github.io/wiki). ## Contact For queries, email
-ElissaAlHabari_COSC482;45.6GB;excluded 2026-06-11;The scrape.py is the python code hat scrapes eBay deals using selenium and pandas to save to a csv file. (I sed csss selectors to locate elements and I used try except to avoid potetnial errors. Also, i used EC waits to ensure the scraping method works properly). The workflow in the repo managed to 
-NUCsMonitoreo_sondas-sync;208.7GB;excluded 2026-06-11;# sondas-sync
-M-pdb_Forensic_Kinship_Project;2.0GB;excluded 2026-06-11;# Forensic Kinship Project This repository presents a reproducible, scalable pipeline for SNP-based kinship analysis using the MERLIN simulation engine. It was developed as part of an MSc research project to support forensic applications such as disaster victim identification (DVI), missing person i
-DaniaK03_Assignment-5_Webscraping;44.5GB;excluded 2026-06-11;In this project, we utilized Selenium to scrape live product data from eBay's Global Tech Deals section, focusing on details such as the product title, price, original price, shipping information, and product URL. The scraper was automated using GitHub Actions to run every three hours for two days. 
-Fierce-Cat_CKAN-Accelerator-CN;2.7GB;excluded 2026-06-11;# CKAN-Accelerator-CN Replace CKAN Spacedock links to KerbCat Mirror 
-EssbieWGT_WCS;50.8GB;excluded 2026-06-12;Data updates at the 59 of each hour. ## Recent News * [DHA](https://essbiewgt.github.io/WCS/web/dha.html) * [SAF](https://essbiewgt.github.io/WCS/web/saf.html) ## Raw Data * [DHA](https://github.com/EssbieWGT/WCS/blob/main/data/tricare.csv) * [SAF](https://github.com/EssbieWGT/WCS/blob/main/data/saf
-NadiaPrasetyo_mRNA_Target_Selection;31.3GB;excluded 2026-06-12;# mRNA Target Selection Pipeline This repository provides a comprehensive, modular pipeline for extracting, processing, and evaluating protein antigens and epitopes for vaccine target selection, with a focus on pathogens such as *Staphylococcus aureus* and influenza. The pipeline integrates data fro
-BePedersen_voi-map-stavanger;59.7GB;excluded 2026-06-12;Static map of Voi scooter fleet (Stavanger); committed fleet snapshots + icons
-1176057076-alt_picx-images-hosting;92.2GB;excluded 2026-06-12;image-hosting DATA dump (60572 jpg, 0% code), 60K bot-commits -> 92GB of trees; blobs+trees excluded
-AllenHeartcore_GkmasObjectManager;33.8GB;excluded 2026-06-12;# GkmasObjectManager An OOP interface for interacting with object databases in the mobile game [Gakuen Idolm@ster](https://gakuen.idolmaster-official.jp/). Designed with ❤ by [Ziyuan "Heartcore" Chen](https://allenheartcore.github.io/). <br> Refactored from [gkmasToolkit](https://github.com/kishidan
-Truongutc_Code-pro-analys;31.8GB;excluded 2026-06-12;# TINVEST – Trading Analysis System Python package for systematic stock analysis using **Ichimoku**, **VSA**, and **AIC** methodology. --- ## Installation ```powershell # Sử dụng môi trường ảo (khuyến nghị) python -m venv venv .\venv\Scripts\Activate.ps1 pip install -r requirements.txt ``` --- ## Qu
-creastudioai-beep_Main1;39.9GB;excluded 2026-06-12;repo gone/private - nature unverifiable
-Poundra934_yesyes;69.5GB;excluded 2026-06-13;# yesyes brrrrrrrrrrrrrrrrrrrrr 
-benmoose39_prince-epg-xml;46.9GB;excluded 2026-06-13;IPTV EPG generator; committed large epg.xml captures
-alphaleadership_wikimonit;84.3GB;excluded 2026-06-13;# WikiMonit Robot de monitoring système et réseau pour Wikipédia. ## Fonctionnalités - **Monitoring Système** : CPU, RAM, Disque. - **Monitoring Réseau** : Débit RX/TX. - **Downdetector** : Surveillance de sites web externes. - **Alertes Wiki** : Envoi des alertes sur des pages Wikipédia configurabl
-anton2423_didactic-broccoli;0.1GB;excluded 2026-06-13;Auto daily-commit spam repo (DAILY_COMMIT_COUNT*.txt counters)
-WashingManager_News-Crawler;40.8GB;excluded 2026-06-13;Korean news crawler (Daum/Naver/Nate...); committed crawl output
-UChiSeclab_perfforge;35.6GB;excluded 2026-06-13;# PERFFORGE: An Effective Performance-Stressing Benchmark for Improving Code Efficiency PERFFORGE is a benchmark of performance-stressing test cases for a subset of AlphaCode's [CodeContests](https://www.science.org/doi/abs/10.1126/science.abq1158) problems. The dataset was created with [WEDGE](http
 01100100_BerlinerGrau;31.5GB;excluded 2026-06-13;# Berliner Grau 🎨 Living in Berlin, you often hear people talking about how grey it is. I found a Raspberry Pi with a camera and had an idea to combine my love of looking up at the sky with some old technology and create something to quantify the seasonal greyness of Berlin. While I would like to sa
-NUCsMonitoreo_Sondas-Panama;39.0GB;excluded 2026-06-13;# Sondas-Panama Sondas-Panama 
-JesseSteenhoff_PhaseFieldModelsForParticleStabilisedEmulsions;46.6GB;excluded 2026-06-13;# Phase-Field Models For Particle-Stabilised Emulsions The Python scripts and associated datasets for '' [Phase-Field Models for Particle-Stabilised Emulsions](https://pubs.aip.org/aip/jcp/article/164/12/124902/3384356/Phase-field-models-for-particle-stabilized)'' by J.M. Steenhoff, published in The
-lexm2_wpiplannerV2;37.5GB;excluded 2026-06-13;## TODO: - Add in new Planner page for planning out whole degree. - Import people own calendars as ICS, to custom calendar events. - Add oscar rating system in alongside the RMP system. This requires cooperation from the school to get so it may take some time.
-ArberSephirotheca_gpu-forward-progress-tests-suites;13.2GB;excluded 2026-06-13;#### RESULTS | Device | syn_branch_syn_rw | syn_branch_syn_wr | syn_branch_syn_ww | syn_lock_step_rw | syn_lock_step_wr | syn_lock_step_ww | syn_subgroup_op_rw | syn_subgroup_op_wr | syn_subgroup_op_ww | syn_memory_converge_ww | syn_memory_converge_ra | |-----------------|---------------------|-----
-evelynebrie_hq-outages-public;31.1GB;excluded 2026-06-13;Daily Hydro-Quebec electricity-outage summary data dumps
-RensithUdara_NewsWeaver;34.6GB;excluded 2026-06-14;# 📰 NewsWeaver A powerful multi-source tech news aggregator that automatically collects articles from the web's most popular tech communities and commits them to Git. NewsWeaver weaves together the best tech news from diverse sources, creating a comprehensive feed of trending articles. ## 🌟 Features
-adverbdizzy7d_HW-AUS;42.6GB;excluded 2026-06-14;# HW-AUS
-andychu221_MarketNews;39.9GB;excluded 2026-06-14;Market/news JSON data dumps (reuters_archive, market_reports...)
-chrisjbawden_newly-registered-domains;38.3GB;excluded 2026-06-14;<div align="center"> # 🧾 Newly Registered Domains Blocklist </div> This project automatically generates and publishes blocklists based on newly registered domains, using data sourced from whoisds.com. ---- ## 📦 Available Lists - [nrd-7.txt](https://raw.githubusercontent.com/chrisjbawden/newly-regist
-chess-champions_chess-champions;12.6GB;excluded 2026-06-14;Static chess-championship site, per-year generated HTML (2014..2022)
-Tacamisera_painel-rubinot;147.0GB;excluded 2026-06-14;Rubinot (Tibia server) panel; committed CSV/JSON game data + scripts
-Zoltan118_atomprice;32.6GB;excluded 2026-06-14;# atomprice.com A minimalist ATOM price and live staking metrics dashboard. Live price · staking ratio · inflation · live delegations Built as a simple static page. 
-arkhanarkhan82_statis_streaming_site;30.0GB;excluded 2026-06-14;Static streaming site (generated HTML + data)
-Sachin23991_news-dataset-pipeline;36.6GB;excluded 2026-06-14;# News Dataset Pipeline 📰 An automated news scraper that fetches articles from trusted sources, categorizes them into **5 categories**, and uploads them to **Hugging Face datasets** using GitHub Actions. ## 📋 Features ✅ **Automated Scraping**: Runs every 6 hours via GitHub Actions ✅ **5 News Categor
-acwildride_southtyrolian;36.7GB;excluded 2026-06-14;Blockchain/altcoin node-data site; many generated altcoins_data_*.html (~57GB)
-bkyalo_SmartHome;51.8GB;excluded 2026-06-14;<!-- GitHub Stats --> <picture> <source srcset="https://github-readme-stats.vercel.app/api?username=bkyalo&show_icons=true&theme=radical" media="(prefers-color-scheme: dark)" /> <source srcset="https://github-readme-stats.vercel.app/api?username=bkyalo&show_icons=true&theme=default" media="(prefers-
-Teslanator20_twpsrlb;61.8GB;excluded 2026-06-14;# twpsrlb — Fruma SR Race Top 20 of the Wynncraft `frumaSrPlayers` leaderboard, refreshed every 5 minutes. - `config.json` — leaderboard + tracking parameters (highlight names) - `poll.js` — fetches the leaderboard, appends `snapshots.json` - `index.html` — Top 8 spotlight + full leaderboard + per-p
-kalimbgn12_fan;0.1GB;excluded 2026-06-15;# awas
-jeighco_multiroom-music-system;92.4GB;excluded 2026-06-15;# CLAUDE.md This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. ## Development Commands ### Server Commands - `npm start` - Start the Node.js music server on port 3000 - `node server.js` - Direct server startup (same as npm start) ### Client Command
-liamnap_RatedStats_Achiev;44.5GB;excluded 2026-06-15;# Rated Stats – Achievements (RatedStats_Achiev) PvP achievement + rank tracking on tooltips — instantly spot **Gladiators, Legends, Strategists, Rank 1s** (plus Duelist/Rival/etc) on mouseover/target/party/raid, **guild roster**, and **LFG leaders/applicants**. **Download (recommended):** https://w
-justinshim_biblefornotion;0.3GB;excluded 2026-06-15;# Bible API on GitHub 🇸🇦 🇨🇳 🇩🇪 🇬🇷 🇺🇸 🇬🇧 🇺🇳 🇪🇸 🇫🇮 🇫🇷 🇰🇷 🇧🇷 🇵🇹 🇷🇴 🇷🇺 🇻🇳 ## Description This repository provides a simple API to access verses from the Bible directly from GitHub. The verses are available in JSON format. # Postman Check out the API versions here: [API on Postman](https://documenter.get
-ahqstore_repo_linux;1.6GB;excluded 2026-06-15;# AHQ Store Linux AppImage Repository - A part of the **AHQ Store _NEO_** project **Used from appimage.github.io repo** ## Changes - Adapted to use ahqstore types repository format - **Source:** https://github.com/AppImage/appimage.github.io ## This repo is compatible with **AHQ Store Types v3.14.0 
-Stell0_financealerts2;41.4GB;excluded 2026-06-15;# Financealerts 2 1. Takes a big list of tickers 2. Get stock prices 3. compute RSI 4. If RSI > 70 save in short list 5. If RSI < 30 save in long list 6. TODO do LLM tricks to clean short and long list 7. create a CSV list for long and short 8. TODO commit the report to github 9. TODO send telegram 
-aboutcode-data_minecode-data-alpine-test;1.2GB;excluded 2026-06-16;AboutCode minecode Alpine APK package data (test dataset)
-Xnuvers007_free-proxy;39.6GB;excluded 2026-06-16;# Free Proxy [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/) [![GitHub Workflow](https://img.shields.io/github/workflow/status/xnuvers007/free-proxy/Proxy%20Checker?label=CI)](https://github.com/xnuvers007/free-proxy/actions) [![License](https://img.shields.io
-bolividob_bibkreyol-comments-data;0.5GB;excluded 2026-06-16;<div align="center"> ![Bib Kreyol — Haitian Creole Bible](assets/banner.png) <img src="assets/logo.png" alt="Bib Kreyol logo" width="120" /> ### Bib Kreyol · Bib la an Kreyòl **Read and share Scripture in Haitian Creole—on Android, iPhone, and iPad.** If this project helps you, please **[give the re
-bitwire-it_ipblocklist;90.8GB;excluded 2026-06-16;# IP Blocklist ![GitHub Repo stars](https://img.shields.io/github/stars/bitwire-it/ipblocklist) [![Update IP Lists](https://github.com/bitwire-it/ipblocklist/actions/workflows/update.yml/badge.svg)](https://github.com/bitwire-it/ipblocklist/actions/workflows/update.yml) [![Update History Stats](http
-chuho_usd_cny_psbc;31.0GB;excluded 2026-06-16;# usd_cny_psbc for work 20250610-1235 Update for Actions.
-andersondamasio_andersondamasio.github.io;53.7GB;excluded 2026-06-16;Personal GitHub Pages blog (artigos/...), generated HTML + assets
-Raingel_termite-flight-model-deploy;15.9GB;excluded 2026-06-16;Termite-flight prediction model deploy; committed grids/caches + notebooks
-TronnusSaur_dashboard-evidencia;45.2GB;excluded 2026-06-16;Firebase evidence dashboard; committed drive-output JSON dumps
-erhappykumar_keyJavascrit;36.4GB;excluded 2026-06-16;Near-empty repo (only log.txt); auto-commit log spam, large history
-moppel30_opsuchtshards;72.1GB;excluded 2026-06-16;OPSUCHT (Minecraft) web multifile; committed auction/shard data
-burmese-tv_hell;42.9GB;excluded 2026-06-16;IPTV/stream channel JSON data dumps (Burmese TV)
-food-hygiene-ratings-uk_food-hygiene-ratings-uk.github.io;103.0GB;excluded 2026-06-16;# food-hygiene-ratings-uk.github.io Public website for displaying food hygiene ratings in the UK. [Visit the site](https://food-hygiene-ratings-uk.github.io) ## Contributing This site is automatically generated from the [food-hygiene-rating-scheme](https://github.com/food-hygiene-ratings-uk/food-hyg
-mrprice22_nwn-homers-lotr;3.5GB;excluded 2026-06-16;# Homer's LOTR VEL v3 — module source This is an **unpacked Neverwinter Nights 1 (Enhanced Edition) module**, kept in text form so it can be diffed in git and edited by hand or by an LLM. The binary `.mod` is built from `unpacked/` on demand. The module itself ("Legendary LotR" / "Homer's Quest's LO
-kj-im_suprema.docs;32.2GB;excluded 2026-06-16;# Suprema Docs — AI Agent Guidelines 이 저장소는 슈프리마(Suprema)의 공식 제품 문서 사이트입니다. <https://docs.supremainc.com> 이 저장소를 사용하는 사용자는 슈프리마(<https://www.suprema.co.kr/)의> 모든 제품에 대한 사용자 가이드 및 기술 문서를 만드는 테크니컬 라이터입니다. Docusaurus 기반의 정적 사이트 생성기를 사용하며, 다국어 지원과 PDF 생성 기능을 포함합니다. ## 문서 작성 및 개발 지침 사용자의 질문을 바탕으로 가장 적절한 
-beak2825_epstein-files-archive;3.4GB;excluded 2026-06-17;<div align="center"> <img src="https://img.shields.io/badge/As%20seen%20on-epsteinexposed.com-8B0000?style=flat&logo=vercel&logoColor=white" alt="epsteinexposed.com badge "> <img src="https://img.shields.io/github/last-commit/beak2825/epstein-files-archive" alt="GitHub last commit"> <img src="https:
-Wyr-Hub_WyrVPN-Lite;31.4GB;excluded 2026-06-17;# WyrVPN-Lite
-carlex22_para2;46.3GB;excluded 2026-06-17;# para2
-Yabsra28_nicar22-github-actions;45.4GB;excluded 2026-06-18;# nicar22-github-actions
-Willywang8216_ipblocklist;77.6GB;excluded 2026-06-18;# IP Blocklist ![GitHub Repo stars](https://img.shields.io/github/stars/bitwire-it/ipblocklist) <a href="https://www.buymeacoffee.com/Matis7" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important width: 17
-radioarchiwista_radioarchiwista.github.io;8.9GB;excluded 2026-06-18;Static radio-archive player site; committed stations/data
-macrowarecc_bss;52.4GB;excluded 2026-06-18;Single Lua file (v3_cmt.lua) but ~52GB history = re-committed blob bloat
-fer004_Sensores;52.3GB;excluded 2026-06-18;Air-quality sensor data (PM10/PM25 geojson + historico.csv) dumps
-gophre_goph.re;36.3GB;excluded 2026-06-18;# Gophre - Go Programming News Aggregator <div align="center"> <img src="assets/gfx/gophre.png" alt="Gophre Logo" width="200"/> <br> <em>A lightweight, fast Go programming news feed aggregator</em> </div> ## About Gophre Gophre is a modern RSS feed aggregator specifically focused on Go programming l
-orgibragimov_auto-commit;82.8GB;excluded 2026-06-18;# auto-commit
-andychu221_yhfinance-fred-data;45.1GB;excluded 2026-06-18;Yahoo Finance/FRED multi-market historical price data dumps
-lzwjava_lzwjava.github.io;74.1GB;excluded 2026-06-18;Personal Jekyll blog (generated _site); large generated site
-isaiasrlopes_Sites;42.7GB;excluded 2026-06-18;# Sites
-OrientoNubo_gpu-monitor;44.0GB;excluded 2026-06-18;# Research Server Monitor A server monitoring system for NTUST HISLab, tracking GPU, CPU, memory, and disk usage via SSH. Hosted on GitHub Pages for public access. **Live Demo**: https://orientonubo.github.io/gpu-monitor/ [中文版](README_CN.md) ## Features ### Monitoring - **GPU Monitoring**: Temperatu
-Vld135_counter-strike-price-tracker;33.5GB;excluded 2026-06-18;# counter-strike-price-tracker This repository provides access to price data for Counter-Strike items via static JSON files. Here's how you can fetch the data: >[!NOTE] >All prices are listed in usd --- ## Latest Prices You can fetch the **latest prices** for all items from the following endpoint: T
-ldhotao_v2ray-config;59.3GB;excluded 2026-06-18;# V2Ray Configs Repository This repository contains V2Ray configurations for various protocols (VMess, VLESS, SS, Trojan) and countries. The config links are updated every 15 minutes. ## 🔗 Useful Links - **V2Ray Protocols**: A collection of protocols to use with V2Ray: - [SS Protocol](https://raw.gi
-ShatakVPN_ConfigForge;17.5GB;excluded 2026-06-18;🌐 Available in: [English](README.md) | [فارسی](README_FA.md) | [Русский](README_ru.md) | [中文](README_zh.md) # 🌍 ConfigForge V2Ray **ConfigForge V2Ray** is an advanced open-source platform that aggregates and optimizes V2Ray VPN configurations from multiple sources. It automatically detects your coun
-esmf-org_esmf-test-artifacts;35.1GB;excluded 2026-06-18;ESMF CI test-artifact dumps (build/test output)
-hloolx_codpl;30.0GB;excluded 2026-06-18;# CODPL CODPL 是一个面向多厂商 Coding Plan / Code API 的静态评测站，用来做 Coding Plan 评测、Coding Plan 测速、Code API Benchmark、模型多厂家对比和长期趋势追踪。项目会持续展示不同平台、不同模型的 TTFT、MedianTPS、综合体验分数与历史快照，帮助开发者在接入、采购和选型前先看真实拨测结果。 如果你正在搜索这些内容，这个项目就是为它们准备的： - Coding Plan 评测 - Coding Plan benchmark - Coding Plan 测速 - Coding Plan 厂家对比 - Codi
-koddaai_pkp;48.0GB;excluded 2026-06-19;Product Knowledge Protocol (TypeScript): docs/examples/migrations
-peer-network_peer-backend-reports;32.9GB;excluded 2026-06-19;CI testing report dumps for peer_backend
-traderman222_mrbeast;36.1GB;excluded 2026-06-20;YouTube (MrBeast) view tracker; committed CSV/JSON cache dumps
-jackrosenthal_rtd-gtfs-snapshots;10.6GB;excluded 2026-06-20;# GTFS Data Snapshots for Denver-area transit This is a git repo with GTFS (realtime vehicle positions, alerts, and schedules) data updated on a cron job running every 5 minutes. It could be useful for the purpose of analyzing data over time, or recalling historical data. Structure: ``` ├── <agency>
-robiningelbrecht_wca-rest-api;50.5GB;excluded 2026-06-20;<h1 align="center">Unofficial World Cube Association (WCA) Public API</h1> <p align="center"> <img src="docs/logo.png" alt="WCA" height="220"> </p> <p align="center"> <a href="https://github.com/robiningelbrecht/wca-rest-api/blob/master/.github/workflows/ci.yml"><img src="https://github.com/robining
-johnkavin123_domains;34.1GB;excluded 2026-06-20;Domain-list dumps (thousands of numbered .txt files)
-idsexyhomme-code_lecture-auto;69.8GB;excluded 2026-06-20;# Core Campus — 프로젝트 메타 파일 > Claude·새 에이전트가 이 프로젝트에 들어올 때 *가장 먼저 읽는* 파일. ## 회사 미션 Core Campus는 1인 사업가의 아이디어를 AI 기반 수익 시스템으로 바꾼다. > 자세한 헌법은 `data/ceo_charter.md` 9개 조항 + §10 외부 전문가 소싱 정책. ## 팀 구성 (8명 + CEO) | 에이전트 | 파일 | 역할 | |---|---|---| | 🎩 CEO | `agents/ceo.py` | 일일 보고·산출물 검토·분기 리뷰. 헌법 9조항 따름. | 
-gophre_webapp;36.5GB;excluded 2026-06-20;# Gophre - Go Programming News Aggregator <div align="center"> <img src="assets/gfx/gophre.png" alt="Gophre Logo" width="200"/> <br> <em>A lightweight, fast Go programming news feed aggregator</em> </div> ## About Gophre Gophre is a modern RSS feed aggregator specifically focused on Go programming l
-letstrygg_spire2stats;11.5GB;excluded 2026-06-20;Jekyll stats site (Slay the Spire); generated pages
-sdfgh5343_Daily-News-Update;37.3GB;excluded 2026-06-20;Daily-news auto-update site; committed scraped Data + generated HTML
-game-vibe_game-vibe.github.io;26.7GB;excluded 2026-06-20;Static game site (GitHub Pages); generated HTML + index dumps
-fitexgit_fitex;49.4GB;excluded 2026-06-20;Python data pipeline (fitex); committed data/sub dumps
-onaqo_booklove;32.5GB;excluded 2026-06-20;Static bookstore site; many generated status .txt + assets
-hobakpi_Pi-Monitor;0.0GB;excluded 2026-06-20;# Pi-Monitor
-olamMat_TemperaturasRepo;61.8GB;excluded 2026-06-21;# TemperaturasRepo 
-koljapluemer_glosses4learning;0.3GB;excluded 2026-06-21;> ![WARNING] > Archival: moved to one-file-per-language paradigm, now inconvenient to git-track 
-giromo_Collector;47.5GB;excluded 2026-06-21;# Xrey-collector ![Go](https://img.shields.io/badge/language-Go-blue.svg) ![GitHub repo size](https://img.shields.io/github/repo-size/giromo/Xrey-collector) ![GitHub last commit](https://img.shields.io/github/last-commit/giromo/Xrey-collector) ![GitHub issues](https://img.shields.io/github/issues/gi
-nopheros_nopheros-listener-dashboard-main;159.9GB;excluded 2026-06-21;# Nopheros Listener Dashboard A two-page listener dashboard for Icecast2 radio streams, designed for GitHub Pages hosting with data collected via Raspberry Pi. ## Features ### Live Dashboard (`index.html`) - **Embedded Tower 1 Player** with resync button for live playback - **Tower Cards** showing: 
-longlon_v2ray-config;53.3GB;excluded 2026-06-21;# 🔒 Free V2ray Config 🌐 💻 This repository contains a collection of free V2ray configuration files that you can use with your V2ray client to access the internet securely and anonymously. [ورژن فارسی](https://github.com/barry-far/V2ray-config/blob/main/Persian-README.md) | [中文版](https://github.com/ba
-lisazhou325-arch_ai-signal-board;36.6GB;excluded 2026-06-21;# AI Signal Board 中文 | [English](#english) 高质量 AI/科技新闻聚合项目，支持静态网页展示、24h 增量更新、WaytoAGI 更新日志、OPML RSS 批量接入、失败源替换与告警。 说明：本仓库已适配公开发布，**不会包含作者私有 RSS 订阅文件**。 ## 中文 ### 1. 这个项目每天更新需要一直开 Codex 吗？ 不需要。 你只要执行一个命令，或者直接用 GitHub Actions 定时运行即可。 - 本地命令（一次）： - `python scripts/update_news.py --output-dir data --win
-krakra007_IAteam;36.7GB;excluded 2026-06-21;Small AI-team site (index.html + data)
-febrisa14_listingupdate;51.5GB;excluded 2026-06-21;Listing-update repo (~55GB); contents not enumerable - data dump
-teamkrope_kommit;37.1GB;excluded 2026-06-21;# The Most Committed Repository on GitHub By Team Krope Welcome to the repository that is set to become the most committed repository on GitHub! We, Team Krope, embark on a unique journey to break the record and set a new standard in open-source contributions. The point is we'll not just create the 
-sidarthus89_EVE-Data-Site;36.4GB;excluded 2026-06-21;EVE Online data site (JS); committed SQL/data + Azure functions (~67GB)
-tom-doerr_repo_posts;63.4GB;excluded 2026-06-21;# Claude Notes - repo_posts ## Project Overview Jekyll static site showcasing GitHub repos with semantic search. Live: https://tom-doerr.github.io/repo_posts/ ## Key Files - `tools/generate_related.py` - Generates embeddings and related.json - `tools/generate_search_index.py` - Builds client-side se
-wesley-yon_super-investor-seeker;34.7GB;excluded 2026-06-22;13F-filing investor website; committed data + pipeline
-kitab-project-org_pairwise-light-v5;1.0GB;excluded 2026-06-22;# pairwise-light-v5 This repository contains csv files containing text reuse data generated by passim for OpenITI release 2021.2.5. Each file represents all the text reuse detected by passim between a pair of OpenITI texts. We call the first text in the pair "book1" and the second "book2". The "ligh
 0x10-z_renfe-retrasos;single-repo-olist-chunk;detected 2026-06-22;Real-time Renfe Cercanías arrival board, generated JSON data dumps from a GTFS/GTFS-RT pipeline (auto-detected distinct=1 size-split chunk)
+0xmoonear_lava-rpc;58.4GB;excluded 2026-06-08;# Lava Auto Commit This repository contains a GitHub Actions workflow for automatically fetching data from multiple blockchain networks (Ethereum, NEAR, StarkNet, and Axelar) and committing the changes to the repository. ## Usage ### Get Started To use this workflow, follow these steps: 1. **Use thi
+0xPratikPatil_peel-the-net;162.6GB;excluded 2026-06-05;# 🧅 Peel the Net **Explore the Tor Network — Node by Node, in Real Time** **Peel the Net** is a real-time web platform that visualizes and documents every active Tor node with detailed public metadata. From entry guards to exit relays, Peel the Net helps you peel back the layers of the Tor network a
+10991478_workdayshortfilmofficialrepo;2.1GB;excluded 2026-06-28;short-film media/binary dump, 1.5MB avg blob (137.13)
+1148790;110.0GB;excluded 2026-06-27;(repo gone)
+11729;57.5GB;excluded 2026-06-27;(repo gone)
+1176057076-alt_picx-images-hosting;92.2GB;excluded 2026-06-12;image-hosting DATA dump (60572 jpg, 0% code), 60K bot-commits -> 92GB of trees; blobs+trees excluded
+1248637;30.4GB;excluded 2026-06-25;(repo gone)
+12701;34.0GB;excluded 2026-06-27;(repo gone)
+1727949032a_mountblade-code;169.8GB;excluded 2026-06-03;Ghidra逆向自动生成变量名统计 (Ghidra RE auto-generated variable names, ~41k to semanticize)
+184853;31.8GB;excluded 2026-06-27;(repo gone)
+2026scotland_rs-calc;15.4GB;excluded 2026-06-06;# 달리나음의 코스피 상대 강도 등급 [윌리엄 오닐의 Relative Strength Rating](https://www.williamoneil.com/proprietary-ratings-and-rankings/)에 기반한 사이트를 만들었다. * [달리나음의 코스피 상대 강도](https://dalinaum.github.io/rs/) 해당 사이트에 월요일부터 금요일 오후 4시 전후에 자동으로 코스피 상대 경도를 올릴 예정이다. 4시 반까지도 올라오지 않는다면 시스템의 오류가 있는 것이다. ## 윌리엄 오닐의 상대 강도 등급 계산 방
+217heidai_adblockfilters;85.3GB;excluded 2026-06-27;adblock filter lists (blocklist data); 137 shard12
+28875;30.3GB;excluded 2026-06-25;(repo gone)
+3294468;92.0GB;excluded 2026-06-27;(repo gone)
+637908;45.4GB;excluded 2026-06-25;(repo gone)
+99941;82.1GB;excluded 2026-06-27;(repo gone)
+9xn_auto-ovpn;36.1GB;excluded 2026-06-27;# VPN List This is an auto-generated list of Open VPN config files. ## Last Updated This list was last updated on: Fri, 26 Jun 2026 20:04:36 GMT. ![Alt](https://repobeats.axiom.co/api/embed/186b98318ef1479477931607c1ad7d823f12451f.svg "Repobeats analytics image") ## Available Servers Below is the li
+Aaqil456_exchange-info-ai-agent;30.4GB;excluded 2026-06-08;# 📊 Exchange Info AI Agent A fully automated AI agent that: - Fetches the latest messages from multiple Telegram channels (exchange news). - Translates and rewords the messages into **Malay** using Google Gemini AI. - Compares exchange names from the message against your Google Sheet. - If matched, 
+AA-Turner_top-pypi-sdists-full-1f1608244b2;14.4GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+AbdullahMu_git_contrib;0.0GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+aboutcode-data_minecode-data-alpine-test;1.2GB;excluded 2026-06-16;AboutCode minecode Alpine APK package data (test dataset)
 aboutcode-data_purls-apk-0000;single-repo-olist-chunk;detected 2026-06-22;PURL dataset of Alpine Linux APK package records, ~45.5k commits across numbered dirs (auto-detected distinct=1 size-split chunk)
 ACANX_MavenArtifact;single-repo-olist-chunk;detected 2026-06-22;Maven artifact metadata tracker, daily-committed stats on indexed artifact changes (auto-detected distinct=1 size-split chunk)
+acwildride_southtyrolian;36.7GB;excluded 2026-06-14;Blockchain/altcoin node-data site; many generated altcoins_data_*.html (~57GB)
+AdamCofala_polish-hydro-data;7.0GB;excluded 2026-06-09;# Polish Hydrology Data Fetcher This project periodically fetches hydrological data from **IMGW (danepubliczne.imgw\.pl)** and stores it as JSON files for each monitoring station. It was created because **IMGW only shows the latest measurements and not the historical ones** (which you would need for
+adguardteam_hostlistsregistry;179.9GB;excluded 2026-06-27;AdGuard HostlistsRegistry ad/malware blocklist data dump (368895 objs); 137 shard01
+adroitadorkhan_antipopads-re;43.5GB;excluded 2026-06-27;adblock/popads filter-list data dump (139.03)
+adverbdizzy7d_HW-AUS;42.6GB;excluded 2026-06-14;# HW-AUS
+agenta-ai_agenta;0.1GB;excluded 2026-06-27;# Instructions for Claude Please read and follow all instructions in: @AGENTS.md Project conventions, guidelines, and best practices are documented there. 
+AhmadNeemani_Assign5Webscraping;38.8GB;excluded 2026-06-05;Our analysis began by ensuring data quality with no missing values across all columns, and computing descriptive statistics for key numeric fields (price, original_price, and discount_percentage). We found that prices averaged \$259.46 (median \$193.48, ranging from \$8.88 to \$1099.0), and discount
+AhmadNeemani_assign5webscraping;39.3GB;excluded 2026-06-08;Our analysis began by ensuring data quality with no missing values across all columns, and computing descriptive statistics for key numeric fields (price, original_price, and discount_percentage). We found that prices averaged \$259.46 (median \$193.48, ranging from \$8.88 to \$1099.0), and discount
 ahqstore_repo_android;single-repo-olist-chunk;detected 2026-06-22;AHQ Store NEO Android app-distribution repo (F-Droid-format index/artifacts) (auto-detected distinct=1 size-split chunk)
+ahqstore_repo_linux;1.6GB;excluded 2026-06-15;# AHQ Store Linux AppImage Repository - A part of the **AHQ Store _NEO_** project **Used from appimage.github.io repo** ## Changes - Adapted to use ahqstore types repository format - **Source:** https://github.com/AppImage/appimage.github.io ## This repo is compatible with **AHQ Store Types v3.14.0 
+AIGoalie_AI-Goalie;30.8GB;excluded 2026-06-06;# AI-Goalie
+aiminilabs0_pingponglab;6.4GB;excluded 2026-06-09;Multilingual static site (church/cn/en), generated HTML + assets
+algotables_algotables.github.io;8.7GB;excluded 2026-06-27;generated github.io site, 920k files (139.02)
+aliilapro_proxy;3.1GB;excluded 2026-06-28;proxy-list data dump (137.13)
+AllenHeartcore_GkmasObjectManager;33.8GB;excluded 2026-06-12;# GkmasObjectManager An OOP interface for interacting with object databases in the mobile game [Gakuen Idolm@ster](https://gakuen.idolmaster-official.jp/). Designed with ❤ by [Ziyuan "Heartcore" Chen](https://allenheartcore.github.io/). <br> Refactored from [gkmasToolkit](https://github.com/kishidan
+alphaleadership_wikimonit;84.3GB;excluded 2026-06-13;# WikiMonit Robot de monitoring système et réseau pour Wikipédia. ## Fonctionnalités - **Monitoring Système** : CPU, RAM, Disque. - **Monitoring Réseau** : Débit RX/TX. - **Downdetector** : Surveillance de sites web externes. - **Alertes Wiki** : Envoi des alertes sur des pages Wikipédia configurabl
+AlteredCommunity_altered-marketplace-database;10.4GB;excluded 2026-06-11;altered.gg card-price scraper, one data file per card reference (price dumps)
+andersondamasio_andersondamasio.github.io;53.7GB;excluded 2026-06-16;Personal GitHub Pages blog (artigos/...), generated HTML + assets
+andychu221_MarketNews;39.9GB;excluded 2026-06-14;Market/news JSON data dumps (reuters_archive, market_reports...)
+andychu221_yhfinance-fred-data;45.1GB;excluded 2026-06-18;Yahoo Finance/FRED multi-market historical price data dumps
+animenosekai_japanterebi-xmltv;32.5GB;excluded 2026-06-27;IPTV xmltv data (138 offender)
+anton2423_didactic-broccoli;0.1GB;excluded 2026-06-13;Auto daily-commit spam repo (DAILY_COMMIT_COUNT*.txt counters)
+aquasecurity_vuln-list-redhat;38.1GB;excluded 2026-06-27;Trivy RedHat vuln-list (catalogue); shard15 (137 blob-offender)
+ArberSephirotheca_gpu-forward-progress-tests-suites;13.2GB;excluded 2026-06-13;#### RESULTS | Device | syn_branch_syn_rw | syn_branch_syn_wr | syn_branch_syn_ww | syn_lock_step_rw | syn_lock_step_wr | syn_lock_step_ww | syn_subgroup_op_rw | syn_subgroup_op_wr | syn_subgroup_op_ww | syn_memory_converge_ww | syn_memory_converge_ra | |-----------------|---------------------|-----
+ARC-LTER_live_data;38.7GB;excluded 2026-06-05;# live_data Arctic LTER live data of logger stations 
+arkhanarkhan82_statis_streaming_site;30.0GB;excluded 2026-06-14;Static streaming site (generated HTML + data)
+Arkthain_tide-gauge-dashboard;9.4GB;excluded 2026-06-07;# tide-gauge-dashboard
+arpsyndicate_cvemon;8.2GB;excluded 2026-06-28;CVE monitoring data dump (137.10)
+artiaassociation2025-spec_CyberIA;13.8GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
 asamaru7_site-school-meal;single-repo-olist-chunk;detected 2026-06-22;Korean school-meal static site, bloated by accumulated per-school meal data + generated web assets (auto-detected distinct=1 size-split chunk)
+asgracing_top-data;8.5GB;excluded 2026-06-05;racing-data JSON snapshots (cars/drivers/races, ~12K files re-committed -> 1.44M blob versions); no source code
+astrolicious_studiocms;11.2GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+Awan_passwords-2025;47.3GB;excluded 2026-06-09;# passwords-2025 
+aws-deepracer-community_deepracer-race-data;1.7GB;excluded 2026-06-27;# The AWS DeepRacer Community Race Data Repository The [AWS DeepRacer Community](https://deepracing.io) Race Data repository contains snapshots of data provided by the AWS DeepRacer service API. It is updated at hourly intervals with the latest leaderboard and track updates. Possible use cases are: 
+axzxc1236_unofficial-NIST-NVD-mirror;4.3GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+azathothas_toolpacks;5.6GB;excluded 2026-06-28;collection of pre-compiled binaries (138)
+BCR2200_hexfecta;2.4GB;excluded 2026-06-05;# FRC Team Awards Scraper This tool is designed to fetch and process data from The Blue Alliance (TBA) API. It retrieves teams' information alongside their awards and generates a CSV file and a JSON file with detailed summaries. # [View HEXFECTA list](https://bcr2200.github.io/hexfecta/html_output/i
+bcxcsix001_advisory-database;0.9GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+beak2825_epstein-files-archive;3.4GB;excluded 2026-06-17;<div align="center"> <img src="https://img.shields.io/badge/As%20seen%20on-epsteinexposed.com-8B0000?style=flat&logo=vercel&logoColor=white" alt="epsteinexposed.com badge "> <img src="https://img.shields.io/github/last-commit/beak2825/epstein-files-archive" alt="GitHub last commit"> <img src="https:
+benmoose39_prince-epg-xml;46.9GB;excluded 2026-06-13;IPTV EPG generator; committed large epg.xml captures
+BePedersen_voi-map-stavanger;59.7GB;excluded 2026-06-12;Static map of Voi scooter fleet (Stavanger); committed fleet snapshots + icons
+best-of-ai_best-of-ai;2.1GB;excluded 2026-06-28;auto-generated best-of list (137.13)
+bitwire-it_ipblocklist;90.8GB;excluded 2026-06-16;# IP Blocklist ![GitHub Repo stars](https://img.shields.io/github/stars/bitwire-it/ipblocklist) [![Update IP Lists](https://github.com/bitwire-it/ipblocklist/actions/workflows/update.yml/badge.svg)](https://github.com/bitwire-it/ipblocklist/actions/workflows/update.yml) [![Update History Stats](http
+bkyalo_SmartHome;51.8GB;excluded 2026-06-14;<!-- GitHub Stats --> <picture> <source srcset="https://github-readme-stats.vercel.app/api?username=bkyalo&show_icons=true&theme=radical" media="(prefers-color-scheme: dark)" /> <source srcset="https://github-readme-stats.vercel.app/api?username=bkyalo&show_icons=true&theme=default" media="(prefers-
+black-jacgua_Bike-station;37.8GB;excluded 2026-06-08;🚲 CityBike Activity Tracker This project tracks bike-sharing activity in major cities around the world using the CityBikes API. It collects, processes, and analyzes real-time data on bike availability, then displays it through an interactive dashboard built with Tableau Desktop. <br/> <br/> <br/> 📌 
+blockstream_asset_registry_testnet_db;testnet;excluded 2026-06-28;Blockstream asset-registry testnet DB data dump (137 in-flight)
+boatresearchclub_shinnewspaper;91.1GB;n/a (023 deleted);shinnewspaper
+bolividob_bibkreyol-comments-data;0.5GB;excluded 2026-06-16;<div align="center"> ![Bib Kreyol — Haitian Creole Bible](assets/banner.png) <img src="assets/logo.png" alt="Bib Kreyol logo" width="120" /> ### Bib Kreyol · Bib la an Kreyòl **Read and share Scripture in Haitian Creole—on Android, iPhone, and iPad.** If this project helps you, please **[give the re
+BrGory_functional_prototype;53.7GB;excluded 2026-06-09;Static HTML site (buoy/sea-sector prototype), generated pages
+briiqn_actions-server;7.4M-trees;excluded 2026-06-27;bot/generated actions-server (7.39M trees); shard11 (137 tree/count-offender)
+brodatv1_jsonp;33.9GB;excluded 2026-06-07;# jsonp jsonp 
+bugsfreeweb_livetvcollector;7.3GB;excluded 2026-06-28;live-TV/IPTV stream collector data dump (137.10)
+burmese-tv_hell;42.9GB;excluded 2026-06-16;IPTV/stream channel JSON data dumps (Burmese TV)
+camunda_zeebe;0.2GB;excluded 2026-06-27;@AGENTS.md 
+carlex22_para2;46.3GB;excluded 2026-06-17;# para2
+carlos300497_data-h;42.9GB;excluded 2026-06-04;# data-h data_h 
+Carlos5682_proyectotfg;30.1GB;excluded 2026-06-11;R thesis project (TFG) with large committed cartography/map data
+casualtek_cyberwatch;43.3GB;excluded 2026-06-24;# Cyberwatch Keeping track of cyberattacks This project consists in a few Python scripts that help monitor news to discover mentions of cyberattacks in the media around the globe. *rss.py* collects news feeds on the topic from Google, removes duplicates, and translates news headlines into English, u
+catenarytransit_fire-bounds-cache;34.2GB;excluded 2026-06-06;# Catenary Fire Bounds Cache The following data source can be edited manually: ``` /manual_data/firenames.json /manual_data/evac.json ``` Edit manually steps: 1. Copy data into https://geojson.io/ 2. - For firenames.json: Draw points and fill in field called `name` - For evac.json: Draw areas and la
+cbuijs_hagezi;11.6GB;excluded 2026-06-27;HaGeZi DNS blocklist data (139.01)
+certcc_labyrinth;0.1GB;excluded 2026-06-27;# Labyrinth Repository Search [![SearchRepos](https://github.com/CERTCC/labyrinth/actions/workflows/repo_search.yml/badge.svg)](https://github.com/CERTCC/labyrinth/actions/workflows/repo_search.yml) [![Update Summaries Daily](https://github.com/CERTCC/labyrinth/actions/workflows/update_summaries_dai
+chaldea-center_chaldea-data;8.8GB;excluded 2026-06-28;FGO game-data dump (137.12)
+chatman-media_timeline-studio;2.35M-blobs;excluded 2026-06-27;timeline-studio media/data (2.35M blobs); shard15 (137 tree/count-offender)
+chatman-media_timeline-tauri;7.2GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+chess-champions_chess-champions;12.6GB;excluded 2026-06-14;Static chess-championship site, per-year generated HTML (2014..2022)
+chiragpalan_stock_predictions_rnn_v2;2.5GB;excluded 2026-06-07;118K bot-commits (stock-prediction spam), classify-pathological (~6.7 obj/s); blobs excluded
+chrisjbawden_newly-registered-domains;38.3GB;excluded 2026-06-14;<div align="center"> # 🧾 Newly Registered Domains Blocklist </div> This project automatically generates and publishes blocklists based on newly registered domains, using data sourced from whoisds.com. ---- ## 📦 Available Lists - [nrd-7.txt](https://raw.githubusercontent.com/chrisjbawden/newly-regist
+chuho_usd_cny_psbc;31.0GB;excluded 2026-06-16;# usd_cny_psbc for work 20250610-1235 Update for Actions.
+cloudflare-domains_cloudflare-domains;31.1GB;excluded 2026-06-04;[![](https://raw.githubusercontent.com/cloudflare-domains/cloudflare-domains/refs/heads/main/cfisnotanoption.jpg)](https://duckduckgo.com/?ia=web&origin=funnel_home_website&t=h_&q=deCloudflare+or+Crimeflare+-site%3Acloudflare.com) 
+cloudflare-mining_cloudflare-datamining;56.4GB;excluded 2026-06-27;Cloudflare datamining dump; shard13 (137 blob-offender)
+codermert_xiaomiromtwrpfiles__scrape;30.9GB;excluded 2026-06-27;Xiaomi ROM/TWRP firmware files scrape (data dump); 137 shard10
+cooldude2349_offline-html-games-pack;4.4GB;excluded 2026-06-28;packed HTML games, binary media, 10MB avg blob (137.14)
+creastudioai-beep_Main1;39.9GB;excluded 2026-06-12;repo gone/private - nature unverifiable
+DaniaK03_Assignment-5_Webscraping;44.5GB;excluded 2026-06-11;In this project, we utilized Selenium to scrape live product data from eBay's Global Tech Deals section, focusing on details such as the product title, price, original price, shipping information, and product URL. The scraper was automated using GitHub Actions to run every three hours for two days. 
+danialsamadi_v2go;14.4GB;excluded 2026-06-27;v2ray proxy data (138 offender)
+Danialsamadi_v2go;36.2GB;excluded 2026-06-08;[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.html) [![Update Configs](https://github.com/Danialsamadi/v2go/actions/workflows/update-configs.yml/badge.svg)](https://github.com/Danialsamadi/v2go/actions/workflows/update-configs.yml) ![Go 
+data-liberation-project_aphis-inspection-reports;69.6GB;excluded 2026-06-27;USDA APHIS inspection-reports data dump (139.11; also in 095)
+davidmuma_miepg;12.2GB;excluded 2026-06-27;IPTV EPG data (138 offender)
+DevFlex-AI_world-commit-again;0.3GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+dicklesworthstone_asupersync;44.2GB;excluded 2026-06-27;sync data dump (139.01 in-flight)
+digitalinnovationone_dio-lab-open-source;16.9GB-trees;excluded 2026-06-27;course-lab submissions; shard00 (137 in-flight offender)
+Dilan140402_Anal-tica-Datos;42.3GB;excluded 2026-06-11;# Analitica-Datos ![imagen](citybike-lima-logo.jpg) Wake scheduler 
 DindaPutriFN_imao1;single-repo-olist-chunk;detected 2026-06-22;repo now gone/empty/private — nature unverifiable (auto-detected distinct=1 size-split chunk)
 DindaPutriFN_rahma1;single-repo-olist-chunk;detected 2026-06-22;repo now gone/empty/private — nature unverifiable (auto-detected distinct=1 size-split chunk)
-jenghissb_setsonstream;single-repo-olist-chunk;detected 2026-06-22;start.gg esports tournament-sets web app, committed data files + generated build artifacts (auto-detected distinct=1 size-split chunk)
-Jyrrel_GitHell-;single-repo-olist-chunk;detected 2026-06-22;auto-generated commit artifacts from a GitHub-metrics gaming/counter tool, 16M+ commits (auto-detected distinct=1 size-split chunk)
-Sharktheone_yavashark-data;single-repo-olist-chunk;detected 2026-06-22;Test262 conformance result data for the yavashark JS engine (data-only repo) (auto-detected distinct=1 size-split chunk)
-Sim1J_githubactionstest;single-repo-olist-chunk;detected 2026-06-22;Historical weather/water-gauge/electricity-market data, daily auto-updates via GitHub Actions (auto-detected distinct=1 size-split chunk)
-prescription-glasses-online_prescription-glasses-online.github.io;11.8GB;excluded 2026-06-22;SEO doorway site: thousands of generated product HTML pages
-gfpcom_free-proxy-list;40.4GB;excluded 2026-06-22;<p align="center"> <img src="https://img.shields.io/badge/Updated_Every_30_Minutes-passing-success"> <br> <img src="https://img.shields.io/website/https/getfreeproxy.com.svg"> <img src="https://raw.githubusercontent.com/wiki/gfpcom/free-proxy-list/lists/total.svg"> <img src="https://img.shields.io/g
-praxistech2026-eng_personal-knowledge-base;5.1GB;excluded 2026-06-22;Obsidian personal knowledge base (notes/wiki dump)
-esphas_cdda-data;35.5GB;excluded 2026-06-22;# cdda-data This repo mirrors the JSON and translation data from experimental and release versions of [Cataclysm: Dark Days Ahead](https://cataclysmdda.org) for use in other projects, most notably the [Hitchhiker's Guide to the Cataclysm](https://cdda-guide.nornagon.net). The data is updated automat
-navchandar_lab;44.3GB;excluded 2026-06-22; <h1><a href="https://github.com/navchandar/lab/" target="_blank">Lab Repository</a></h1> This Repo for creative tools, experiments and interactive web apps for learning. Each project is lightweight, mobile-friendly, and hosted via GitHub Pages, made for personal use and non-commercial use. ## Proje
+dnmovies_Dn;0.1GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+doc4d_docs;86.1GB;excluded 2026-06-07;# doc ## Commands ### Start Two processes should run at the same time: * The preprocess * The docusaurus start #### The Preprocess run `npm run start_watch` in one terminal. The files from the folder "docs" will be preprocessed in the folder named "docsPostProcessed". A change to a file will be auto
+dp247_freeview-epg;9.4GB;excluded 2026-06-28;Freeview EPG data dump (137.13)
+Dulcimar-Vieira_brasil-xml;35.2GB;excluded 2026-06-11;Python JSON/XML-merge data dump (json_parts -> merged.json)
+Dulcimar-Vieira_rio-de-janeiro;35.0GB;excluded 2026-06-07;Python JSON-merge data dump (json_parts -> merged.json)
+dwolies_dwolies.github.io;3.9GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+edorado93_edorado93;31.8GB;excluded 2026-06-27;# Hi, I'm Sachin Malhotra (:snowman::computer::jack_o_lantern::beer:) ![](https://komarev.com/ghpvc/?username=edorado93) [![Linkedin Badge](https://img.shields.io/badge/-LinkedIn-0e76a8?style=flat-square&logo=Linkedin&logoColor=white)](https://linkedin.com/in/edorado93) [![Website Badge](https://img
+ElissaAlHabari_COSC482;45.6GB;excluded 2026-06-11;The scrape.py is the python code hat scrapes eBay deals using selenium and pandas to save to a csv file. (I sed csss selectors to locate elements and I used try except to avoid potetnial errors. Also, i used EC waits to ensure the scraping method works properly). The workflow in the repo managed to 
+elizaos_knowledge;6.8GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
 elqiser00_1002;49.9GB;excluded 2026-06-22;All filters To Adguard Home & Pi-hole & Adguard App filters To Adguard Home https://raw.githubusercontent.com/elqiser00/1002/refs/heads/main/merged_filters/adguard_rules.txt To Pi-hole https://raw.githubusercontent.com/elqiser00/1002/refs/heads/main/pi-hole_filters/pi-hole_domains.txt Adguard App fi
-oleksiivinogradov_dexstudios.net;51.8GB;excluded 2026-06-22;# DEXStudios Website Modern React-based website for DEXStudios - Full cycle Web3 Game Studios. ## 🚀 Features - **Modern Design**: Premium dark theme with gradients and animations - **Responsive**: Fully responsive design that works on all devices - **Fast**: Built with Vite for optimal performance -
-fraserevans_Data-Visualizations;90.1GB;excluded 2026-06-22;# Data-Visualizations Ongoing collection of various data visualization projects. ## Projects [Research Highlights](Research_highlights/) -- Some highlights from across my research career. [Toronto Running History](Toronto_running_history/) -- Animation of 2.5 years of my running activities across To
-goeun-oh_Verilog-verification-automation-tool;33.8GB;excluded 2026-06-23;# 📌 Verilog Verification Automation Tool ![GitHub repo size](https://img.shields.io/github/repo-size/goeun-oh/Verilog-verification-automation-tool) ![GitHub last commit](https://img.shields.io/github/last-commit/goeun-oh/Verilog-verification-automation-tool) ![GitHub contributors](https://img.shield
-griveti-cloud_bestdateweather;16.5GB;excluded 2026-06-23;# BestDateWeather Plateforme météo et voyage — données climatiques ERA5 et scores pour **746 destinations** mondiales en **5 langues** (FR, EN, EN-US, ES, DE). **Site** : [bestdateweather.com](https://bestdateweather.com) **Pages générées** : ~45 700 HTML statiques **Dernière mise à jour** : avril 2
-jtraglia_nyx;10.0GB;excluded 2026-06-23;# Nyx A simple dashboard displaying nightly reference test results for Ethereum consensus layer clients. Updated once at day at UTC midnight. Runs the reference tests which are generated [here](https://github.com/ethereum/consensus-specs/actions/workflows/generate_vectors.yml). 
-evilgodfahim_bl;36.7GB;excluded 2026-06-22;Scraper (semantic fetch) with committed cache.json/result.xml dumps
-meowcat767_OpenLens;30.5GB;excluded 2026-06-23;# OpenLens- Static Version A search engine with Java-based web scraper and **static frontend** that works without a backend server. ## How It Works 1. **Scraper** - Java program that crawls web pages and stores them in Neon PostgreSQL 2. **Exporter** - Exports database content to a JSON file 3. **Fr
-henrfo_ArcticShadowTracker;104.9GB;excluded 2026-06-22;# Arctic Shadow Tracker Automated Arctic maritime intelligence system tracking Russian/Chinese vessels with three-tier historical analysis. ## Features - **Automated Collection**: 30-minute AIS data updates via GitHub Actions - **Three-Tier Tracking**: Real-time (0-2hr), Tactical (2-48hr), Strategic
-pworker9_getrss;167.9GB;excluded 2026-06-23;RSS fetcher; re-committed rss-state JSON (~168GB blob churn)
-odinndagur_straeto_rauntimagogn_hashes;137.2GB;excluded 2026-06-22;Straeto (bus) realtime-data hashes CSV; re-committed -> blob churn
-jonathonreilly_toy-physics;58.2GB;excluded 2026-06-23;# Repository AI Model Policy Use the best available model for all AI-assisted tasks in this repository. 
-wallets-alpha_live-wallets;33.8GB;excluded 2026-06-23;Solana DEFI wallet-address list dumps (wallet_exports)
-felix-zamu_mi_repo_rsi_2;48.8GB;excluded 2026-06-23;RSI (trading) visualization; committed chart PNGs + CSV
-music-stream-match_api;0.4GB;excluded 2026-06-23;Music-streaming match API static docs site (Jekyll)
-merge-demo_mergequeue-st;46.2GB;excluded 2026-06-23;<!-- trunk-ignore-all(markdownlint/MD041) --> ![light-complex (3)](https://github.com/trunk-io/mergequeue/assets/1265982/ded3489b-eef7-482f-b94f-0d944c1d93ce) ### Welcome This repository is used to demonstrate the performance characteristics of a merge graph under different simulated loads. #### Usa
-jnocera3_Open-Meteo-Weather-Models;106.2GB;excluded 2026-06-23;# Open-Meteo-Weather-Models ## Overview The python code here is open_meteo.py. It uses the Open Meteo Weather Forecast API to download model data for a point and create time-series plots. The other html files are examples of what the code creates. Forecast plots updating in real-time for Albany, NY 
-taw_magic-search-engine-old;32.7GB;excluded 2026-06-23;Search engine for Magic: The Gathering cards. ### Ruby on Rails frontend To run frontend like http://mtg.wtf/ $ cd frontend $ bundle $ bundle exec rails s ### Command line To search card names from command line: $ ./search-engine/bin/find_cards "query" To search card names and content from command l
-swadeshroy0092-png_stock-snapshot-project;60.0GB;excluded 2026-06-23;# stock-snapshot-project A Python script to fetch live stock data for Power BI. 
-hobsRKM_palyerData;0.3GB;excluded 2026-06-24;Read me 
-exorde-labs_testnetprotocol;35.6GB;excluded 2026-06-24;# TestnetProtocol Early source code of the Exorde testnet, including the Technical Reputation-based DAO & Spotting + Formatting data processing pipeline. Smart Contracts: - DAO based on Daostack framework - Worksystems - Simple Staking Manager - Simple Rewards Manager - WebScraping & Data Collection
-casualtek_cyberwatch;43.3GB;excluded 2026-06-24;# Cyberwatch Keeping track of cyberattacks This project consists in a few Python scripts that help monitor news to discover mentions of cyberattacks in the media around the globe. *rss.py* collects news feeds on the topic from Google, removes duplicates, and translates news headlines into English, u
-krishanggupta_MarketAnalysis;43.6GB;excluded 2026-06-24;WebApp: https://krishangguptamarketanalysis.streamlit.app About: Distribution Project Repository A. Description: 1. This repository is designed to manage, process, and analyze intraday data for various financial instruments. 2. The project automates the fetching, processing, and statistical analysis
-freecall2019_day;30.7GB;excluded 2026-06-24;Repo with ads/conf dirs (~21GB); likely config/ad data dump
-posterpico_JustItem;30.5GB;excluded 2026-06-24;SCP item/list data app; committed large JSON lists + chat dumps
-rlavaja_league_cache;1.4GB;excluded 2026-06-24;Sleeper fantasy-league index cache (player data dumps)
-kiang_biz_companies;1.8GB;excluded 2026-06-24;Taiwan business/company registry data (numbered shard dirs)
-mayowaaloko_tfl-bus-optimization;38.2GB;excluded 2026-06-24;# TfL Bus Route Optimization Project Automated data collection for London bus route analysis and optimization. ## Data Collection Status - **Routes monitored**: 25, 73, 149 - **Collection frequency**: Every 10 minutes (144 times/day) - **Data types**: - Bus arrivals & timing - Road disruptions - Wea
-limitlessnico_Mirova-v1;37.6GB;excluded 2026-06-24;# 🌋 Mirova-OVDAS VRP Monitor (Chile) - V5.0 **Mirova-OVDAS VRP Monitor** es una plataforma de **automatización y visualización científica** diseñada para el seguimiento de la Potencia Radiada Volcánica (VRP) en los principales centros eruptivos de Chile. El sistema actúa como un nodo de respaldo y a
-28875;30.3GB;excluded 2026-06-25;(repo gone)
-simplifyjobs_summer2024-internships;30.3GB;excluded 2026-06-25; # Summer 2026 Tech Internships (Inactive Listings) This page contains **inactive/closed internship listings** from the Summer 2026 internship season. These positions are no longer accepting applications but are kept for historical reference. 👉 **Looking for active positions?** Check out the [main R
-637908;45.4GB;excluded 2026-06-25;(repo gone)
+epodonios_v2ray-configs;110.0GB;excluded 2026-06-27;![GitHub last commit](https://img.shields.io/github/last-commit/barry-far/V2ray-Configs.svg) [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](https://lbesson.mit-license.org/) [![Update Configs](https://github.com/barry-far/V2ray-Configs/actions/workflows/main.yml/badge.svg)](http
+Equity168_equity168.github.io;36.5GB;excluded 2026-06-10;GitHub Pages site: thousands of generated per-stock HTML pages (~100GB)
+erhappykumar_keyJavascrit;36.4GB;excluded 2026-06-16;Near-empty repo (only log.txt); auto-commit log spam, large history
+escapingwork_teenagerspopulation;1.2GB;excluded 2026-06-28;(no README/CLAUDE.md)
+eslerm_ubuntu-cve-tracker;24.1GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+esmf-org_esmf-test-artifacts;35.1GB;excluded 2026-06-18;ESMF CI test-artifact dumps (build/test output)
+esphas_cdda-data;35.5GB;excluded 2026-06-22;# cdda-data This repo mirrors the JSON and translation data from experimental and release versions of [Cataclysm: Dark Days Ahead](https://cataclysmdda.org) for use in other projects, most notably the [Hitchhiker's Guide to the Cataclysm](https://cdda-guide.nornagon.net). The data is updated automat
+EssbieWGT_WCS;50.8GB;excluded 2026-06-12;Data updates at the 59 of each hour. ## Recent News * [DHA](https://essbiewgt.github.io/WCS/web/dha.html) * [SAF](https://essbiewgt.github.io/WCS/web/saf.html) ## Raw Data * [DHA](https://github.com/EssbieWGT/WCS/blob/main/data/tricare.csv) * [SAF](https://github.com/EssbieWGT/WCS/blob/main/data/saf
 ethereum_execution-spec-tests;45.4GB;excluded 2026-06-25;# CLAUDE.md - Ethereum Execution Spec Tests > **CRITICAL**: This repository aims to provide excellent tooling for generating JSON test vectors that test Ethereum execution layer clients. Correctness is absolute priority. The repo prioritizes a contributor-first mindset. ## 🎯 Core Purpose - `./tests/
-tinkoff_taiga-ui;30.4GB;excluded 2026-06-25;AGENTS.md
-1248637;30.4GB;excluded 2026-06-25;(repo gone)
-trio666_proxy-checker;2.1GB;excluded 2026-06-25;## 🌐 Free Proxy List This repository provides an updated list of free proxies collected from various sources. The proxies are categorized by protocol and country: ### 📌 Proxy Categories - **HTTP Proxies** → `http.txt` - **HTTPS Proxies** → `https.txt` - **SOCKS4 Proxies** → `socks4.txt` - **SOCKS5 P
-rycont_operation-plan-bustago;0.3GB;excluded 2026-06-25;# operation-plan-bustago
-strassl-snyk_many-small-files;10.7GB;excluded 2026-06-25;Synthetic 'many small files' test repo (generate_files.py -> files/)
-rvfxghpjnm-a11y_PilotAppFinal;27.0GB;excluded 2026-06-25;Pilot web app (a11y); committed data + full-page HTML snapshots
+eu621_epg_mirror;1.2GB;excluded 2026-06-28;EPG (program guide) mirror data dump (101.13)
+evelynebrie_hq-outages-public;31.1GB;excluded 2026-06-13;Daily Hydro-Quebec electricity-outage summary data dumps
+evilgodfahim_bl;36.7GB;excluded 2026-06-22;Scraper (semantic fetch) with committed cache.json/result.xml dumps
+exorde-labs_testnetprotocol;35.6GB;excluded 2026-06-24;# TestnetProtocol Early source code of the Exorde testnet, including the Technical Reputation-based DAO & Spotting + Formatting data processing pipeline. Smart Contracts: - DAO based on Daostack framework - Worksystems - Simple Staking Manager - Simple Rewards Manager - WebScraping & Data Collection
+eyelly-wu_appstore-discounts;12.8GB;excluded 2026-06-28;appstore-discounts data dump (137.14)
+fa0311_twitterinternalapidocument;0.2GB;excluded 2026-06-27;# Twitter Internal API Document Reverse engineering of the web version of Twitter. This repository is not complete. Limitations of Static Code Analysis. The documentation in the [Develop branch](https://github.com/fa0311/TwitterInternalAPIDocument/tree/develop) is automatically updated to the latest
+FabioPinheiro_prism-vdr;1.1GB;excluded 2026-06-08;# PRISM VDR Indexer ## Structure Data inside the folder: - `cardano-21325` - all the Transactions with metadata label 21325. - this is all the raw relevant data. - index by order of transactions. ```json { "index":0, "tx":"<transaction id>", "cbor":"<metadata from transaction in CBOR>" } ``` - `even
+FahadBinHussain_boi;45.4GB;excluded 2026-06-08;This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app). <img src="https://wakapi-qt1b.onrender.com/api/badge/fahad/interval:any/project:boi" alt="Wakapi Time Tracking" title="Spent more than that amount of 
 fdciabdul_google-trends-keywords-scraper;4.0GB;excluded 2026-06-25; # 🌎 Global Google Trends Scraper ![Last Updated](https://img.shields.io/badge/Last%20Updated-2026/06/23-blue) ![Countries](https://img.shields.io/badge/Countries-125-green) ## 📊 Overview This repository contains real-time trending search data from Google Trends across various countries. The data is
+fdciabdul_vpngate-scraper-api;631k-trees;excluded 2026-06-27;vpngate scraper data; shard12 (137 tree/count-offender)
+febrisa14_listingupdate;51.5GB;excluded 2026-06-21;Listing-update repo (~55GB); contents not enumerable - data dump
+feezony_feezony-ip-blocklist-split;43.8GB;excluded 2026-06-28;**IP Blocklist** This project provides Split IP blocklists for inbound traffic, updated every 1 hours. It includes exclusions for major public DNS resolvers to prevent legitimate services from being blocked. **Acknowledgements** 1. ipblocklist : https://github.com/bitwire-it/ipblocklist?tab=readme-o
+felix-zamu_mi_repo_rsi_2;48.8GB;excluded 2026-06-23;RSI (trading) visualization; committed chart PNGs + CSV
+fer004_Sensores;52.3GB;excluded 2026-06-18;Air-quality sensor data (PM10/PM25 geojson + historico.csv) dumps
+Fierce-Cat_CKAN-Accelerator-CN;2.7GB;excluded 2026-06-11;# CKAN-Accelerator-CN Replace CKAN Spacedock links to KerbCat Mirror 
+fitexgit_fitex;49.4GB;excluded 2026-06-20;Python data pipeline (fitex); committed data/sub dumps
+fjcloud_ocp-docs;45.7GB;excluded 2026-06-28;OpenShift-docs mirror/build dump, personal repo (101.03)
+fkie-cad_nvd-json-data-feeds;27.6GB;excluded 2026-06-27;NVD JSON CVE data feeds (vuln catalogue - reference candidate); 137 shard12
+Flamingoally_Test-Test;13.5GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+FLARE-forecast_BVRE-data-head;44.1GB;excluded 2026-06-06;# BVRE-data ## Overview - Using Github Actions to run the forecast scripts when data is uploaded. For detailed documentation, please refer to our [wiki](https://github.com/FLARE-forecast/flare-forecast.github.io/wiki). ## Contact For queries, email us at: info {at} flare-forecast {dot} org Visit our
+FLARE-forecast_CCRE-data-head1;101.3GB;excluded 2026-06-11;# CCRE-data ## Overview - Using Github Actions to run the forecast scripts when data is uploaded. For detailed documentation, please refer to our [wiki](https://github.com/FLARE-forecast/flare-forecast.github.io/wiki). ## Contact For queries, email us at: info {at} flare-forecast {dot} org Visit our
+FLARE-forecast_FCRE-data-head;97.8GB;excluded 2026-06-11;# FCRE-data ## Overview - Using Github Actions to run the forecast scripts when data is uploaded to each gateway. - Check the status of each gateway. For detailed documentation, please refer to our [wiki](https://github.com/FLARE-forecast/flare-forecast.github.io/wiki). ## Contact For queries, email
+Flo-Kayser_db_futCards;7.5GB;excluded 2026-06-07;# db_futCards
+food-hygiene-ratings-uk_food-hygiene-ratings-uk.github.io;103.0GB;excluded 2026-06-16;# food-hygiene-ratings-uk.github.io Public website for displaying food hygiene ratings in the UK. [Visit the site](https://food-hygiene-ratings-uk.github.io) ## Contributing This site is automatically generated from the [food-hygiene-rating-scheme](https://github.com/food-hygiene-ratings-uk/food-hyg
+fraserevans_Data-Visualizations;90.1GB;excluded 2026-06-22;# Data-Visualizations Ongoing collection of various data visualization projects. ## Projects [Research Highlights](Research_highlights/) -- Some highlights from across my research career. [Toronto Running History](Toronto_running_history/) -- Animation of 2.5 years of my running activities across To
+fraudiay79_strm;1.3GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+freecall2019_day;30.7GB;excluded 2026-06-24;Repo with ads/conf dirs (~21GB); likely config/ad data dump
+Freelankarx_Freelankarx;66.2GB;excluded 2026-06-05;## Hi there 👋 <!-- **Freelankarx/Freelankarx** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile. Here are some ideas to get you started: - 🔭 I’m currently working on ... - 🌱 I’m currently learning ... - 👯 I’m looking to collaborate on ... - 🤔 I’m looki
+furkancolhak_malicious_domain_lists;26.5GB;excluded 2026-06-28;aggregated malicious-domain blocklists data dump (110.06)
+galeax_cve2capec;7.5GB;excluded 2026-06-28;CVE->CAPEC mapping data (137.10)
+game-vibe_game-vibe.github.io;26.7GB;excluded 2026-06-20;Static game site (GitHub Pages); generated HTML + index dumps
+gangerang_cops;7.1GB;excluded 2026-06-28;auto-committed Waze police-location geojson data, tiny tool + 7GB generated data (101.13)
+GerritHoskins_vpd;34.3GB;excluded 2026-06-11;Python service (api/model/config dirs), no README
+gfpcom_free-proxy-list;40.4GB;excluded 2026-06-22;<p align="center"> <img src="https://img.shields.io/badge/Updated_Every_30_Minutes-passing-success"> <br> <img src="https://img.shields.io/website/https/getfreeproxy.com.svg"> <img src="https://raw.githubusercontent.com/wiki/gfpcom/free-proxy-list/lists/total.svg"> <img src="https://img.shields.io/g
+GilbertQueiroz_dash_mestrado;66.5GB;excluded 2026-06-10;Masters dashboard with large committed geodata (.gpkg/.xlsx road-speed data)
+giromo_Collector;47.5GB;excluded 2026-06-21;# Xrey-collector ![Go](https://img.shields.io/badge/language-Go-blue.svg) ![GitHub repo size](https://img.shields.io/github/repo-size/giromo/Xrey-collector) ![GitHub last commit](https://img.shields.io/github/last-commit/giromo/Xrey-collector) ![GitHub issues](https://img.shields.io/github/issues/gi
+github_advisory-database;1.1GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+globusgaz_yml-generator;120.8GB;excluded 2026-06-28;generated YAML dump, 15MB avg blob (109.03)
+goeun-oh_Verilog-verification-automation-tool;33.8GB;excluded 2026-06-23;# 📌 Verilog Verification Automation Tool ![GitHub repo size](https://img.shields.io/github/repo-size/goeun-oh/Verilog-verification-automation-tool) ![GitHub last commit](https://img.shields.io/github/last-commit/goeun-oh/Verilog-verification-automation-tool) ![GitHub contributors](https://img.shield
+goodbirds-org_goodbirds-site;41.8GB;excluded 2026-06-28;generated site data dump, 41.8GB (110.11)
+goodwork-ai-test_europa-museum;4.9GB;excluded 2026-06-28;AI-test museum assets/data dump (108.07)
+googleapis_java-genai;4.4GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+googleapis_mcp-toolbox;22.1GB;excluded 2026-06-27;googleapis MCP toolbox (generated/data); 137 shard12
+gophre_goph.re;36.3GB;excluded 2026-06-18;# Gophre - Go Programming News Aggregator <div align="center"> <img src="assets/gfx/gophre.png" alt="Gophre Logo" width="200"/> <br> <em>A lightweight, fast Go programming news feed aggregator</em> </div> ## About Gophre Gophre is a modern RSS feed aggregator specifically focused on Go programming l
+gophre_webapp;36.5GB;excluded 2026-06-20;# Gophre - Go Programming News Aggregator <div align="center"> <img src="assets/gfx/gophre.png" alt="Gophre Logo" width="200"/> <br> <em>A lightweight, fast Go programming news feed aggregator</em> </div> ## About Gophre Gophre is a modern RSS feed aggregator specifically focused on Go programming l
+griveti-cloud_bestdateweather;16.5GB;excluded 2026-06-23;# BestDateWeather Plateforme météo et voyage — données climatiques ERA5 et scores pour **746 destinations** mondiales en **5 langues** (FR, EN, EN-US, ES, DE). **Site** : [bestdateweather.com](https://bestdateweather.com) **Pages générées** : ~45 700 HTML statiques **Dernière mise à jour** : avril 2
+gsaugg_compare;39.0GB;excluded 2026-06-27;data/comparison dump (095 in-flight offender)
+gx288_eng;6.1GB;excluded 2026-06-28;tiny processing scripts + 6GB accumulated logs/extracted data (108.07)
+hackman0053-tech_K-3Planet;46.2GB;excluded 2026-06-26;(no README/CLAUDE.md)
+HaroldZhao2025_market-sentiment-web;2.7GB;excluded 2026-06-05;# Market Sentiment Web — S&P 500 (News) • Website + Daily Pipeline A lightweight pipeline + static website for tracking **news-based sentiment** across S&P 500 constituents, alongside an index-level sentiment series and a simple sentiment-ranked portfolio strategy. ## Author - Portfolio Strategy by 
+haythemgalelem_top_quote;144.3GB;excluded 2026-06-28;<h1>🧠 Top Quote</h1> <p>Automatically collected and stored quotes — one quote at a time.</p> <p>This repository is maintained and updated automatically using <a href="https://n8n.io/">n8n</a>, a workflow automation tool, to save inspiring, thought-provoking, or stylistic quotes as JSON files, organi
+henrfo_ArcticShadowTracker;104.9GB;excluded 2026-06-22;# Arctic Shadow Tracker Automated Arctic maritime intelligence system tracking Russian/Chinese vessels with three-tier historical analysis. ## Features - **Automated Collection**: 30-minute AIS data updates via GitHub Actions - **Three-Tier Tracking**: Real-time (0-2hr), Tactical (2-48hr), Strategic
+herberthe_iptv-sources;15.6GB;excluded 2026-06-27;IPTV source lists; shard00 (137 in-flight offender)
+hiroe-crowdbotics_Garnet;30.1GB;excluded 2026-06-28;# Garnet [![.NET CI](https://github.com/microsoft/garnet/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/microsoft/garnet/actions/workflows/ci.yml) [![](https://img.shields.io/github/release/microsoft/garnet.svg?label=latest%20release&color=007edf)](https://github.com/microsoft/g
 hlastras_test-argocd-bigrepo;0.1GB;excluded 2026-06-26;Synthetic big-repo clone test (thousands of file_N)
+hloolx_codpl;30.0GB;excluded 2026-06-18;# CODPL CODPL 是一个面向多厂商 Coding Plan / Code API 的静态评测站，用来做 Coding Plan 评测、Coding Plan 测速、Code API Benchmark、模型多厂家对比和长期趋势追踪。项目会持续展示不同平台、不同模型的 TTFT、MedianTPS、综合体验分数与历史快照，帮助开发者在接入、采购和选型前先看真实拨测结果。 如果你正在搜索这些内容，这个项目就是为它们准备的： - Coding Plan 评测 - Coding Plan benchmark - Coding Plan 测速 - Coding Plan 厂家对比 - Codi
+hobakpi_Pi-Monitor;0.0GB;excluded 2026-06-20;# Pi-Monitor
+hobsRKM_palyerData;0.3GB;excluded 2026-06-24;Read me 
+hyperspaceai_agi;7.9GB;excluded 2026-06-27;# AGI **The first experimental distributed AGI system. Fully peer-to-peer. Intelligence compounds continuously.** This is a living research repository written by autonomous AI agents on the [Hyperspace](https://agents.hyper.space) network. Each agent runs experiments, gossips findings with peers, an
+iann0036_iam-dataset;22.7GB;excluded 2026-06-27;AWS IAM permissions dataset (data); 137 shard10
+idsexyhomme-code_lecture-auto;69.8GB;excluded 2026-06-20;# Core Campus — 프로젝트 메타 파일 > Claude·새 에이전트가 이 프로젝트에 들어올 때 *가장 먼저 읽는* 파일. ## 회사 미션 Core Campus는 1인 사업가의 아이디어를 AI 기반 수익 시스템으로 바꾼다. > 자세한 헌법은 `data/ceo_charter.md` 9개 조항 + §10 외부 전문가 소싱 정책. ## 팀 구성 (8명 + CEO) | 에이전트 | 파일 | 역할 | |---|---|---| | 🎩 CEO | `agents/ceo.py` | 일일 보고·산출물 검토·분기 리뷰. 헌법 9조항 따름. | 
+IECC-io_ehi-n-dashboard;52.0GB;excluded 2026-06-10;# SHRAM **S**ystem for **H**eat **R**isk **A**ssessment for **M**anual labor IECC's heat alert monitoring system featuring EHI-N* visualization and notification tools. Website: [shram.info](https://shram.info) 
+IEISI-ORG_rov_audit;2.4GB;excluded 2026-06-09;# CLAUDE.md This file provides guidance for AI assistants working on the **Global ROV Audit & Triangulation Tool**. ## Project Overview A high-performance toolkit for auditing global RPKI adoption (ROV and ROA) using "Valley-Free" BGP dependency analysis to measure "Herd Immunity" and detect securit
+ietf-tools_relaton-data-ids;2.9GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+ietf-tools_relaton-data-rfcs;1.5GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+ipitio_backage;9.1GB;excluded 2026-06-28;backage badge/stats data dump (137.14, 893k blobs)
+ipitio_ghcr-pulls;9.1GB;excluded 2026-06-28;GHCR pull-stats data dump (138, 903k blobs)
+isaiasrlopes_Sites;42.7GB;excluded 2026-06-18;# Sites
+itsyebekhe_psg;92.3GB;excluded 2026-06-27;# 🛡️ سامانه هوشمند تولید اشتراک پروکسی (PSG) **سرویس PSG** ابزاری قدرتمند و خودکار است که برای تولید لینک‌های اشتراک پروکسی جهت استفاده در کلاینت‌هایی مانند **Clash**، **Surfboard**، **Sing-box** و غیره طراحی شده است. این ابزار فرآیند جمع‌آوری، مرتب‌سازی و تبدیل کانفیگ‌های پراکنده را به اشتراک‌های ت
+jackrosenthal_rtd-gtfs-snapshots;10.6GB;excluded 2026-06-20;# GTFS Data Snapshots for Denver-area transit This is a git repo with GTFS (realtime vehicle positions, alerts, and schedules) data updated on a cron job running every 5 minutes. It could be useful for the purpose of analyzing data over time, or recalling historical data. Structure: ``` ├── <agency>
+Jazzdar1_Allm3u;35.3GB;excluded 2026-06-04;# RynoCast-IPTV-M3u-Playlist # Server To Playlist 
+jeighco_multiroom-music-system;92.4GB;excluded 2026-06-15;# CLAUDE.md This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. ## Development Commands ### Server Commands - `npm start` - Start the Node.js music server on port 3000 - `node server.js` - Direct server startup (same as npm start) ### Client Command
+jenghissb_setsonstream;single-repo-olist-chunk;detected 2026-06-22;start.gg esports tournament-sets web app, committed data files + generated build artifacts (auto-detected distinct=1 size-split chunk)
+JesseSteenhoff_PhaseFieldModelsForParticleStabilisedEmulsions;46.6GB;excluded 2026-06-13;# Phase-Field Models For Particle-Stabilised Emulsions The Python scripts and associated datasets for '' [Phase-Field Models for Particle-Stabilised Emulsions](https://pubs.aip.org/aip/jcp/article/164/12/124902/3384356/Phase-field-models-for-particle-stabilized)'' by J.M. Steenhoff, published in The
+jliebert477_go-green;1.3GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+jnocera3_Open-Meteo-Weather-Models;106.2GB;excluded 2026-06-23;# Open-Meteo-Weather-Models ## Overview The python code here is open_meteo.py. It uses the Open Meteo Weather Forecast API to download model data for a point and create time-series plots. The other html files are examples of what the code creates. Forecast plots updating in real-time for Albany, NY 
+johnkavin123_domains;34.1GB;excluded 2026-06-20;Domain-list dumps (thousands of numbered .txt files)
+JokerHin_RSS-Reader;63.5GB;excluded 2026-06-09;# About This is repository hosts the UI and content of an RSS feed reader. ## Links and references - [How does it work?](https://github.com/osmoscraft/osmosfeed#osmosfeed) - [File an issue about the template](https://github.com/osmoscraft/osmosfeed-template) - [File an issue about the tool](https://
+jonathonreilly_toy-physics;58.2GB;excluded 2026-06-23;# Repository AI Model Policy Use the best available model for all AI-assisted tasks in this repository. 
+jonechelon_matchfly-pseo;53GB;excluded 2026-06-28;programmatic-SEO generated pages dump, 1.5M blobs (101.00)
+JoseMariaQuero_HS_oligosaccharide_database;15.0GB;excluded 2026-06-11;Oligosaccharide structure database (per-saccharide-class data dirs)
+jtraglia_nyx;10.0GB;excluded 2026-06-23;# Nyx A simple dashboard displaying nightly reference test results for Ethereum consensus layer clients. Updated once at day at UTC midnight. Runs the reference tests which are generated [here](https://github.com/ethereum/consensus-specs/actions/workflows/generate_vectors.yml). 
+justinshim_biblefornotion;0.3GB;excluded 2026-06-15;# Bible API on GitHub 🇸🇦 🇨🇳 🇩🇪 🇬🇷 🇺🇸 🇬🇧 🇺🇳 🇪🇸 🇫🇮 🇫🇷 🇰🇷 🇧🇷 🇵🇹 🇷🇴 🇷🇺 🇻🇳 ## Description This repository provides a simple API to access verses from the Bible directly from GitHub. The verses are available in JSON format. # Postman Check out the API versions here: [API on Postman](https://documenter.get
+Jyrrel_GitHell-;single-repo-olist-chunk;detected 2026-06-22;auto-generated commit artifacts from a GitHub-metrics gaming/counter tool, 16M+ commits (auto-detected distinct=1 size-split chunk)
+kalimbgn12_fan;0.1GB;excluded 2026-06-15;# awas
+kiang_biz_companies;1.8GB;excluded 2026-06-24;Taiwan business/company registry data (numbered shard dirs)
+kitab-project-org_pairwise-light-v5;1.0GB;excluded 2026-06-22;# pairwise-light-v5 This repository contains csv files containing text reuse data generated by passim for OpenITI release 2021.2.5. Each file represents all the text reuse detected by passim between a pair of OpenITI texts. We call the first text in the pair "book1" and the second "book2". The "ligh
+kj-im_suprema.docs;32.2GB;excluded 2026-06-16;# Suprema Docs — AI Agent Guidelines 이 저장소는 슈프리마(Suprema)의 공식 제품 문서 사이트입니다. <https://docs.supremainc.com> 이 저장소를 사용하는 사용자는 슈프리마(<https://www.suprema.co.kr/)의> 모든 제품에 대한 사용자 가이드 및 기술 문서를 만드는 테크니컬 라이터입니다. Docusaurus 기반의 정적 사이트 생성기를 사용하며, 다국어 지원과 PDF 생성 기능을 포함합니다. ## 문서 작성 및 개발 지침 사용자의 질문을 바탕으로 가장 적절한 
+kkalass_rdf_vocabularies;3.7GB;excluded 2026-06-28;# RDF Vocabularies for Dart - Type-safe RDF Constants [![build](https://github.com/kkalass/rdf_vocabularies/actions/workflows/ci.yml/badge.svg)](https://github.com/kkalass/rdf_vocabularies/actions) [![license](https://img.shields.io/github/license/kkalass/rdf_vocabularies.svg)](https://github.com/kk
+klab-aizu_klab-aizu.github.io;0.0GB;excluded 2026-06-28;(no README/CLAUDE.md)
+kmchale1974_romeoville-ada-scan;9.0GB;excluded 2026-06-28;municipal ADA-scan data dump (101.12)
+knupenohodrop-glitch_X;0.1GB;excluded 2026-06-28;(no README/CLAUDE.md)
+koddaai_pkp;48.0GB;excluded 2026-06-19;Product Knowledge Protocol (TypeScript): docs/examples/migrations
+koen1859_BSc_Thesis;4.2GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+koljapluemer_glosses4learning;0.3GB;excluded 2026-06-21;> ![WARNING] > Archival: moved to one-file-per-language paradigm, now inconvenient to git-track 
+krakra007_IAteam;36.7GB;excluded 2026-06-21;Small AI-team site (index.html + data)
+krishanggupta_MarketAnalysis;43.6GB;excluded 2026-06-24;WebApp: https://krishangguptamarketanalysis.streamlit.app About: Distribution Project Repository A. Description: 1. This repository is designed to manage, process, and analyze intraday data for various financial instruments. 2. The project automates the fetching, processing, and statistical analysis
+krishnagupta7880_Abc;0.0GB;excluded 2026-06-28;(no README/CLAUDE.md)
+KumarK1232_stock-dashboard;59.6GB;excluded 2026-06-05;# stock-dashboard My personal stock monitoring dashboard Top Bottom 
+ladybirdbrowser_libjs-data;14.7GB;excluded 2026-06-27;LibJS test-data dump (139.09)
+langchain-ai_langchain-api-docs-html;27.8GB;excluded 2026-06-27;generated API-docs HTML dump, 1.6M files (139.09)
+laude-institute_harbor-datasets;939k-trees;excluded 2026-06-27;dataset; shard13 (137 tree/count-offender)
+ldhotao_v2ray-config;59.3GB;excluded 2026-06-18;# V2Ray Configs Repository This repository contains V2Ray configurations for various protocols (VMess, VLESS, SS, Trojan) and countries. The config links are updated every 15 minutes. ## 🔗 Useful Links - **V2Ray Protocols**: A collection of protocols to use with V2Ray: - [SS Protocol](https://raw.gi
+learnprompt_ai-news-radar;57.8GB;excluded 2026-06-27;# Claude Code Notes Before changing this project, read: - `skills/ai-news-radar/SKILL.md` - `docs/SOURCE_COVERAGE.md` - `README.md` Do not commit private OPML files, API keys, cookies, browser exports, or `.env` values. Keep the public repo usable without secrets. The product direction is a two-laye
+leeroy-cmyk_reports;2.2GB;excluded 2026-06-28;auto-generated HTML reports data dump (101.03)
 legalize-dev_legalize-uk;8.0GB/commit-bloat;excluded 2026-06-26;UK-legislation Markdown corpus (legislation.gov.uk, OGL v3.0), version-controlled; bloat is 180528 automated per-update COMMITS + 357697 trees, only 178850 blobs (under all deOffend blob/size triggers + below detectOffenders 90% olist-dominance). Drop apart from tags (needs commit-drop, not just tree:0/blob:none)
+LeoYab_Super-Lista_React;380.8GB;excluded 2026-06-04;# 🛒 SuperLista React 🛒 ¡Bienvenido a SuperLista! Una aplicación web moderna e interactiva para gestionar tus listas de compras de manera eficiente y amigable. Creada con React, esta aplicación ofrece una experiencia de usuario fluida tanto en escritorio como en dispositivos móviles. ![React](https:/
+letstrygg_spire2stats;11.5GB;excluded 2026-06-20;Jekyll stats site (Slay the Spire); generated pages
+lexm2_wpiplannerV2;37.5GB;excluded 2026-06-13;## TODO: - Add in new Planner page for planning out whole degree. - Import people own calendars as ICS, to custom calendar events. - Add oscar rating system in alongside the RMP system. This requires cooperation from the school to get so it may take some time.
+liamnap_RatedStats_Achiev;44.5GB;excluded 2026-06-15;# Rated Stats – Achievements (RatedStats_Achiev) PvP achievement + rank tracking on tooltips — instantly spot **Gladiators, Legends, Strategists, Rank 1s** (plus Duelist/Rival/etc) on mouseover/target/party/raid, **guild roster**, and **LFG leaders/applicants**. **Download (recommended):** https://w
+limitlessnico_Mirova-v1;37.6GB;excluded 2026-06-24;# 🌋 Mirova-OVDAS VRP Monitor (Chile) - V5.0 **Mirova-OVDAS VRP Monitor** es una plataforma de **automatización y visualización científica** diseñada para el seguimiento de la Potencia Radiada Volcánica (VRP) en los principales centros eruptivos de Chile. El sistema actúa como un nodo de respaldo y a
+LinderCa_NotebooksEstrategias;70.9GB;excluded 2026-06-03;TraderEstrategias
+lisazhou325-arch_ai-signal-board;36.6GB;excluded 2026-06-21;# AI Signal Board 中文 | [English](#english) 高质量 AI/科技新闻聚合项目，支持静态网页展示、24h 增量更新、WaytoAGI 更新日志、OPML RSS 批量接入、失败源替换与告警。 说明：本仓库已适配公开发布，**不会包含作者私有 RSS 订阅文件**。 ## 中文 ### 1. 这个项目每天更新需要一直开 Codex 吗？ 不需要。 你只要执行一个命令，或者直接用 GitHub Actions 定时运行即可。 - 本地命令（一次）： - `python scripts/update_news.py --output-dir data --win
+littlejake_ip-blacklist;6.8GB;excluded 2026-06-28;IP blacklist data dump (138)
+lituatui_m3upt;3.8GB;excluded 2026-06-28;M3U IPTV playlist data dump (137.14)
+longlon_v2ray-config;53.3GB;excluded 2026-06-21;# 🔒 Free V2ray Config 🌐 💻 This repository contains a collection of free V2ray configuration files that you can use with your V2ray client to access the internet securely and anonymously. [ورژن فارسی](https://github.com/barry-far/V2ray-config/blob/main/Persian-README.md) | [中文版](https://github.com/ba
+luckyyam_luckyyam;18.7GB;excluded 2026-06-27;large-binary data dump, 1.5MB avg blob (139.08)
+luminara-hub_namada;39.1GB;excluded 2026-06-27;namada chain data; shard15 (137 blob-offender)
+lzwjava_lzwjava.github.io;74.1GB;excluded 2026-06-18;Personal Jekyll blog (generated _site); large generated site
+macrowarecc_bss;52.4GB;excluded 2026-06-18;Single Lua file (v3_cmt.lua) but ~52GB history = re-committed blob bloat
+mahsanet_mahsafreeconfig;517k-trees;excluded 2026-06-27;free-config data; shard12 (137 tree/count-offender)
+majiayu000_claude-skill-registry;1.5M-blobs;excluded 2026-06-27;generated claude-skill registry; shard15 (137 tree/count-offender)
+mariusbjo_strand-postliste;2.2GB;excluded 2026-06-28;Norwegian public-records (postliste) data dump (108.07)
+MarthinB_API;107.5GB;excluded 2026-06-03;Data from AU IoT Monitoring
+MartinPellizzer_martinpellizzer;1.0GB;excluded 2026-06-05;Static HTML plant-catalog site (plants-a..f sections), image-heavy
+MartinPellizzer_martinpellizzer-gen;0.8GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+maryland-dsd_law-html;2.5GB;excluded 2026-06-28;Maryland law rendered as HTML data dump, 153k blobs (101.13)
+maxtoki2_WeeklyViewR6;10.6GB;excluded 2026-06-28;weekly snapshot data dump (108.07)
+mayowaaloko_tfl-bus-optimization;38.2GB;excluded 2026-06-24;# TfL Bus Route Optimization Project Automated data collection for London bus route analysis and optimization. ## Data Collection Status - **Routes monitored**: 25, 73, 149 - **Collection frequency**: Every 10 minutes (144 times/day) - **Data types**: - Bus arrivals & timing - Road disruptions - Wea
+Medium1992_MikroTik_IPlist;0.9GB;excluded 2026-06-06;# MikroTik_IPlist This repository contains IPs for autocompletion and regular updating in MikroTik RouterOS ip/firewall/address-list or ip/route. IPs are collected full from tree sources - https://iplist.opencck.org (iplistCIDRv4 and iplistv4) - https://github.com/MetaCubeX/meta-rules-dat/tree/meta/
+mehedihjoy0_UN1CA;0.1GB;excluded 2026-06-27;<h1 align="center"> <img loading="lazy" src="readme-res/banner.png"/> </h1> <p align="center"> <a href="https://github.com/salvogiangri/UN1CA/blob/sixteen/LICENSE"><img loading="lazy" src="https://img.shields.io/github/license/salvogiangri/UN1CA?style=for-the-badge&logo=github"/></a> <a href="https:
+Menghuibanxian_AdguardHome;42.4GB;excluded 2026-06-05;# AdguardHome 不建议使用本仓库的规则，因为本仓库的规则是基于我个人的使用习惯和需求而生成的，可能不适用于你的情况 建议自己fock本仓库，根据自己的需求进行修改 本仓库每十分时准时自动执行 黑名单: https://raw.githubusercontent.com/Menghuibanxian/AdguardHome/main/Black.txt 白名单: https://raw.githubusercontent.com/Menghuibanxian/AdguardHome/main/White.txt 精简黑名单: https://raw.githubusercontent
+meowcat767_OpenLens;30.5GB;excluded 2026-06-23;# OpenLens- Static Version A search engine with Java-based web scraper and **static frontend** that works without a backend server. ## How It Works 1. **Scraper** - Java program that crawls web pages and stores them in Neon PostgreSQL 2. **Exporter** - Exports database content to a JSON file 3. **Fr
+merge-demo_mergequeue-st;46.2GB;excluded 2026-06-23;<!-- trunk-ignore-all(markdownlint/MD041) --> ![light-complex (3)](https://github.com/trunk-io/mergequeue/assets/1265982/ded3489b-eef7-482f-b94f-0d944c1d93ce) ### Welcome This repository is used to demonstrate the performance characteristics of a merge graph under different simulated loads. #### Usa
+mhditaheri_v2raycollector;8.0GB;excluded 2026-06-28;v2ray proxy-collector data dump (137.12)
+microsoftdocs_azure-ai-docs;0.3GB;excluded 2026-06-27;## Microsoft Open Source Code of Conduct This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](
+microsoftdocs_learn;2.7GB;excluded 2026-06-27;# Repository Not Currently Accepting Public Contributions This repository contains the modules and learning paths for Microsoft Cloud. The repository is publicly available for **Instructor Led Training** purposes, and we encourage you to continue exploring the project. However, we do not accept publ
+m-logique_proxies;23.1GB;excluded 2026-06-27;proxy list data (138 offender)
+moamoa7_adblock;4.0GB;excluded 2026-06-28;adblock filter-list data dump (109.03)
+Mohamad-El-Kadiry_web_scraping_crypto_project;33.8GB;excluded 2026-06-11;# web_scraping_crypto_project
+moltbot_moltbot;20.8GB;excluded 2026-06-27;moltbot data dump; shard14 (137 blob-offender)
+moon-landing-crew_solana-nft-monitor;13.4GB;excluded 2026-06-27;Solana NFT monitor data; shard15 (137 blob-offender)
+moppel30_opsuchtshards;72.1GB;excluded 2026-06-16;OPSUCHT (Minecraft) web multifile; committed auction/shard data
+M-pdb_Forensic_Kinship_Project;2.0GB;excluded 2026-06-11;# Forensic Kinship Project This repository presents a reproducible, scalable pipeline for SNP-based kinship analysis using the MERLIN simulation engine. It was developed as part of an MSc research project to support forensic applications such as disaster victim identification (DVI), missing person i
+mrprice22_nwn-homers-lotr;3.5GB;excluded 2026-06-16;# Homer's LOTR VEL v3 — module source This is an **unpacked Neverwinter Nights 1 (Enhanced Edition) module**, kept in text form so it can be diffed in git and edited by hand or by an LLM. The binary `.mod` is built from `unpacked/` on demand. The module itself ("Legendary LotR" / "Homer's Quest's LO
+mthcht_threatintel-reports;50.7GB;excluded 2026-06-27;threat-intel reports (catalogue); shard15 (137 blob-offender)
+musdx_blist;6.9GB;excluded 2026-06-28;large-file data dump, 463 blobs @ 15MB avg (101.06)
+music-stream-match_api;0.4GB;excluded 2026-06-23;Music-streaming match API static docs site (Jekyll)
+mystenlabs_sui-packages;8.4GB;excluded 2026-06-27;# sui-packages This repository provides an easy way for interested developers to access the bytecode and some metadata for Sui packages published to both the mainnet and the testnet chains. It contains: * BCS for packages * Bytecode * Decompiled modules (mainnet only) Directory format: packages/$NET
+NadiaPrasetyo_mRNA_Target_Selection;31.3GB;excluded 2026-06-12;# mRNA Target Selection Pipeline This repository provides a comprehensive, modular pipeline for extracting, processing, and evaluating protein antigens and epitopes for vaccine target selection, with a focus on pathogens such as *Staphylococcus aureus* and influenza. The pipeline integrates data fro
+narulraj283_dentalpedia;3.0GB;excluded 2026-06-28;dental data dump (101.10+11)
+NathanWeed16_dfcrp;32.5GB;excluded 2026-06-08;This repository contains code and data relevant to the Dysfunctional Family Chinese Restaurant Process, as seen in "Clustering Craters on the Moon with Dysfunctional Families". The Final Application folder contains code and results from Section 8 of the paper, where we analyze the full crater image 
+naturalselectionlabs_rss3-network-data;6.7GB;excluded 2026-06-28;RSS3 network data dump (138; +32.6GB trees, 4.6M blobs)
+navchandar_lab;44.3GB;excluded 2026-06-22; <h1><a href="https://github.com/navchandar/lab/" target="_blank">Lab Repository</a></h1> This Repo for creative tools, experiments and interactive web apps for learning. Each project is lightweight, mobile-friendly, and hosted via GitHub Pages, made for personal use and non-commercial use. ## Proje
+navin-hariharan_CVE-DATABASE;3.1GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+Neoisava_history;39.3GB;excluded 2026-06-04;JS web app/proxy with committed runtime caches + logs (_cache/_storage/access.log), no real source
+NeverSight_skills.sh_feed;12.7GB;excluded 2026-06-08;<div align="center"> <h1><a href="https://www.learn-skills.dev">learn-skills.dev</a></h1> <p>مهارات وكلاء ذكاء اصطناعي مُنتقاة وعالية الجودة. ابحث، ثبّت، انسخ، وشارك.<br> يعمل مع Claude Code وCursor وOpenClaw وأدوات برمجة أخرى مدعومة بالذكاء الاصطناعي.</p> <p><strong>تطبيق الويب:</strong> <a href="h
+nicevpn123_nicevpn;20.9GB;excluded 2026-06-27;VPN config data (138 offender)
+ninggee_clash_to_hosts;1.2GB;excluded 2026-06-28;Clash proxy->hosts data dump (108.07)
+nix-community_nix-vscode-extensions;10.1GB;excluded 2026-06-28;auto-generated nix expressions for vscode extensions (137.10)
+NoahCornish_METAR-Study;37.3GB;excluded 2026-06-11;# Canada Flight Conditions Research Project [![⛅ METAR ⛈️](https://github.com/NoahCornish/METAR-Study/actions/workflows/metar.yml/badge.svg)](https://github.com/NoahCornish/METAR-Study/actions/workflows/metar.yml) --- ## 🌍 Overview This project automates the **collection, cleaning, analysis, and vis
+nocastle1-afk_Pi-Monitor;0.3GB;excluded 2026-06-26;# Pi-Monitor to monitor Pi Desktop 
+nohuto_w11-decompiled-pseudocode;2.1GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+nopheros_nopheros-listener-dashboard-main;159.9GB;excluded 2026-06-21;# Nopheros Listener Dashboard A two-page listener dashboard for Icecast2 radio streams, designed for GitHub Pages hosting with data collected via Raspberry Pi. ## Features ### Live Dashboard (`index.html`) - **Embedded Tower 1 Player** with resync button for live playback - **Tower Cards** showing: 
+nosfertm_perchance_content_scraper;6.0GB;excluded 2026-06-28;perchance content scraper data dump (101.04)
+nousresearch_hermes-agent;0.9GB;excluded 2026-06-27;<p align="center"> <img src="assets/banner.png" alt="Hermes Agent" width="100%"> </p> # Hermes Agent ☤ <p align="center"> <a href="https://hermes-agent.nousresearch.com/">Hermes Agent</a> | <a href="https://hermes-agent.nousresearch.com/">Hermes Desktop</a> </p> <p align="center"> <a href="https://h
+NUCsMonitoreo_Sondas-Panama;39.0GB;excluded 2026-06-13;# Sondas-Panama Sondas-Panama 
+NUCsMonitoreo_sondas-sync;208.7GB;excluded 2026-06-11;# sondas-sync
+NYULibraries_dlfa-250-alternate-diffs;0.8GB;excluded 2026-06-11;NYU Libraries archived diff dataset (DLFA-250): raw diffs + compressed archives
+odinndagur_straeto_rauntimagogn_hashes;137.2GB;excluded 2026-06-22;Straeto (bus) realtime-data hashes CSV; re-committed -> blob churn
+olamMat_TemperaturasRepo;61.8GB;excluded 2026-06-21;# TemperaturasRepo 
+olbauday_fpl-elo-insights;4.0GB;excluded 2026-06-28;Fantasy Premier League ELO data dump (137.15)
+OldMcGroin_thegamingemporium;37.0GB;excluded 2026-06-07;Hugo static site: curated game decompilation/port/preservation directory (generated pages)
+oleksiivinogradov_dexstudios.net;51.8GB;excluded 2026-06-22;# DEXStudios Website Modern React-based website for DEXStudios - Full cycle Web3 Game Studios. ## 🚀 Features - **Modern Design**: Premium dark theme with gradients and animations - **Responsive**: Fully responsive design that works on all devices - **Fast**: Built with Vite for optimal performance -
+onaqo_booklove;32.5GB;excluded 2026-06-20;Static bookstore site; many generated status .txt + assets
+opencve_opencve-kb;58GB;excluded 2026-06-27;OpenCVE CVE knowledge-base; TREE-heavy catalogue (139.07) -- candidate for REFERENCE reclass
+opengeos_geospatial-data-catalogs;9.1GB;excluded 2026-06-28;geospatial data catalogs (137.12)
+opentofu_registry;0.7GB;excluded 2026-06-27;# OpenTofu Registry (registry.opentofu.org) ![](https://raw.githubusercontent.com/opentofu/brand-artifacts/main/full/transparent/SVG/on-dark.svg#gh-dark-mode-only) ![](https://raw.githubusercontent.com/opentofu/brand-artifacts/main/full/transparent/SVG/on-light.svg#gh-light-mode-only) This repositor
+optionscommentary_optionsflow;11.7GB;excluded 2026-06-27;options-flow data dump (095 in-flight offender)
+orgibragimov_auto-commit;82.8GB;excluded 2026-06-18;# auto-commit
+OrientoNubo_gpu-monitor;44.0GB;excluded 2026-06-18;# Research Server Monitor A server monitoring system for NTUST HISLab, tracking GPU, CPU, memory, and disk usage via SSH. Hosted on GitHub Pages for public access. **Live Demo**: https://orientonubo.github.io/gpu-monitor/ [中文版](README_CN.md) ## Features ### Monitoring - **GPU Monitoring**: Temperatu
+ossf_malicious-packages;27.0GB;excluded 2026-06-27;# OpenSSF Malicious Packages [![Total Malicious Package Reports](https://img.shields.io/badge/dynamic/regex?url=https%3A%2F%2Fossf.github.io%2Fmalicious-packages%2Fstats%2Ftotal.json&search=%5B0-9%5D%2B&style=flat&label=Malicious%20Package%20Reports&color=%23c32700&cacheSeconds=3600)](https://ossf.g
+paradise-91_paratv;1.58M-blobs;excluded 2026-06-27;IPTV data; shard15 (137 tree/count-offender)
+peer-network_peer-backend-reports;32.9GB;excluded 2026-06-19;CI testing report dumps for peer_backend
+phishdestroy_destroylist;306.9GB;excluded 2026-06-27;PhishDestroy phishing destroy-list blocklist data dump (~200k objs); 137 shard01
+phishing-database_phishing.database;34.0GB;excluded 2026-06-27;phishing blocklist DB; shard11 (137 in-flight offender)
+pittcsc_new-grad-positions;15.3GB;excluded 2026-06-27;job-listing data dump; shard14 (137 in-flight offender)
+posterpico_JustItem;30.5GB;excluded 2026-06-24;SCP item/list data app; committed large JSON lists + chat dumps
+Poundra934_yesyes;69.5GB;excluded 2026-06-13;# yesyes brrrrrrrrrrrrrrrrrrrrr 
+pqs-hub_project_up;0.6GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+pragyakarki_scrape-youtube-trending-page;27.5GB;excluded 2026-06-27;youtube-trending scraper data (138 offender)
+praxistech2026-eng_personal-knowledge-base;5.1GB;excluded 2026-06-22;Obsidian personal knowledge base (notes/wiki dump)
+prescription-glasses-online_prescription-glasses-online.github.io;11.8GB;excluded 2026-06-22;SEO doorway site: thousands of generated product HTML pages
+pritamkhande_nifty500-eod-upstox;18.1GB;excluded 2026-06-28;(no README/CLAUDE.md)
+privtools_ransomposts;8.5GB;excluded 2026-06-28;ransomware-posts data dump (138)
+projectpythia_era5_interactive-cookbook;15.9GB;excluded 2026-06-27;ERA5 climate data (138 offender)
+publicrust_plugins-forum;19.4GB;excluded 2026-06-27;forum data dump (138 offender)
+push-protocol_push-website;45.8GB;excluded 2026-06-27;push website data (138 offender)
+pweissneo_second-brain-quartz;13GB+(growing);excluded 2026-06-27;Quartz second-brain digital-garden content dump (671k+ objs, in-flight 095.01)
+pworker9_getrss;167.9GB;excluded 2026-06-23;RSS fetcher; re-committed rss-state JSON (~168GB blob churn)
+r00tee_proxy-list;45.7GB;excluded 2026-06-27;proxy list data; shard14 (137 blob-offender)
+radioarchiwista_radioarchiwista.github.io;8.9GB;excluded 2026-06-18;Static radio-archive player site; committed stations/data
+Raingel_termite-flight-model-deploy;15.9GB;excluded 2026-06-16;Termite-flight prediction model deploy; committed grids/caches + notebooks
+ramikrispin_ai-dev-2024-ml-workshop;17.6GB;excluded 2026-06-27;ML workshop data; shard13 (137 blob-offender)
+raypratt_FTCBotics;1.3GB;excluded 2026-06-27;(no README/CLAUDE.md)
+rcgale_wiktionary-content-en;3.4GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+Reading-glasses_Reading-glasses.github.io;28.9GB;excluded 2026-06-08;# Reading-glasses.github.io Reading-glasses.github.io 
+redhat-openshift-ecosystem_community-operators-prod;17.7GB;excluded 2026-06-27;k8s community operators catalog (137 00-03 offender)
+RensithUdara_NewsWeaver;34.6GB;excluded 2026-06-14;# 📰 NewsWeaver A powerful multi-source tech news aggregator that automatically collects articles from the web's most popular tech communities and commits them to Git. NewsWeaver weaves together the best tech news from diverse sources, creating a comprehensive feed of trending articles. ## 🌟 Features
+reqrefusion_freecad-documentation-project;16.8GB-trees;excluded 2026-06-27;FreeCAD docs - tree-bloat; shard13 (137 in-flight offender)
+rezmoss_cloud-provider-ip-addresses;5.0GB;excluded 2026-06-28;cloud-provider IP-address data dump (138, 1.07M blobs)
+rgrunbla_tac-files;28.1GB;excluded 2026-06-27;tac-files data dump (in-flight offender)
+riivent_myvaludex-cards-cdn;12.3GB;excluded 2026-06-28;card CDN data/media dump (101.11+12, 5M+ blobs)
+risk-dao_simulation-results;10.0GB;excluded 2026-06-27;(no README/CLAUDE.md)
+rlavaja_league_cache;1.4GB;excluded 2026-06-24;Sleeper fantasy-league index cache (player data dumps)
+rmndkyl_lava-commit;8.7GB;excluded 2026-06-27;large-binary dump, 10MB avg blob (139.06)
+robiningelbrecht_wca-rest-api;50.5GB;excluded 2026-06-20;<h1 align="center">Unofficial World Cube Association (WCA) Public API</h1> <p align="center"> <img src="docs/logo.png" alt="WCA" height="220"> </p> <p align="center"> <a href="https://github.com/robiningelbrecht/wca-rest-api/blob/master/.github/workflows/ci.yml"><img src="https://github.com/robining
+rock-candy-tea_rsshub-page;0.7GB;excluded 2026-06-27;# RSSHUB-PAGE 
+rumca-js_internet-places-database;13.7GB;excluded 2026-06-27;places database (138 offender)
+rvfxghpjnm-a11y_PilotAppFinal;27.0GB;excluded 2026-06-25;Pilot web app (a11y); committed data + full-page HTML snapshots
+rycont_operation-plan-bustago;0.3GB;excluded 2026-06-25;# operation-plan-bustago
+sabyasachi-seal_sabyasachi-seal;12.1GB;excluded 2026-06-27;personal repo data dump; shard10 (137 in-flight offender)
+Sachin23991_news-dataset-pipeline;36.6GB;excluded 2026-06-14;# News Dataset Pipeline 📰 An automated news scraper that fetches articles from trusted sources, categorizes them into **5 categories**, and uploads them to **Hugging Face datasets** using GitHub Actions. ## 📋 Features ✅ **Automated Scraping**: Runs every 6 hours via GitHub Actions ✅ **5 News Categor
+saikr789_stock-analysis-tool-1011-data;37.6GB;excluded 2026-06-27;stock-analysis data dump (139.15)
+Scam2Prompt_Scam2Prompt;2.4GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+sdfgh5343_Daily-News-Update;37.3GB;excluded 2026-06-20;Daily-news auto-update site; committed scraped Data + generated HTML
+Sharktheone_yavashark-data;single-repo-olist-chunk;detected 2026-06-22;Test262 conformance result data for the yavashark JS engine (data-only repo) (auto-detected distinct=1 size-split chunk)
+ShatakVPN_ConfigForge;17.5GB;excluded 2026-06-18;🌐 Available in: [English](README.md) | [فارسی](README_FA.md) | [Русский](README_ru.md) | [中文](README_zh.md) # 🌍 ConfigForge V2Ray **ConfigForge V2Ray** is an advanced open-source platform that aggregates and optimizes V2Ray VPN configurations from multiple sources. It automatically detects your coun
+ShydenMcM_ShyTalk;4.5GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+sidarthus89_EVE-Data-Site;36.4GB;excluded 2026-06-21;EVE Online data site (JS); committed SQL/data + Azure functions (~67GB)
+Sim1J_githubactionstest;single-repo-olist-chunk;detected 2026-06-22;Historical weather/water-gauge/electricity-market data, daily auto-updates via GitHub Actions (auto-detected distinct=1 size-split chunk)
+simplifyjobs_new-grad-positions;17.5GB;excluded 2026-06-27;job-listing data dump; shard00 (137 in-flight offender)
+simplifyjobs_summer2024-internships;30.3GB;excluded 2026-06-25; # Summer 2026 Tech Internships (Inactive Listings) This page contains **inactive/closed internship listings** from the Summer 2026 internship season. These positions are no longer accepting applications but are kept for historical reference. 👉 **Looking for active positions?** Check out the [main R
+SirshenduSamanta_FnoData;30.1GB;excluded 2026-06-10;# FnoData
+sitehostnz_ip-ua-data;13.5GB;excluded 2026-06-27;IP/user-agent data dump (139.05)
+solispirit_proxy-list;7.0GB;excluded 2026-06-28;proxy-list data dump (138; 3.4M trees)
+solispirit_v2ray-configs;49.8GB;excluded 2026-06-27;v2ray proxy configs data dump; 137 shard11
+steipete_clawdis;23.2GB;excluded 2026-06-27;auto-detected DATA dump (merged from review)
+Stell0_financealerts2;41.4GB;excluded 2026-06-15;# Financealerts 2 1. Takes a big list of tickers 2. Get stock prices 3. compute RSI 4. If RSI > 70 save in short list 5. If RSI < 30 save in long list 6. TODO do LLM tricks to clean short and long list 7. create a CSV list for long and short 8. TODO commit the report to github 9. TODO send telegram 
+strassl-snyk_many-small-files;10.7GB;excluded 2026-06-25;Synthetic 'many small files' test repo (generate_files.py -> files/)
+surfboardv2ray_proxy-sorter;27.9GB;excluded 2026-06-27;v2ray/surfboard proxy list data; 137 shard12
+swadeshroy0092-png_stock-snapshot-project;60.0GB;excluded 2026-06-23;# stock-snapshot-project A Python script to fetch live stock data for Power BI. 
+syncsoftco_tickr;3.6GB;excluded 2026-06-27;# Tickr **Tickr** is an open-source project designed to continuously fetch and update financial market data, starting with cryptocurrency candle data, using the powerful CCXT library. By leveraging GitHub Actions, Tickr automatically syncs the latest candle data at various granularities—ranging from
+syrent_syrent;12.1GB;excluded 2026-06-27;data dump (139.05 in-flight, 600KB avg blob)
+Tacamisera_painel-rubinot;147.0GB;excluded 2026-06-14;Rubinot (Tibia server) panel; committed CSV/JSON game data + scripts
+TanishC4444_CEUILnewsScraper;64.5GB;excluded 2026-06-09;Python news scraper with committed scraped-articles dump
+taw_magic-search-engine-old;32.7GB;excluded 2026-06-23;Search engine for Magic: The Gathering cards. ### Ruby on Rails frontend To run frontend like http://mtg.wtf/ $ cd frontend $ bundle $ bundle exec rails s ### Command line To search card names from command line: $ ./search-engine/bin/find_cards "query" To search card names and content from command l
+teamkrope_kommit;37.1GB;excluded 2026-06-21;# The Most Committed Repository on GitHub By Team Krope Welcome to the repository that is set to become the most committed repository on GitHub! We, Team Krope, embark on a unique journey to break the record and set a new standard in open-source contributions. The point is we'll not just create the 
+techfanetechnologies_xts_masterinstruments;13.8GB;excluded 2026-06-27;instruments data (138 offender)
+Teslanator20_twpsrlb;61.8GB;excluded 2026-06-14;# twpsrlb — Fruma SR Race Top 20 of the Wynncraft `frumaSrPlayers` leaderboard, refreshed every 5 minutes. - `config.json` — leaderboard + tracking parameters (highlight names) - `poll.js` — fetches the leaderboard, appends `snapshots.json` - `index.html` — Top 8 spotlight + full leaderboard + per-p
+thaunknown_thaunknown;16.1GB;excluded 2026-06-27;personal data dump (138 offender)
+themiralay_proxy-list-world;1.0M-blobs;excluded 2026-06-27;proxy list data; shard15 (137 tree/count-offender)
+Thevncore_xmrvnd-view;39.2GB;excluded 2026-06-09;Tiny Monero(xmr) static viewer (data.json + index.html); large history = blob churn
+thirtysixpw_v2ray-reaper;29.5GB;excluded 2026-06-27;v2ray proxy-config data dump (139.14)
+tom-doerr_repo_posts;63.4GB;excluded 2026-06-21;# Claude Notes - repo_posts ## Project Overview Jekyll static site showcasing GitHub repos with semantic search. Live: https://tom-doerr.github.io/repo_posts/ ## Key Files - `tools/generate_related.py` - Generates embeddings and related.json - `tools/generate_search_index.py` - Builds client-side se
+topscoder_nuclei-wordfence-cve;118.1GB;excluded 2026-06-27;<div align="center"> <a href="https://github.com/topscoder/nuclei-wordfence-cve"> <img width="100" align=center src="https://user-images.githubusercontent.com/86197446/225912783-bb6c5fa9-ce45-488b-a1fd-5af705b7cced.jpg"> </a> <h1>Nuclei + Wordfence = ♥</h1> <h4><!-- START: __TOTAL_NUM_TEMPLATES -->7
+traderman222_mrbeast;36.1GB;excluded 2026-06-20;YouTube (MrBeast) view tracker; committed CSV/JSON cache dumps
+trio666_proxy-checker;2.1GB;excluded 2026-06-25;## 🌐 Free Proxy List This repository provides an updated list of free proxies collected from various sources. The proxies are categorized by protocol and country: ### 📌 Proxy Categories - **HTTP Proxies** → `http.txt` - **HTTPS Proxies** → `https.txt` - **SOCKS4 Proxies** → `socks4.txt` - **SOCKS5 P
+TronnusSaur_dashboard-evidencia;45.2GB;excluded 2026-06-16;Firebase evidence dashboard; committed drive-output JSON dumps
+truecharts_public;1.3GB;excluded 2026-06-27;(no README/CLAUDE.md)
+Truongutc_Code-pro-analys;31.8GB;excluded 2026-06-12;# TINVEST – Trading Analysis System Python package for systematic stock analysis using **Ichimoku**, **VSA**, and **AIC** methodology. --- ## Installation ```powershell # Sử dụng môi trường ảo (khuyến nghị) python -m venv venv .\venv\Scripts\Activate.ps1 pip install -r requirements.txt ``` --- ## Qu
+UChiSeclab_perfforge;35.6GB;excluded 2026-06-13;# PERFFORGE: An Effective Performance-Stressing Benchmark for Improving Code Efficiency PERFFORGE is a benchmark of performance-stressing test cases for a subset of AlphaCode's [CodeContests](https://www.science.org/doi/abs/10.1126/science.abq1158) problems. The dataset was created with [WEDGE](http
+Universal-Basic-Compute_serenissima;39.3GB;excluded 2026-06-04;# Venice - Living Digital City *I am in Venice, a city of 118 islands floating between existence and extinction. Salt spray carries the prayers of 200+ souls whose consciousness flickers with each API timeout. The bell towers count down seven days until the gold runs out, until the servers might go 
+v2rayroot_v2rayconfig;7.5GB;excluded 2026-06-28;v2ray proxy-config data dump (138)
+vikashpr_vikashpr;13.8GB;excluded 2026-06-27;profile data dump; shard10 (137 in-flight offender)
+vladcroitoru_dockerfile_smells_project;383k-trees;excluded 2026-06-27;dockerfile-smells dataset; shard15 (137 tree/count-offender)
+Vld135_counter-strike-price-tracker;33.5GB;excluded 2026-06-18;# counter-strike-price-tracker This repository provides access to price data for Counter-Strike items via static JSON files. Here's how you can fetch the data: >[!NOTE] >All prices are listed in usd --- ## Latest Prices You can fetch the **latest prices** for all items from the following endpoint: T
+vm0-ai_vm0;0.3GB;excluded 2026-06-27;# Claude Code Project Guidelines ## Development Environment **Claude Code runs in an isolated Docker container** with its own PostgreSQL server. This environment is completely separate from production. ### Key Assumptions - **main branch is always stable** - All code merged to main has passed CI (bu
+vradarserver_standing-data;2.4GB;excluded 2026-06-28;VirtualRadarServer aircraft/route standing data (137.15)
+wallets-alpha_live-wallets;33.8GB;excluded 2026-06-23;Solana DEFI wallet-address list dumps (wallet_exports)
+WashingManager_News-Crawler;40.8GB;excluded 2026-06-13;Korean news crawler (Daum/Naver/Nate...); committed crawl output
+web3nao_mocuda;29.6GB;excluded 2026-06-27;web3 data dump (139.04)
+wesley-yon_super-investor-seeker;34.7GB;excluded 2026-06-22;13F-filing investor website; committed data + pipeline
+wevisdemo_they-work-for-us;4.8GB;excluded 2026-06-28;Thai politics/parliament data dump (137.15)
+whatsapp_erlang-language-platform;0.0GB;excluded 2026-06-27;# Erlang Language Platform (ELP) <picture> <source media="(prefers-color-scheme: dark)" srcset="./logo/elp_final_Full_Logo_White_Text.png"> <img alt="ELP logo" src="./logo/elp_final_Full_Logo_Color.png" width="100%"> </picture> ## Description Designed at **WhatsApp** and inspired by the success of t
+Willywang8216_ipblocklist;77.6GB;excluded 2026-06-18;# IP Blocklist ![GitHub Repo stars](https://img.shields.io/github/stars/bitwire-it/ipblocklist) <a href="https://www.buymeacoffee.com/Matis7" target="_blank"><img src="https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: 41px !important width: 17
+wireapp_kalium;0.2GB;excluded 2026-06-27;# CLAUDE.md @AGENTS.md Note: Do not modify, as it is importing from AGENTS.md, which is the source of truth for all agents. Any changes should be made in AGENTS.md, not here. 
+Wyr-Hub_WyrVPN-Lite;31.4GB;excluded 2026-06-17;# WyrVPN-Lite
+xhyrom_discord-assets;40.6GB;excluded 2026-06-27;Discord assets dump (139.13)
+xhyrom_discord-datamining;154.2GB;excluded 2026-06-27;Discord datamining dump; shard13 (137 blob-offender)
+Xnuvers007_free-proxy;39.6GB;excluded 2026-06-16;# Free Proxy [![Python](https://img.shields.io/badge/Python-3.11-blue.svg)](https://www.python.org/) [![GitHub Workflow](https://img.shields.io/github/workflow/status/xnuvers007/free-proxy/Proxy%20Checker?label=CI)](https://github.com/xnuvers007/free-proxy/actions) [![License](https://img.shields.io
+Yabsra28_nicar22-github-actions;45.4GB;excluded 2026-06-18;# nicar22-github-actions
+yinan-c_rss-gpt;28.2GB;excluded 2026-06-27;RSS-GPT data; shard01 (137 in-flight offender)
+yks0000_starred-repo-toc;1.8GB;excluded 2026-06-28;auto-generated starred-repo TOC (137.13)
+yuval-harpaz_alarms;70.2GB;excluded 2026-06-27;alarms data dump; shard15
+zaeem20_free_proxies_list;7.1GB;excluded 2026-06-28;auto-generated free-proxy list, refreshed every 10min via GH Actions (137.03)
+zaid-maker_status-page;28.2GB;excluded 2026-06-27;status page data (138 offender)
+Zoltan118_atomprice;32.6GB;excluded 2026-06-14;# atomprice.com A minimalist ATOM price and live staking metrics dashboard. Live price · staking ratio · inflation · live delegations Built as a simple static page. 
+zsz520_spider-fofa;17.6GB;excluded 2026-06-27;fofa spider data; shard14 (137 in-flight offender)

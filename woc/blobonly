@@ -1,0 +1,5 @@
+# blob-only / reference-hybrid: WoC keeps commits+trees, drops blobs; clone archived to da8 reference
+cveproject_cvelistv5
+ossf_malicious-packages
+ietf-tools_relaton-data-rfcs
+ietf-tools_relaton-data-ids
