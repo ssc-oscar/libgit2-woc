@@ -13,10 +13,12 @@
 #               (>TREE_AGG_MIN) across shards -- the blob tests never weigh trees,
 #               so tree-bloat data repos (re-committed corpora, version-controlled
 #               datasets: many trees+commits, few blobs) used to slip through.
-# For each offending shard: if a grabGitI worker is still running, kill it and
-# relaunch the FULL grab excluding the offenders' blobs; otherwise re-extract
-# the shard's BLOBS+TREES only (commit/tag left intact) and swap in the smaller
-# dump. Each offender is appended once to ~/trees/offenders as
+# For each offending shard the offenders are removed IN PLACE (filterDeoff.pl):
+# the existing blob+tree (+drop-commit subset's commits) idx/bin are rewritten by
+# byte-copying only the kept objects -- NO re-grab, NO clones (there is no sense
+# re-extracting from clones to drop objects we already have). A shard with a live
+# grab is deferred (filtering would race the writer) until the grab finishes.
+# Each offender is appended once to ~/trees/offenders as
 #   repo;size;excluded <date>;summary
 # A per-shard marker (<base>.<l>.excluded) accumulates excluded repos so a
 # relaunched grab is not re-killed.
@@ -174,39 +176,30 @@ for l in {00..15}; do
   pid=$(pgrep -f "grabGitI(Type)?\.perl .*/$base\.$m\.$l\$")
   echo "[deOffend $(date '+%F %T')] $base.$m.$l ($((sz/1000000000))GB) exclude=$(paste -sd, "$mark") dropcommit=${patc:-none} live=${pid:-none}" >&2
 
+  # IN-PLACE offender removal -- NO grab, NO clones. Rewrite the affected idx/bin by
+  # byte-copying only the kept objects (filterDeoff.pl), dropping offenders' blob+tree
+  # and the drop-commit subset's commits. There is no sense re-grabbing from clones to
+  # remove objects we already have; the existing dump is authoritative. The original
+  # grab applied the offender filter at grab time, so a clean dump never needs this --
+  # this only fixes dumps that predate an offender's registration.
   if [[ -n $pid ]]; then
-    for p in $pid; do killtree "$p"; done; sleep 2
-    # relaunch full grab: drop ALL offenders' blob+tree, and drop-commit subset's
-    # commits too (NOMATCH sentinel keeps the commit grep a no-op when patc empty).
-    nohup bash -c "cd '$REPOS' && gunzip -c '$DST/$base.$m.olist.$l.gz' \
-        | grep -Ev '(${pat});(blob|tree)' \
-        | grep -Ev '(${patc:-__NOMATCH__});commit' \
-        | perl -I '$HOME/lib64/perl5' '$HOME/bin/grabGitI.perl' '$DST/$base.$m.$l' \
-        2> '$DST/$base.$m.$l.err'" >/dev/null 2>&1 &
+    # A live grab is still writing this shard; filtering it now would race the writer.
+    # Defer: the grab finishes (offenders included), a later cycle removes them in place.
+    echo "[deOffend] $base.$m.$l has live grab ($pid) -- deferring in-place removal" >&2
   else
-    # offline re-extract: blob+tree always; commit too when there is a drop-commit
-    # subset in this shard. NOMATCH sentinel makes the commit grep a no-op otherwise.
-    seltypes='$2=="blob"||$2=="tree"'; gtype="blob,tree"; swapt="blob tree"
-    if [[ -n $patc ]]; then seltypes='$2=="blob"||$2=="tree"||$2=="commit"'; gtype="blob,tree,commit"; swapt="blob tree commit"; fi
-    gunzip -c "$DST/$base.$m.olist.$l.gz" | awk -F';' "$seltypes" \
-      | grep -Ev "(${pat});(blob|tree)" \
-      | grep -Ev "(${patc:-__NOMATCH__});commit" \
-      | perl -I "$HOME/lib64/perl5" "$HOME/bin/grabGitIType.perl" "$DST/$base.$m.$l.rb" "$gtype" \
-      2> "$DST/$base.$m.$l.deoff.err"
+    swapt="blob tree"; [[ -n $patc ]] && swapt="blob tree commit"
     for _t in $swapt; do
-      _rb=$DST/$base.$m.$l.rb.$_t.idx; _real=$DST/$base.$m.$l.$_t.idx
-      _exc="$mark"; [[ $_t == commit ]] && _exc="$markc"
-      if [[ -s $_rb ]]; then
-        mv -f "$_rb" "$_real"; mv -f "${_rb%.idx}.bin" "${_real%.idx}.bin"
-      elif [[ -f $_real ]] && awk -F';' 'NR==FNR{o[$1]=1;next} !($5 in o){exit 1}' "$_exc" "$_real"; then
-        # the shard's $_t objects are ALL excluded offenders -> correct result is an
-        # empty dump; the -s guard alone would leave the offender forever (seen on
-        # 055: shards 05-09 were 100% one count-offender). Truncate to remove it.
-        : > "$_real"; : > "${_real%.idx}.bin"; rm -f "$_rb" "${_rb%.idx}.bin"
-      fi
+      [[ -s $DST/$base.$m.$l.$_t.idx ]] || continue
+      # offenders=$mark (this shard's exclusion set), dropcommit=$markc; no blobonly here
+      perl "$HOME/bin/filterDeoff.pl" "$_t" "$DST/$base.$m.$l" "$mark" "${KEEP_FILE:-}" "" "$markc" \
+        2>> "$DST/$base.$m.$l.deoff.err"
+      _rb=$DST/$base.$m.$l.deoff.$_t
+      # filterDeoff always writes the output (empty if the type was 100% offenders --
+      # that empty swap correctly removes a count-offender that fills a whole shard).
+      [[ -f $_rb.idx ]] && { mv -f "$_rb.idx" "$DST/$base.$m.$l.$_t.idx"; mv -f "$_rb.bin" "$DST/$base.$m.$l.$_t.bin"; }
     done
     rm -f "$markc"
-    DIRTY[$l]=1   # offline re-extract completed synchronously -- shard's dumps changed
+    DIRTY[$l]=1   # in-place removal completed synchronously -- shard's dumps changed
   fi
 
   # log offenders (dedup by repo) with README/CLAUDE.md summary; size shown is
