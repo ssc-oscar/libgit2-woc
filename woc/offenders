@@ -415,3 +415,27 @@ zaeem20_free_proxies_list;7.1GB;excluded 2026-06-28;auto-generated free-proxy li
 zaid-maker_status-page;28.2GB;excluded 2026-06-27;status page data (138 offender)
 Zoltan118_atomprice;32.6GB;excluded 2026-06-14;# atomprice.com A minimalist ATOM price and live staking metrics dashboard. Live price · staking ratio · inflation · live delegations Built as a simple static page. 
 zsz520_spider-fofa;17.6GB;excluded 2026-06-27;fofa spider data; shard14 (137 in-flight offender)
+pacuitinfo_edge43;pathological;excluded 2026-06-28;pathological tree wedges grabft/grabf (D-state) for 14h+ (101.01)
+eco-trans_GTFS-UI;15.6GB;excluded 2026-06-28;# GTFS-UI Analysis of GTFS data in USA APP: https://eco-trans.github.io/GTFS-UI/ 
+borestad_blocklist-ip;5.5GB;excluded 2026-06-28;IP blocklist data dump (139.01)
+basellm_llm-metadata;2.7GB;excluded 2026-06-28;LLM metadata data dump (139.01)
+borisdundakov_pythonautomation2;135GB;excluded 2026-06-28;useless_info.txt auto-append dump, 150k commits (139.01)
+alsyundawy_trustpositif-to-rpz-binary;160.6GB;excluded 2026-06-28;TrustPositif DNS blocklist->RPZ binary dump (139.12)
+acidjesuz_epgtalk;38.2GB;excluded 2026-06-28;EPG program-guide data dump (139.12)
+yuan2pro_sub_merge;8.4GB;excluded 2026-06-28;proxy/v2ray subscription-merge data dump (139.12)
+yuito-it_yuito-it;11.9GB;excluded 2026-06-28;personal profile/site repo bloated to 11.9GB (generated/assets) (139.12)
+sari3l_poc-monitor;7.0GB;excluded 2026-06-28;PoC/exploit monitor security data dump (139.15)
+krishangguptafibonacciresearch_distributionproject;184GB;excluded 2026-06-28;research distribution data dump, 1MB avg blob (139.09)
+kisarapesanjithperera_kisarapesanjithperera;109.9GB;excluded 2026-06-28;personal profile repo bloated to 110GB (139.09)
+kort0881_vpn-vless-configs-russia;17.9GB;excluded 2026-06-28;VPN/vless proxy-config data dump (139.09)
+kokesh22_cabinpacs_final;74.1GB;excluded 2026-06-28;(no README/CLAUDE.md)
+6091;74.1GB;excluded 2026-06-28;(repo gone)
+fmanzar143_historyname;43.4GB;excluded 2026-06-28;(no README/CLAUDE.md)
+ecoliving-tips_ecoliving-tips.github.io;0.0GB;excluded 2026-06-28;# Swaram — Project Instructions for Claude Code ## Project Overview **Swaram** is a free AI-powered chord finder platform + curated Malayalam Christian chord library. Primary product: **Chord Finder** — upload any audio file, AI detects chords instantly (any genre, any language). Secondary: Hand-cur
+legalize-nl_legalize-nl;71.4GB;excluded 2026-06-28;# legalize-nl Nederlandse wetgeving als versiebeheerde Markdown-bestanden met complete historie en rechtspraakverwijzingen. Deze repository bevat het volledige Nederlandse wettelijk landschap in machineleesbaar formaat, waarbij elke wijziging in de wetgeving wordt vastgelegd als een Git-commit. Hier
+kwlyu_cospectral-tournaments;52.0GB;excluded 2026-06-28;## No new results. (last change: 2025-07-03 22:40:41) _Last checked: 2025-07-08 01:05:38_ # Cospectral vs Switching Equivalence Results | n | Status | cospectral ⇒ switching | |---|--------|-------------------------| | 1 | ✅ YES | 1/1 (100.00%) | | 2 | ✅ YES | 1/1 (100.00%) | | 3 | ✅ YES | 1/1 (100.
+elnx_window_window_manager;0.5GB;excluded 2026-06-29;# Window Manager ## Introduction The Window Manager subsystem provides basic capabilities of window and display management. It is the basis for UI display. The following figure shows the architecture of the Window Manager subsystem. **Figure 1** Architecture of the Window Manager subsystem ![WindowM
+jake126_steptacular_maps;30.8GB;excluded 2026-06-29;# Count.It daily Steptacular export This project pulls selected Count.It people/teams, creates one daily `export.csv` and `steptacular.html` for every day with data, and uploads those files to dated folders in GitHub. ## View maps on web To view the html files, go to the following URL: https://jake1
+93655;136.8GB;excluded 2026-06-29;(repo gone)
+planteman_vsedit;0.0GB;excluded 2026-06-29;# vsedit A full-fidelity terminal port of [Visual Studio Code](https://github.com/microsoft/vscode), implemented in Rust using [Ratatui](https://ratatui.rs) and [Crossterm](https://github.com/crossterm-rs/crossterm). ## Goals - **Binary extension compatibility** — Run VS Code extensions unmodified v
+nazuninha_uploads;114.6GB;excluded 2026-06-28;(no README/CLAUDE.md)
