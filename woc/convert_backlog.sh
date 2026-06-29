@@ -17,6 +17,24 @@ MINAGE=${MINAGE:-20}           # skip batches whose .idx/.bin changed < MINAGE m
 mkdir -p "$GEN"
 LIST="$GEN/.batches"
 
+# === GEN-LAYER IMPORT GATE ====================================================
+# NEVER import a shard that still carries offenders. Drained shards accumulate
+# offenders as the registry GROWS (late registration), so re-deoff every drained
+# update shard against the CURRENT registry first. The registry + sweep are shipped
+# to da8 by da8redeoff.sh (run on clone0); we REQUIRE them fresh + non-empty and
+# re-run the sweep here, aborting the import if anything stays dirty.
+# Set GATE_SKIP=1 only for a deliberate offender-free run (e.g. commit-only type).
+if [ "${GATE_SKIP:-0}" != 1 ]; then
+  GATE_OFF=/tmp/offenders.da8; GATE_SWEEP=/tmp/deoffDa8sweep.sh; FRESHMAX=${FRESHMAX:-180}
+  [ -s "$GATE_OFF" ] && [ -s "$GATE_SWEEP" ] || { echo "GATE ABORT: missing $GATE_OFF or $GATE_SWEEP -- run 'da8redeoff.sh V2605' on clone0 first"; exit 3; }
+  [ "$(wc -l <"$GATE_OFF")" -ge 1000 ] || { echo "GATE ABORT: $GATE_OFF has <1000 entries (truncated/partial ship)"; exit 3; }
+  [ -z "$(find "$GATE_OFF" -mmin +"$FRESHMAX" 2>/dev/null)" ] || { echo "GATE ABORT: $GATE_OFF older than ${FRESHMAX}min (stale registry) -- re-run 'da8redeoff.sh V2605' on clone0"; exit 3; }
+  echo "[$(date +%T)] import gate: re-deoff sweep vs current registry ($(wc -l <"$GATE_OFF") offenders, $(( $(date +%s) - $(stat -c%Y "$GATE_OFF") ))s old)"
+  bash "$GATE_SWEEP" V2605 || { echo "GATE ABORT: deoffDa8sweep left shard(s) dirty -- NOT importing $TYPE"; exit 3; }
+  echo "[$(date +%T)] import gate PASSED"
+fi
+# =============================================================================
+
 # rsync-safety: a dataset is UNSAFE if it has an rsync temp file (.New<...>.<ds>.*)
 # or any final batch modified within MINAGE minutes (mid-rename), or is in EXCLUDE.
 unsafe=" $(echo "$EXCLUDE" | tr ',' ' ') "
