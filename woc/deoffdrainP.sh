@@ -12,20 +12,25 @@ for cand in /media/volume/b/V2605.$V /media/volume/out/V2605.$V; do
   [ -d "$cand" ] && { d="$cand"; break; }
 done
 [ -z "$d" ] && { echo "no dir for $V"; exit 1; }
+
+# PER-DATASET DRAIN LOCK: only ONE drainer (this deoffdrainP, a regrab-seq deoffdrainP, a
+# handleDataset deoffdrainP, or runExo's bulk drain) may drain a dataset at a time. Held for
+# the WHOLE run -- the backgrounded drainbg subshells inherit fd 8, so the lock stays until
+# every drain finishes. Replaces the racy "pgrep rsync" guard (two drainers could both pass it
+# before either's rsync started -> duplicate rsyncs / orphan da8 temps / rename race). runExo's
+# drain takes the same lock (flock -n), so handler-vs-grab-driver collisions can't happen.
+exec 8>"/tmp/woc-drain.V2605.$V.lock"
+flock -n 8 || { echo "## $V: another drainer holds the drain lock -- exit (it will handle $V)"; exit 0; }
+
 cut -d';' -f1 /media/volume/trees/offenders | sort -u > /tmp/odp.$V
 comm -23 /tmp/odp.$V <(sort -u /media/volume/trees/keep) > /tmp/odp.$V.2; mv /tmp/odp.$V.2 /tmp/odp.$V
-# SAFETY: the offenders registry has tens of thousands of entries. An EMPTY read here
-# means we caught the file mid-rewrite (truncation window of a non-atomic sort) -- if we
-# proceed, every shard looks "clean" and we drain RAW offender data to da8. ABORT instead.
+# SAFETY: the offenders registry has tens of thousands of entries. An EMPTY read here means we
+# caught the file mid-rewrite (truncation window) -- proceeding would drain RAW. ABORT instead.
 if [ ! -s /tmp/odp.$V ]; then echo "ABORT $V: offenders read EMPTY (registry truncated mid-rewrite?) -- NOT draining anything"; exit 1; fi
 
 drainbg(){ local l=$1
-  ( # RACE GUARD: re-check offenders against the LIVE registry right before draining
-    # -- an offender may have been registered since deoffdrainP started; if so, do
-    # NOT ship it un-deoffed. Skip; the next handler cycle re-reads + deoffs it.
-    cut -d';' -f1 /media/volume/trees/offenders 2>/dev/null | sort -u > "/tmp/odp.$V.$l.live"
+  ( cut -d';' -f1 /media/volume/trees/offenders 2>/dev/null | sort -u > "/tmp/odp.$V.$l.live"
     comm -23 "/tmp/odp.$V.$l.live" <(sort -u /media/volume/trees/keep 2>/dev/null) > "/tmp/odp.$V.$l.live2"; mv "/tmp/odp.$V.$l.live2" "/tmp/odp.$V.$l.live"
-    # SAFETY: empty live read = registry caught mid-rewrite -> do NOT drain (would ship raw).
     if [ ! -s "/tmp/odp.$V.$l.live" ]; then echo "  $V.$l: offenders read EMPTY -- NOT draining (retry next cycle)"; return; fi
     rb=$(awk -F';' 'NR==FNR{o[$1]=1;next} o[$5]{s+=$2}END{printf "%.3f",s/1e9}' "/tmp/odp.$V.$l.live" $d/$base.$V.$l.blob.idx 2>/dev/null)
     rt=$(awk -F';' 'NR==FNR{o[$1]=1;next} o[$5]{s+=$2}END{printf "%.3f",s/1e9}' "/tmp/odp.$V.$l.live" $d/$base.$V.$l.tree.idx 2>/dev/null)
@@ -35,7 +40,6 @@ drainbg(){ local l=$1
       err=$(perl -I /home/exouser/lib64/perl5 /home/exouser/lookup/checkBin1in.perl "$t" "$d/$base.$V.$l.$t" 2>&1 >/dev/null)
       [ -n "$err" ] && { echo "  $V.$l checkBin1in $t FAIL -- KEPT: $(echo "$err"|head -1)"; return; }
     done
-    # include the RAW per-shard olist (NN.olist.gz) as provenance; NOT the deduped olist.NN.gz
     rawolist=""; [ -f "$d/$base.$V.$l.olist.gz" ] && rawolist="$d/$base.$V.$l.olist.gz"
     ionice -c3 rsync -a $d/$base.$V.$l.{blob,commit,tree,tag}.{bin,idx} $rawolist "$dest" 2>&1 | tail -1
     if [ "${PIPESTATUS[0]}" -eq 0 ]; then
@@ -48,11 +52,11 @@ for l in $shards; do
   [ -f "$d/$base.$V.$l.blob.bin" ] || { echo "## $V.$l absent -- skip"; continue; }
   # never touch a shard with a LIVE or SUSPENDED grabGitI (incomplete)
   if pgrep -f "grabGitI.*$base\.$V\.$l\$" >/dev/null 2>&1; then echo "## $V.$l has grabGitI (incomplete) -- SKIP"; continue; fi
-  # never double-process a shard already being deoffed/drained (idempotent for repeated handler calls)
+  # secondary guard: a non-deoffdrainP rsync (e.g. runExo bulk drain that didn't take the lock,
+  # or a deOffend cull) already transferring this shard -- don't double-send.
   if pgrep -f "rsync.*$base\.$V\.$l\.|filterDeoff.pl (blob|tree) [^ ]*$V\.$l$" >/dev/null 2>&1; then echo "## $V.$l already in deoff/drain -- SKIP"; continue; fi
-  # OFFENDER PRE-PASS (offsweep): detect+auto-register dominant single-repo dumps / tree-bombs
-  # in this COMPLETED shard BEFORE deoff, so they drop in this same cycle (not late-registration
-  # that only the da8 gate would catch). Then refresh the offender set in case it registered any.
+  # OFFENDER PRE-PASS (offsweep): detect+auto-register dominant dumps / tree-bombs in this
+  # COMPLETED shard BEFORE deoff, then refresh the offender set in case it registered any.
   /home/exouser/bin/offsweepShard.sh "$V" "$l" 2>/dev/null
   cut -d';' -f1 /media/volume/trees/offenders 2>/dev/null | sort -u > /tmp/odp.$V
   comm -23 /tmp/odp.$V <(sort -u /media/volume/trees/keep 2>/dev/null) > /tmp/odp.$V.2; mv /tmp/odp.$V.2 /tmp/odp.$V

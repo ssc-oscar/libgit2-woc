@@ -102,8 +102,17 @@ done
 wait 2>/dev/null
 $HOME/bin/deOffend.sh $m $ver $out      # final sweep for shards finished between polls
 
-rsync -av list$DT.* $DST/*.olist.gz $DST/$base.$m.p2cd.gz $DST/*.{blob,commit,tree,tag}.{bin,idx} $RSYNC_DEST/$ver/ \
-  && echo "rsynced $(date '+%F %T')" > $TREES/$ver.$m/STAGE
+# PER-DATASET DRAIN LOCK (shared with deoffdrainP): if a handler (handleDataset/regrab-seq
+# deoffdrainP) is already draining this dataset, DON'T also bulk-drain -- it would spawn a
+# duplicate rsync per shard (orphan da8 temps / rename race). The handler will land the shards.
+exec 8>"/tmp/woc-drain.$ver.$m.lock"
+if flock -n 8; then
+  rsync -av list$DT.* $DST/*.olist.gz $DST/$base.$m.p2cd.gz $DST/*.{blob,commit,tree,tag}.{bin,idx} $RSYNC_DEST/$ver/ \
+    && echo "rsynced $(date '+%F %T')" > $TREES/$ver.$m/STAGE
+  flock -u 8
+else
+  echo "[runExo $ver.$m] drain lock held by another drainer -- skipping bulk rsync (handler drains)" >&2
+fi
 # The repo-folder STAGE marker progresses: rsynced -> verified. This deOffend
 # call confirms no oversized shards remain and upgrades STAGE to "verified ..."
 # -- then it is safe to delete the repo clones and the dumps. (The cron
