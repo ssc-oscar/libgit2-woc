@@ -50,6 +50,13 @@ for l in $shards; do
   if pgrep -f "grabGitI.*$base\.$V\.$l\$" >/dev/null 2>&1; then echo "## $V.$l has grabGitI (incomplete) -- SKIP"; continue; fi
   # never double-process a shard already being deoffed/drained (idempotent for repeated handler calls)
   if pgrep -f "rsync.*$base\.$V\.$l\.|filterDeoff.pl (blob|tree) [^ ]*$V\.$l$" >/dev/null 2>&1; then echo "## $V.$l already in deoff/drain -- SKIP"; continue; fi
+  # OFFENDER PRE-PASS (offsweep): detect+auto-register dominant single-repo dumps / tree-bombs
+  # in this COMPLETED shard BEFORE deoff, so they drop in this same cycle (not late-registration
+  # that only the da8 gate would catch). Then refresh the offender set in case it registered any.
+  /home/exouser/bin/offsweepShard.sh "$V" "$l" 2>/dev/null
+  cut -d';' -f1 /media/volume/trees/offenders 2>/dev/null | sort -u > /tmp/odp.$V
+  comm -23 /tmp/odp.$V <(sort -u /media/volume/trees/keep 2>/dev/null) > /tmp/odp.$V.2; mv /tmp/odp.$V.2 /tmp/odp.$V
+  [ -s /tmp/odp.$V ] || { echo "## $V.$l offenders read empty after offsweep -- SKIP"; continue; }
   ob=$(awk -F';' 'NR==FNR{o[$1]=1;next} o[$5]{s+=$2}END{printf "%.3f",s/1e9}' /tmp/odp.$V $d/$base.$V.$l.blob.idx 2>/dev/null)
   ot=$(awk -F';' 'NR==FNR{o[$1]=1;next} o[$5]{s+=$2}END{printf "%.3f",s/1e9}' /tmp/odp.$V $d/$base.$V.$l.tree.idx 2>/dev/null)
   if awk "BEGIN{exit !($ob==0 && $ot==0)}"; then
