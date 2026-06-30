@@ -24,15 +24,20 @@ awk -F';' -v OFF="/tmp/osw.off.$m.$l" -v KEEP="/tmp/osw.keep.$m.$l" '
   BEGIN{ while((getline x<OFF)>0)o[x]=1; while((getline x<KEEP)>0)k[x]=1 }
   $1=="TOT"{tot=$3; next} $1=="B"{b[$2]=$3; reps[$2]=1} $1=="T"{t[$2]=$3; reps[$2]=1}
   END{ for(r in reps){ if(o[r]||k[r])continue; bb=b[r]+0; tt=t[r]+0; sh=(tot>0)?bb/tot:0
-      if(tt>=4e9 || bb>=40e9 || (bb>=5e9 && sh>=0.5)) printf "AUTO;%s;%.1f;%.1f;%.2f\n",r,bb/1e9,tt/1e9,sh
-      else if(bb>=3e9 || tt>=1e9) printf "REVIEW;%s;%.1f;%.1f;%.2f\n",r,bb/1e9,tt/1e9,sh } }' "/tmp/osw.bt.$m.$l" > "/tmp/osw.dec.$m.$l"
+      auto=(tt>=4e9 || bb>=40e9 || (bb>=5e9 && sh>=0.5)); inband=(bb>=3e9 || tt>=1e9)
+      # SUSPICIOUS-KEYWORD auto-register: a review-band repo whose name carries a high-confidence
+      # data-dump token (proxy/blocklist/scraper/raw-data/site/etc.) auto-registers regardless of
+      # dominance -- closes the gap for non-dominant proxy/blocklist dumps that else need manual triage.
+      kw=(tolower(r) ~ /(proxy|v2ray|vmess|trojan|shadowsocks|sing.?box|mihomo|surfboard|hysteria|clash.?(meta|rule)|blocklist|blacklist|denylist|adblock|adguard|oisd|easylist|filterlist|hostlist|scam.?link|phish|rule.?set|raw.?data|market.?data|dataset|scraper|crawler|leaderboard|github\.io|iptv|m3u8?|playlist)/)
+      if(auto || (inband && kw)) printf "AUTO;%s;%.1f;%.1f;%.2f;%s\n",r,bb/1e9,tt/1e9,sh,(auto?"size":"keyword")
+      else if(inband) printf "REVIEW;%s;%.1f;%.1f;%.2f\n",r,bb/1e9,tt/1e9,sh } }' "/tmp/osw.bt.$m.$l" > "/tmp/osw.dec.$m.$l"
 
 autoreg=$(awk -F';' '$1=="AUTO"{print $2}' "/tmp/osw.dec.$m.$l")
 if [ -n "$autoreg" ]; then
-  while IFS=';' read -r tag repo bgb tgb sh; do
+  while IFS=';' read -r tag repo bgb tgb sh trig; do
     [ "$tag" = AUTO ] || continue
-    grep -q "^$repo;" "$REG" || echo "$repo;${bgb}GB-blob/${tgb}GB-tree;auto-offsweep $(date '+%F');shard $m.$l, ${sh} blob-share -- auto-detected large single-repo dump" >> "$REG"
-    echo "$(date '+%F %T') AUTO-OFFENDER $m.$l $repo blob=${bgb}GB tree=${tgb}GB share=${sh}" >> "$REVIEW"
+    grep -q "^$repo;" "$REG" || echo "$repo;${bgb}GB-blob/${tgb}GB-tree;auto-offsweep $(date '+%F');shard $m.$l, ${sh} blob-share, trigger=${trig} -- auto-detected dump" >> "$REG"
+    echo "$(date '+%F %T') AUTO-OFFENDER($trig) $m.$l $repo blob=${bgb}GB tree=${tgb}GB share=${sh}" >> "$REVIEW"
   done < "/tmp/osw.dec.$m.$l"
   /home/exouser/bin/regsort.sh "$REG"
   cp -a "$REG" /media/volume/trees/src/libgit2-woc/woc/offenders 2>/dev/null
