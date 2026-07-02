@@ -9,6 +9,9 @@ Built by default; disable with `-DBUILD_WOC=OFF`.
 
 See [`PIPELINE.md`](PIPELINE.md) for the end-to-end data flow (inputs, stages,
 and outputs) and [`pipeline.dot`](pipeline.dot) for the graph.
+[`LAYERED_STORE.md`](LAYERED_STORE.md) describes the append-only base+generations
+store; [`REALTIME.md`](REALTIME.md) evaluates real-time WoC feasibility (tiered
+freshness, commit-first/deferred-blob backfill, and what blocks continuous update).
 
 ## Tools
 
