@@ -4739,6 +4739,7 @@ data-liberation-project_aphis-inspection-reports;69.6GB;excluded 2026-06-27;USDA
 datacenter-personal_vpngate-scraper-api;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 datadog_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 datafields-team_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+datakind-blr_covid19bharat_data;30.9GB-blob;manual-largest 2026-07-02;shard 138.12 -- covid19 district data dump (fork of covid19india)
 datakurre_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 dataofmen_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 datatrekkers_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -8462,6 +8463,7 @@ hosseinkoofi_go_v2raycollector;ghafork;2026-06-29;fork of GHA-declared offender 
 hosseinrgame_proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 hostingglobal-tech_google-trends-keywords-scraper;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 hostingmydata_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+hotcakex_official-iana-ip-blocks;22.1GB-blob;manual-largest 2026-07-02;shard 138.12 -- IANA IP blocks TEXT/CSV/JSON raw-data dump
 hotemotion_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 hou-sz_harbor-datasets;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 houssem2055_proxy-list-1;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
