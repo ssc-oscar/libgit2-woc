@@ -12,6 +12,59 @@ possible). Read those first.
 
 ---
 
+## Architecture at a glance
+
+The shape of the proposal: split the pipeline by **freshness tier**. The cheap, high-value
+tiers (commits, trees, relations) stream through the append-only store within hours; the heavy
+tier (blobs) is deferred and selective; global analytics are pinned to the last frozen
+generation. Solid arrows = live/streaming path; dashed = deferred or periodic.
+
+```mermaid
+flowchart TD
+    GHA["GHArchive push events + gather_new<br/><i>hourly discovery</i>"]
+
+    subgraph T01["T0 objects + T1 relations — NEAR-REAL-TIME (hours)"]
+        direction TB
+        P1["fetchExoP1.sh<br/>fetch commits + trees only<br/>(--filter blob:none; haves for updates)"]
+        GEN["Layered store — append to LIVE gen N+1<br/>(convgen exact-dedup on write; base immutable)"]
+        UPD["captureUpdate.sh / get_new_commits<br/><i>per-push incremental (repos already in WoC)</i>"]
+        P1 --> GEN
+        UPD --> GEN
+    end
+
+    subgraph BLOB["Blob content — DEFERRED & SELECTIVE (slower / on-demand)"]
+        direction TB
+        WANT["persist backfill want-list<br/>backfill.m.gz + urls.m.gz<br/>(repos then deleted — disk-bound)"]
+        SEL{"SELECT<br/>which repos<br/>deserve blobs?"}
+        P2["backfillExo.sh<br/>fetch deferred blob OIDs → .bf shards"]
+        WANT --> SEL
+        SEL -->|chosen from T1 metadata| P2
+    end
+
+    subgraph T2["T2 global analytics — VERSION-SNAPSHOTTED (per cycle)"]
+        direction TB
+        FREEZE["freeze gen N at version boundary<br/>= consistency watermark / --haves anchor"]
+        ANALYTICS["deforking p2PFull · alias A2* · reRank · b2f<br/><i>non-local: global recompute</i>"]
+        FREEZE --> ANALYTICS
+    end
+
+    GHA --> P1
+    P1 -.->|deferred| WANT
+    P2 -.->|append blobs| GEN
+    GEN -->|periodic freeze| FREEZE
+
+    QLIVE(["query: objects + relations<br/><b>as of gen N</b> (live tail)"])
+    QSNAP(["query: fork family / author id<br/><b>pinned to last frozen watermark</b>"])
+    GEN --> QLIVE
+    ANALYTICS --> QSNAP
+
+    BFR["nightly: fold live gen → frozen set,<br/>rebuild binary-fuse dedup filters"]
+    GEN -.->|freshness| BFR
+    BFR -.->|dedup next fetch| P1
+```
+
+---
+
 ## 1. What "real-time" means here (define the target before judging feasibility)
 
 "Real-time" is not one latency; the pipeline has three distinct freshness clocks and they
