@@ -49,17 +49,17 @@ pigz -dc $DST/todo.$m | split -l $part -a2 -d  --filter='pigz > $FILE.gz' - $DST
 cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.offrepos
 grep -v '^#' "$REFERENCE_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST/.refrepos
 
-# ---- phase 2: SEQUENTIAL grab + deoff+drain, one shard at a time ----
-for l in {00..15}
-do
-  [ -f "$DST/$base.$m.olist.$l.gz" ] || { echo "[seq $m.$l] no olist -- skip"; continue; }
-  # disk gate: refresh offrepos from the LIVE registry (atomic file) each shard, then
-  # wait until the dump disk has headroom before grabbing this shard.
-  cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.offrepos
-  while [ "$(df -B1 --output=avail "$DST"|tail -1)" -lt "$MINFREE" ]; do
-    echo "[seq $m.$l] waiting for >=$((MINFREE/1000000000))G on $out (now $(df -h $DST|awk 'END{print $4}')) $(date '+%T')"; sleep 180
-  done
-  echo "######## SEQ GRAB $m.$l $(date '+%F %T') ########"
+# ---- phase 2: PARALLEL grab in a rolling pool of SHARD_PAR shards at a time, each
+# shard deoff+drained (to da8, rm local) as it finishes -- bounds peak disk to ~SHARD_PAR
+# shards (vs all 16 in runExo, which filled b on 140; vs 1 in the old seq, which serialized
+# behind a single mega-dump offender and stalled 141 for hours). SHARD_PAR override:
+#   SHARD_PAR=1 -> old one-at-a-time behaviour; default 4.
+SHARD_PAR=${SHARD_PAR:-4}
+echo "=== runExoSeq $ver.$m PARALLEL phase-2, SHARD_PAR=$SHARD_PAR $(date '+%F %T') ==="
+
+grab_one() {   # grab shard $1, then deoff+drain it, then wait for the local blob.bin to clear
+  local l="$1"
+  echo "######## GRAB $m.$l $(date '+%F %T') ########"
   pigz -dc $DST/$base.$m.olist.$l.gz \
    | awk -F';' -v RF="$DST/.refrepos" -v OF="$DST/.offrepos" '
        BEGIN{ while((getline x < RF)>0) ref[x]=1; while((getline x < OF)>0) off[x]=1 }
@@ -68,11 +68,25 @@ do
        {print}' \
    | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err
   echo "  $m.$l grabbed $(date '+%T') ($(du -shc $DST/$base.$m.$l.*.bin 2>/dev/null|tail -1|cut -f1)); deoff+drain"
-  $HOME/bin/deoffdrainP.sh $m $l   # deoffdrainP arg1=dataset(m), rest=shard list
-  # wait for the drain to remove the local blob.bin (frees disk) before next shard
-  t=0; while [ -f "$DST/$base.$m.$l.blob.bin" ] && [ $t -lt 10800 ]; do sleep 60; t=$((t+60)); done
+  $HOME/bin/deoffdrainP.sh $m $l
+  local t=0; while [ -f "$DST/$base.$m.$l.blob.bin" ] && [ $t -lt 10800 ]; do sleep 60; t=$((t+60)); done
   echo "  $m.$l drained/cleared $(date '+%T'); $out free $(df -h $DST|awk 'END{print $4}')"
-done
+}
 
-echo "verified $(date '+%F %T') (seq grab)" > $TREES/$ver.$m/STAGE
+for l in {00..15}
+do
+  [ -f "$DST/$base.$m.olist.$l.gz" ] || { echo "[par $m.$l] no olist -- skip"; continue; }
+  # throttle: keep at most SHARD_PAR grab_one subshells running at once
+  while [ "$(jobs -rp | wc -l)" -ge "$SHARD_PAR" ]; do wait -n 2>/dev/null || sleep 5; done
+  # disk gate: don't launch a new shard unless the dump disk has headroom
+  while [ "$(df -B1 --output=avail "$DST"|tail -1)" -lt "$MINFREE" ]; do
+    echo "[par $m.$l] waiting for >=$((MINFREE/1000000000))G on $out (now $(df -h $DST|awk 'END{print $4}')) $(date '+%T')"; sleep 180
+  done
+  # refresh offrepos from the LIVE registry (atomic file) right before launching this shard
+  cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.offrepos
+  grab_one "$l" &
+done
+wait
+
+echo "verified $(date '+%F %T') (par-$SHARD_PAR grab)" > $TREES/$ver.$m/STAGE
 echo "=== runExoSeq $ver.$m DONE $(date '+%F %T') ==="
