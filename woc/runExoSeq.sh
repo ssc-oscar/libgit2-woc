@@ -67,6 +67,17 @@ grep -vE '^#|^$' "$DROPCOMMIT_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST
 SHARD_PAR=${SHARD_PAR:-2}
 echo "=== runExoSeq $ver.$m PARALLEL phase-2, SHARD_PAR=$SHARD_PAR $(date '+%F %T') ==="
 
+# Serial drainer: deoffdrainP holds a PER-DATASET drain flock, so when several rolling
+# grab_one shards finish close together only one drains -- the others get the lock refused
+# (flock -n) and their grab_one would wait 3h for a blob.bin that never clears. Launch a
+# handleDataset companion that serially deoff+drains every finished shard (respecting the
+# flock), so flock-skipped shards are never stranded. It self-exits when the dataset has no
+# local blob.bin left AND no grabGitI running.
+if ! pgrep -f "handleDataset.sh $m\b" >/dev/null 2>&1; then
+  nohup setsid bash "$HOME/bin/handleDataset.sh" "$m" > "$TREES/handle$m.log" 2>&1 < /dev/null &
+  echo "  launched handleDataset $m (serial drainer companion)"
+fi
+
 grab_one() {   # grab shard $1, then deoff+drain it, then wait for the local blob.bin to clear
   local l="$1"
   echo "######## GRAB $m.$l $(date '+%F %T') ########"
