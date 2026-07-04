@@ -7435,10 +7435,14 @@ githubhjs_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (
 githubxsy_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 gitkee_adblockfilters;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 gitlab.com_Alexandr-Fox_hacks-ai-spb;8.2GB-blob/0.0GB-tree;auto-offsweep 2026-07-03;shard 129.08, 0.65 blob-share, trigger=size -- auto-detected dump
+gitlab.com_Case_Of_liguros-repo;1.1GB;excluded 2026-07-03;(no README/CLAUDE.md)
 gitlab.com_KellyErvin_compas;10.8GB;detected 2026-07-01;COMPAS computational database of polycyclic aromatic systems; scientific data dump
 gitlab.com_Leuca_centos-stream-10;1.2GB;excluded 2026-06-30;Linux kernel ============ There are several guides for kernel developers and users. These guides can be rendered in a number of formats, like HTML and PDF. Please read Documentation/admin-guide/README.rst first. In order to build the documentation, use ``make htmldocs`` or ``make pdfdocs``. The form
 gitlab.com_armbiant_debian-packages;32.1GB;excluded 2026-07-02;(no README/CLAUDE.md)
+gitlab.com_qqlaoxia_deepka;9.6GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 134.10, 0.58 blob-share, trigger=size -- auto-detected dump
+gitlab.com_rule-cycc_blackmirror;13.4GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 135.05, 0.52 blob-share, trigger=size -- auto-detected dump
 gitlab.com_taoml9527_blocklist-convertor-automation;36.7GB;excluded 2026-07-01;# BlockList Convertor Automation Automation for converting ABP filters to Apple format Blocking Rules. Automation process integrates the necessary components and is executed in GitLab CI environment based on a well defined pipeline. # Building & Testing - It is required to have swift installed for u
+gitlab.com_ultralytics_docs;0.0GB;excluded 2026-07-04;<a href="https://www.ultralytics.com/" target="_blank"><img src="https://raw.githubusercontent.com/ultralytics/assets/main/logo/Ultralytics_Logotype_Original.svg" width="320" alt="Ultralytics logo"></a> # 📚 Ultralytics Docs Welcome to Ultralytics Docs, your comprehensive resource for understanding a
 gitlab.com_zabbix-tools_documentation;0.9GB;excluded 2026-07-01;(no README/CLAUDE.md)
 gitpacked_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 gitpiao_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -17110,6 +17114,7 @@ sally-baolian_azure-ai-docs;ghafork;2026-06-29;fork of GHA-declared offender fam
 sallygm7_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sallys03_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 salma-elshafey_azure-ai-docs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+salma752540_meteo-scraper;0.0GB-blob/1.5GB-tree;auto-offsweep 2026-07-04;shard 135.05, 0.00 blob-share, trigger=keyword -- auto-detected dump
 salomonmusare_proxy-list-1;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 salomonmusare_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 salonajola_push-website;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -17127,6 +17132,7 @@ samboy1990_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (c
 samdevelopeer_advisory-database;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sameerakhatoon_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sameerlike141_whatsapp-proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+sameersegal_learn-parameter-golf;0.4GB;excluded 2026-07-03;# CLAUDE.md This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository. ## Project Overview Data pipeline and analysis framework for OpenAI's **Parameter Golf** competition (`openai/parameter-golf`). Scrapes GitHub PRs, uses LLM extraction to parse submissi
 samerali73_proxy-list1;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 samerali73_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 samermassoud_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -17447,6 +17453,7 @@ seep2026_hermes-agent-study;ghafork;2026-06-29;fork of GHA-declared offender fam
 seeyangzhi_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 segasonic618_v2ray-configs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 segiddins_gem-daily-downloads;31.3GB;excluded 2026-07-03;(no README/CLAUDE.md)
+segiddins_rubygems-org-db-dumps;37.7GB;excluded 2026-07-04;# rubygems-org-db-dumps Database dumps from rubygems.org, as CSVs 
 sehtherek_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 seif-abaza_hagezi;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 seigneurtsui_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -17554,6 +17561,7 @@ sgunadhya_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connect
 sgx-labs_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sh-hi_cloudflare-gateway-block-ads;ghafork;2026-06-30;fork of GHA-declared offender family (connected-component propagation round 2, expanded offender seeds, 6.96M megacluster excluded)
 sh4lluloveme_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+shaa2020_V2Ray-Automator;3.2GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 135.06, 0.10 blob-share, trigger=keyword -- auto-detected dump
 shabbirhasan1_proxy-list-1;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 shabbirhasan1_proxy-list-2;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 shabbirhasan1_proxy-list-3;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -17842,6 +17850,7 @@ silvioerick_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (
 silvsnow_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sim-lu_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 simardeepsingh-zsh_azure-ai-docs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+simenoddenhansen_togtider;11.5GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 133.04, 0.60 blob-share, trigger=size -- auto-detected dump
 simeonifalore_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 simhaonline_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 simisoft-exo_logseq;20.8GB-blob/0.0GB-tree;auto-offsweep 2026-07-03;shard 119.08, 0.52 blob-share, trigger=size -- auto-detected dump
@@ -17900,6 +17909,7 @@ siutung_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (co
 siva-karthi_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sivag7447_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sivagurus_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+sivaramansrp_CI;0.2GB;excluded 2026-07-04;# Prueba local de GitHub Actions para Microfrontends Este documento explica cómo probar los workflows de GitHub Actions localmente en un Mac M1 antes de subirlos al repositorio. ## Enfoque de prueba Para probar localmente tus GitHub Actions en Mac M1, proporcionamos dos scripts: 1. **Simulación simp
 sivavijayasri_advisory-database;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 siwtom_twitterinternalapidocument;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 six5nine_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -17982,6 +17992,7 @@ slid2008_azure-ai-docs;ghafork;2026-06-29;fork of GHA-declared offender family (
 slimeboi514_proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 slinkle_rss-gpt;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 slintes_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+slippax_lotus-ge;0.1GB;excluded 2026-07-04;This is an OSRS market siphon. It is used to collect data from the OSRS Wiki API and power the OSRS GE Analyzer. DB is stored in a private Dropbox as per the yml workflow. https://lotus-ge.vercel.app/analytics 
 slister1001_azure-ai-docs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 slixxfish_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sloaninnovations_selectbaseballteams_d11;0.3GB;excluded 2026-07-02;<img alt="Drupal Logo" src="https://www.drupal.org/files/Wordmark_blue_RGB.png" height="60px"> Drupal is an open source content management platform supporting a variety of websites ranging from personal weblogs to large community-driven websites. For more information, visit the Drupal website, [Drup
@@ -18017,6 +18028,7 @@ smileslzw_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (co
 smileyjack_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 smilingleo_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 smitlila_new-grad-positions;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+smjcxf_pz;30.6GB-blob/0.2GB-tree;auto-offsweep 2026-07-04;shard 132.04, 0.80 blob-share, trigger=size -- auto-detected dump
 smlcodes_bms;ghafork;2026-06-30;fork of GHA-declared offender family (connected-component propagation round 2, expanded offender seeds, 6.96M megacluster excluded)
 smnbrz_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 smokex2_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -18066,6 +18078,7 @@ snyk_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender f
 so-sammy_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 so2liu_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 soanguyen_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+soazcomms_DSN.github.io;9.1GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 133.02, 0.38 blob-share, trigger=keyword -- auto-detected dump
 sobllack_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 soc-otter_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 socekin_readnext;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -18096,6 +18109,7 @@ sohogg_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (con
 sohrabp72_v2ray-configs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sohumshah25_new-grad-positions;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 soichiyo_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+soid_columbia-catalog-data;18.0GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 135.11, 0.69 blob-share, trigger=size -- auto-detected dump
 soilus-664_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sojay_solana-nft-monitor;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 sojib-mia_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -18209,6 +18223,7 @@ spacetesla_leaderboard-data;ghafork;2026-06-30;fork of GHA-declared offender fam
 spaeteraendern_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 spagno_truecharts-public;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 spai-phoenix_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+spainsworth_CaBi_Scrape;27.2GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 133.00, 0.78 blob-share, trigger=size -- auto-detected dump
 spajai_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 spandan-mishra_leaderboard-data;ghafork;2026-06-30;fork of GHA-declared offender family (connected-component propagation round 2, expanded offender seeds, 6.96M megacluster excluded)
 spandy-cactus_agi;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -18727,6 +18742,7 @@ tahamahmood24_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared off
 tahanazeri70_proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 taharatt_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tahermotukuna-web_best-of-ai;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+tahmaseb73_ConfigScavenger;21.3GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 128.00, 0.55 blob-share, trigger=size -- auto-detected dump
 tahmeed-asaad_new-grad-positions;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tahmidulhassan_advisory-database;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tahzpalma_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -18856,6 +18872,7 @@ tcrimmins95_malicious-packages;ghafork;2026-06-29;fork of GHA-declared offender 
 td21forever_rss-gpt;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tdabasinskas_registry;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tdchwish_camunda;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+tdestryk_music_data;13.0GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 132.14, 0.94 blob-share, trigger=size -- auto-detected dump
 tdimino_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tdr-1000_proxy-list-2023;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tdr-3000_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -18899,6 +18916,7 @@ teefisher2k20_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender fami
 teenager-eth_execution-spec-tests;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 teflotask_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tehbrokebots_knowledge;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+tejas-k3_most-commits;1.72GB-commit/9.79M-commits;manual-largest 2026-07-04;shard 126.02 -- COMMIT-BOMB 'repo with most commits', record-setting spam; complete ban (dropcommit)
 tejas2hit_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tejasag_discord-datamining;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tejaswikolli-web_learn;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -19117,6 +19135,7 @@ theussilvas_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender
 theutheuutra_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thewilloftheshadow_clawdis;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thewylot_syrent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+thexnumb_thexwriteup;22.7GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 133.08, 0.55 blob-share, trigger=size -- auto-detected dump
 theylonfarias_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thfaix_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thhreh_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -19153,6 +19172,7 @@ thiaguito0_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender 
 thiendt2k1_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thienphuc92_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thigas05_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+thihazawsatellite_iptv_validated_list;4.0GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 135.15, 0.23 blob-share, trigger=keyword -- auto-detected dump
 thihazawsatellite_proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thijsvries1_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 thille19771_xiaomiromtwrpfiles__scrape;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -19296,6 +19316,7 @@ tinydicklionsden_algotables.github.io;ghafork;2026-06-29;fork of GHA-declared of
 tipex-16_advisory-database;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tipiweb_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tiptoe-lane-gee_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+tiqidini_prozorro2;27.1GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 133.15, 0.99 blob-share, trigger=size -- auto-detected dump
 tiraboschi_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tishleric_distributionproject;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tit1e_ai-news-radar;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -19359,6 +19380,7 @@ tolern_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (conne
 tolryg_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tolusha_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tom-doerr_repo_posts;63.4GB;excluded 2026-06-21;# Claude Notes - repo_posts ## Project Overview Jekyll static site showcasing GitHub repos with semantic search. Live: https://tom-doerr.github.io/repo_posts/ ## Key Files - `tools/generate_related.py` - Generates embeddings and related.json - `tools/generate_search_index.py` - Builds client-side se
+tomaasz_litellm-free-models-proxy;4.7GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 135.05, 0.13 blob-share, trigger=keyword -- auto-detected dump
 tomaioo_vm0;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomaivanovtomov_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomararun_sabyasachi-seal;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -19375,6 +19397,7 @@ tomboyhao_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offende
 tomchapin_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomchapin_knowledge;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomcharlesosman_junoagi;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+tomevault-io_windsurf-plugins;0.0GB-blob/17.2GB-tree;auto-offsweep 2026-07-03;shard 129.08, 0.00 blob-share, trigger=size -- auto-detected dump
 tomeversdijk_azure-ai-docs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomgould_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomiis4_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -19400,6 +19423,7 @@ tomyebest_studiocms;ghafork;2026-06-29;fork of GHA-declared offender family (con
 tomyprs25_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomyummmm_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tomzhang_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+ton-ai-core_ton-chats;12.2GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 132.08, 0.50 blob-share, trigger=size -- auto-detected dump
 ton-devback_contribui-o;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 toney001_learn;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tongtongtju_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -20304,6 +20328,7 @@ vpathare_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connecte
 vpnineh_config;12.6GB;excluded 2026-07-02;(no README/CLAUDE.md)
 vprashar2929_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 vradarserver_standing-data;2.4GB;excluded 2026-06-28;VirtualRadarServer aircraft/route standing data (137.15)
+vrcorp_captcha-list-vr;20.9GB;excluded 2026-07-04;(no README/CLAUDE.md)
 vrenaville_m3upt;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 vriftist_hermes-agent-1;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 vrkuro_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -20443,6 +20468,7 @@ wangqiang19900111_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender 
 wangsan_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wangscript007_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wangshuyongyhm_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+wangsicong120_Adblock;23.3GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 134.12, 0.78 blob-share, trigger=size -- auto-detected dump
 wangui-monicah_new-grad-positions;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wangwiza_azure-ai-docs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wangxnhit_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -20525,6 +20551,7 @@ web-lolai_v2ray-configs;ghafork;2026-06-29;fork of GHA-declared offender family 
 web3even_v2ray-configs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 web3nao_mocuda;29.6GB;excluded 2026-06-27;web3 data dump (139.04)
 web3wannabe_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+webbnzhong-commits_Modeling-E.-Coli---Evolution-Speed-VS-Fitness-git2;3.2GB;excluded 2026-07-04;# Modeling E. coli: Evolution Speed vs Fitness This project runs and analyzes E. coli evolution simulations across environment change-rate settings. ## Main Scripts - `simulation_entry.py`: Selects draw/headless simulation mode. - `master_simulations.py`: Runs grouped simulation batches and aggregat
 webchaudhary_geospatial-data-catalogs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 webclinic017_stock-analysis-tool-1011-data;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 webclinic017_tickr;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -20626,6 +20653,7 @@ wh014m_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (conne
 wh0isalderio_discord-datamining;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wh1sky4u_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wh2004_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+whatalife1_tc;23.2GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 128.15, 0.69 blob-share, trigger=size -- auto-detected dump
 whatdoyouwantbitchy_scripts;39.1GB;excluded 2026-07-02;(no README/CLAUDE.md)
 whatsapp-proxy_whatsapp-proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 whatsapp_erlang-language-platform;0.0GB;excluded 2026-06-27;# Erlang Language Platform (ELP) <picture> <source media="(prefers-color-scheme: dark)" srcset="./logo/elp_final_Full_Logo_White_Text.png"> <img alt="ELP logo" src="./logo/elp_final_Full_Logo_Color.png" width="100%"> </picture> ## Description Designed at **WhatsApp** and inspired by the success of t
@@ -20880,6 +20908,7 @@ wwwyo_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (conn
 wwxvr_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wx2cyj_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wxdairdrop_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+wxglenovo_AdGuardHome-;7.1GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 126.12, 0.34 blob-share, trigger=keyword -- auto-detected dump
 wxglenovo_AdGuardHome-Filter;26.5GB-blob/0.0GB-tree;auto-offsweep 2026-07-03;shard 119.07, 0.46 blob-share, trigger=keyword -- auto-detected dump
 wxmdot_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 wxydd_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -20976,6 +21005,7 @@ xiangjingli_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared off
 xiangweizheng_rss-gpt;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 xiangxik_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 xianwuxue-noaa_esmf-test-artifacts;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+xiaoandy1974g_gdl;0.5GB;excluded 2026-07-03;(no README/CLAUDE.md)
 xiaobitaozi_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 xiaochen2050_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 xiaochi8676_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -21187,6 +21217,7 @@ yadavpunam_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offend
 yadavshubham01_leaderboard-data;ghafork;2026-06-30;fork of GHA-declared offender family (connected-component propagation round 2, expanded offender seeds, 6.96M megacluster excluded)
 yaddanab_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yadhukrishanyadhukrishan_kisarapesanjithperera;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+yaelgin2_new-graph-measures;0.1GB;excluded 2026-07-04; 
 yagami009_agi;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yago-matas_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yagogalani_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -21334,6 +21365,7 @@ yes-man-guo_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family
 yes4066_vip;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yes4600887_vip;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yes999zc_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+yesakhtar_yesakhtar.github.io;3.9GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 128.02, 0.16 blob-share, trigger=keyword -- auto-detected dump
 yesc_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yesetr8_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yesid693_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -21351,6 +21383,7 @@ yfjin-png_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (
 yhh-l_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yhj0901_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yhjiaoye_v2ray-configs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+yhpgi_genshin-wiki;25.3GB-blob/0.4GB-tree;auto-offsweep 2026-07-04;shard 133.06, 0.64 blob-share, trigger=size -- auto-detected dump
 yht122003_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yhzwant_free_proxies_list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yhzx2013_labyrinth;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -21422,6 +21455,7 @@ yongkangchen_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offe
 yonyxxxe_livetvcollector;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yoocs24_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yoodefender_nuclei-wordfence-cve;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+yoplekiller_QATEST;4.4GB;excluded 2026-07-04;# QA 자동화 포트폴리오 프로젝트 ## 📌 프로젝트 개요 - 반복적인 수동 테스트를 자동화하기 위해 Python 기반으로 구현한 QA테스트 자동화 포트폴리오입니다. - 실제 웹 서비스(마켓컬리)를 대상으로 Selenium 테스트를 수행하였고, - 별도의 영화 홈페이지(https://www.themoviedb.org/) API를 활용한 테스트 자동화도 포함하였습니다. - 테스트 결과는 Excel파일로 저장되며, Slack으로 자동 보고됩니다. ## 🧩 프로젝트 구성 ### 1. 마켓컬리 웹 테스트(Selenium) - 상품 검색, 
 yorgunkurt_proxy-list-1;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yorgunkurt_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 yorick-ml_agenta;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -21771,6 +21805,7 @@ zhaoshaolin0_hermes-agent--;ghafork;2026-06-29;fork of GHA-declared offender fam
 zharizal_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zhayinggang_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zhengb-gc_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+zhengchen712-cpu_vibecoding;12.8GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 132.03, 0.51 blob-share, trigger=size -- auto-detected dump
 zhenghongpeng_deepracer-race-data;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zhenghuawei923_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zhenglin-li_summer2024-internships-1;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -21884,6 +21919,7 @@ zmlgit_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (con
 znavy_zeebe;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 znitr0_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 znomade_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+znzryb-blog_znzryb-blog.github.io;3.4GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 128.05, 0.22 blob-share, trigger=keyword -- auto-detected dump
 zo0043_ai-news-radar;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zoceanbase_hermes-agent2;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zoey-oss_ai-news-radar;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -21944,6 +21980,7 @@ zv09_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connect
 zvernatusik85_proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zvnc28_hermes-mac;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zwaaryo_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+zwang20_honours-data-2;34.8GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 133.13, 0.76 blob-share, trigger=size -- auto-detected dump
 zwang20_honours-data-3;3.6GB;excluded 2026-07-03;(no README/CLAUDE.md)
 zwegyi182-eng_zwe-v2ray-configs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 zwgy_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
