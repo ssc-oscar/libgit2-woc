@@ -13,7 +13,7 @@ base=New$DT$ver
 : "${RSYNC_DEST:=da8:/mnt/ordos/data/data/update}"; : "${HASOBJ_HOST:=da5}"
 : "${REFERENCE_FILE:=$TREES/reference}"
 : "${DROPCOMMIT_FILE:=$TREES/dropcommit}" # commit-bomb repos: also skip COMMIT lines at grab time
-: "${MINFREE:=$((500*1000000000))}"   # wait for >=500G free on the dump disk before each shard
+: "${MINFREE:=$((800*1000000000))}"   # wait for >=500G free on the dump disk before each shard
 
 [[ -d $ver.$m ]] || exit
 DST=$VOL/$out/$ver.$m
@@ -64,7 +64,7 @@ grep -vE '^#|^$' "$DROPCOMMIT_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST
 # shards (vs all 16 in runExo, which filled b on 140; vs 1 in the old seq, which serialized
 # behind a single mega-dump offender and stalled 141 for hours). SHARD_PAR override:
 #   SHARD_PAR=1 -> old one-at-a-time behaviour; default 4.
-SHARD_PAR=${SHARD_PAR:-4}
+SHARD_PAR=${SHARD_PAR:-2}
 echo "=== runExoSeq $ver.$m PARALLEL phase-2, SHARD_PAR=$SHARD_PAR $(date '+%F %T') ==="
 
 grab_one() {   # grab shard $1, then deoff+drain it, then wait for the local blob.bin to clear
