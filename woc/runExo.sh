@@ -8,6 +8,7 @@ base=New$DT$ver
 : "${VOL:=/media/volume}"; : "${TREES:=$VOL/trees}"
 : "${RSYNC_DEST:=da8:/mnt/ordos/data/data/update}"; : "${HASOBJ_HOST:=da5}"
 : "${REFERENCE_FILE:=$TREES/reference}"   # reference-class repos: archived intact (archiveReference.sh), NOT extracted into WoC
+: "${DROPCOMMIT_FILE:=$TREES/dropcommit}" # commit-bomb repos: also skip COMMIT lines at grab time (only tags survive)
 
 [[ -d $ver.$m ]] || exit
 DST=$VOL/$out/$ver.$m
@@ -79,11 +80,15 @@ cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.off
 # reference-class repos: curated catalogues archived intact (archiveReference.sh) -> skip
 # ALL their object types here so nothing is ingested into WoC.
 grep -v '^#' "$REFERENCE_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST/.refrepos
+# commit-bomb repos: their commits are dropped by deOffend anyway, so skip them at grab time
+# too (avoids grabc re-walking a repo's whole history in every shard it scatters into).
+grep -vE '^#|^$' "$DROPCOMMIT_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST/.dcrepos
 for l in {00..15}
 do pigz -dc $DST/$base.$m.olist.$l.gz \
-   | awk -F';' -v RF="$DST/.refrepos" -v OF="$DST/.offrepos" '
-       BEGIN{ while((getline x < RF)>0) ref[x]=1; while((getline x < OF)>0) off[x]=1 }
+   | awk -F';' -v RF="$DST/.refrepos" -v OF="$DST/.offrepos" -v DC="$DST/.dcrepos" '
+       BEGIN{ while((getline x < RF)>0) ref[x]=1; while((getline x < OF)>0) off[x]=1; while((getline x < DC)>0) dc[x]=1 }
        ref[$1]{next}                                # reference repo -> skip ALL types (archived intact)
+       dc[$1] && $2=="commit"{next}                 # commit-bomb -> skip commits too (only tags survive)
        off[$1] && ($2=="blob"||$2=="tree"){next}    # offender -> skip blob/tree (keep commit/tag)
        {print}' \
    | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err &

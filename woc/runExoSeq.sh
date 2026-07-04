@@ -12,6 +12,7 @@ base=New$DT$ver
 : "${VOL:=/media/volume}"; : "${TREES:=$VOL/trees}"
 : "${RSYNC_DEST:=da8:/mnt/ordos/data/data/update}"; : "${HASOBJ_HOST:=da5}"
 : "${REFERENCE_FILE:=$TREES/reference}"
+: "${DROPCOMMIT_FILE:=$TREES/dropcommit}" # commit-bomb repos: also skip COMMIT lines at grab time
 : "${MINFREE:=$((500*1000000000))}"   # wait for >=500G free on the dump disk before each shard
 
 [[ -d $ver.$m ]] || exit
@@ -48,6 +49,7 @@ pigz -dc $DST/todo.$m | split -l $part -a2 -d  --filter='pigz > $FILE.gz' - $DST
 
 cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.offrepos
 grep -v '^#' "$REFERENCE_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST/.refrepos
+grep -vE '^#|^$' "$DROPCOMMIT_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST/.dcrepos
 
 # ---- phase 2: PARALLEL grab in a rolling pool of SHARD_PAR shards at a time, each
 # shard deoff+drained (to da8, rm local) as it finishes -- bounds peak disk to ~SHARD_PAR
@@ -61,9 +63,10 @@ grab_one() {   # grab shard $1, then deoff+drain it, then wait for the local blo
   local l="$1"
   echo "######## GRAB $m.$l $(date '+%F %T') ########"
   pigz -dc $DST/$base.$m.olist.$l.gz \
-   | awk -F';' -v RF="$DST/.refrepos" -v OF="$DST/.offrepos" '
-       BEGIN{ while((getline x < RF)>0) ref[x]=1; while((getline x < OF)>0) off[x]=1 }
+   | awk -F';' -v RF="$DST/.refrepos" -v OF="$DST/.offrepos" -v DC="$DST/.dcrepos" '
+       BEGIN{ while((getline x < RF)>0) ref[x]=1; while((getline x < OF)>0) off[x]=1; while((getline x < DC)>0) dc[x]=1 }
        ref[$1]{next}
+       dc[$1] && $2=="commit"{next}
        off[$1] && ($2=="blob"||$2=="tree"){next}
        {print}' \
    | perl -I $HOME/lib64/perl5 $HOME/bin/grabGitI.perl $DST/$base.$m.$l 2> $DST/$base.$m.$l.err
@@ -82,8 +85,9 @@ do
   while [ "$(df -B1 --output=avail "$DST"|tail -1)" -lt "$MINFREE" ]; do
     echo "[par $m.$l] waiting for >=$((MINFREE/1000000000))G on $out (now $(df -h $DST|awk 'END{print $4}')) $(date '+%T')"; sleep 180
   done
-  # refresh offrepos from the LIVE registry (atomic file) right before launching this shard
+  # refresh offrepos + dcrepos from the LIVE registry (atomic files) right before launching this shard
   cut -d';' -f1 "${OFFENDERS:-$TREES/offenders}" 2>/dev/null | sort -u > $DST/.offrepos
+  grep -vE '^#|^$' "$DROPCOMMIT_FILE" 2>/dev/null | cut -d';' -f1 | sort -u > $DST/.dcrepos
   grab_one "$l" &
 done
 wait
