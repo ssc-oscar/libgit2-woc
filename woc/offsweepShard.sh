@@ -34,7 +34,7 @@ awk -F';' -v OFF="/tmp/osw.off.$m.$l" -v KEEP="/tmp/osw.keep.$m.$l" '
       # SUSPICIOUS-KEYWORD auto-register: a review-band repo whose name carries a high-confidence
       # data-dump token (proxy/blocklist/scraper/raw-data/site/etc.) auto-registers regardless of
       # dominance -- closes the gap for non-dominant proxy/blocklist dumps that else need manual triage.
-      kw=(tolower(r) ~ /(proxy|v2ray|vmess|trojan|shadowsocks|sing.?box|mihomo|surfboard|hysteria|clash.?(meta|rule)|blocklist|blacklist|denylist|adblock|adguard|oisd|easylist|filterlist|hostlist|scam.?link|phish|rule.?set|raw.?data|market.?data|dataset|scraper|crawler|leaderboard|github\.io|iptv|m3u8?|playlist)/)
+      kw=(tolower(r) ~ /(proxy|v2ray|vmess|trojan|shadowsocks|sing.?box|mihomo|surfboard|hysteria|clash.?(meta|rule)|blocklist|blacklist|denylist|adblock|adguard|oisd|easylist|filterlist|hostlist|scam.?link|phish|scrape|rss|rule.?set|raw.?data|market.?data|dataset|scraper|crawler|leaderboard|github\.io|iptv|m3u8?|playlist)/)
       if(auto || (inband && kw) || (ctbomb && kw)) printf "AUTO;%s;%.1f;%.1f;%.2f;%s;%d\n",r,bb/1e9,tt/1e9,sh,(auto?"size":(ctbomb?"count":"keyword")),cc
       else if(inband || ctband) printf "REVIEW;%s;%.1f;%.1f;%.2f;%d\n",r,bb/1e9,tt/1e9,sh,cc } }' "/tmp/osw.bt.$m.$l" > "/tmp/osw.dec.$m.$l"
 
