@@ -23,6 +23,14 @@ cd $ver.$m
 grep -qE '^(listed|grabbing|rsynced|verified)\b' STAGE 2>/dev/null || {
   echo "$ver.$m: STAGE='$(cat STAGE 2>/dev/null)' -- clone/list not finished; skipping grab" >&2
   exit 1; }
+# GRAB-HOLD GATE: while this flag exists, a root that has finished cloning WAITS here (STAGE
+# stays 'listed', clone is done) instead of starting the disk-heavy grab -- used to hold roots
+# back until in-flight <137 new-repo datasets drain/free disk. Remove the flag to release.
+HOLD="${GRAB_HOLD_FLAG:-$TREES/.hold_root_grab}"
+while [ -f "$HOLD" ]; do
+  echo "[runExoSeq $ver.$m] grab HELD by $HOLD (clone done, waiting to grab) $(date '+%F %T')" >&2
+  sleep 300
+done
 echo "grabbing $(date '+%F %T')" > STAGE
 
 cp list$DT.${ver}1.$m  CopyList.${ver}1.$m
