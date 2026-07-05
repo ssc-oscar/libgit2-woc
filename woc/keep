@@ -46,3 +46,4 @@ schusterlab_slab_qick_calib;legit physics-lab QICK calibration fork (142.04, 5.4
 seanmacavaney_ir-datasets.com;legit widely-used ir-datasets IR tool site (142.04, 4GB, keep)
 dicklesworthstone_frankenterm;legit Rust terminal-hypervisor for AI agent swarms (143.04, 17.6GB — real project, keep)
 dicklesworthstone_frankenpandas;legit Rust pandas reimplementation (143.04, 5.4GB — real project, keep)
+camunda-cloud_zeebe;legit Camunda Zeebe workflow engine — GHA-fork false-positive, held back from fork lists
