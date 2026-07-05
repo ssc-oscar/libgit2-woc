@@ -42,3 +42,5 @@ projectpythia_healpix-cookbook;legit Pythia educational cookbook (141.01, 4GB no
 tgd2005_Re-Genesis;legit Imperial Y3 Bioeng team academic Jupyter project (129.00, 6GB notebooks)
 zhfeng_release;legit OpenShift release-tooling fork (128.08, 385k blobs/1.1GB — high count but real content, NOT a dump)
 gitlab.com_cznic_libsqlite3;legit modernc.org Go SQLite C-to-Go port (126.13, 3GB generated bindings — real widely-used pkg)
+schusterlab_slab_qick_calib;legit physics-lab QICK calibration fork (142.04, 5.4GB Jupyter — research data, keep)
+seanmacavaney_ir-datasets.com;legit widely-used ir-datasets IR tool site (142.04, 4GB, keep)
