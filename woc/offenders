@@ -23402,3 +23402,8 @@ zzzzcat_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (co
 zzzzes_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 mauforonda_dolares;19.5GB-blob/0.0GB-tree/100359-blobs;manual-triage 2026-07-05;shard 142.15, USD-rate scraper time-series dump (count-band)
 mauforonda_precios;6.6GB-blob/0.0GB-tree/9135-blobs;manual-triage 2026-07-05;shard 142.15, price scraper time-series dump
+vpereira01_electricalgridptqos;25.3GB-blob/0.2GB-tree/289155-blobs;manual-triage 2026-07-05;shard 145.11, electrical-grid QoS data dump (count-bomb 289k)
+vuthanhdatt_vn-stock-price;1.8GB-blob/142487-blobs;manual-triage 2026-07-05;shard 145.11, VN stock-price scraper (count-band)
+vuthanhdatt_web-indicator;1.6GB-blob/63824-blobs;manual-triage 2026-07-05;shard 145.11, web-indicator scraper data (same author)
+vvithurshan_data_for_training;1.2GB-blob/7429-blobs;manual-triage 2026-07-05;shard 145.11, ML training-data dump
+w3ndig0u0_w3ndig0u0;11.5GB-blob/16808-blobs;manual-triage 2026-07-05;shard 145.11, self-named large-file dump
