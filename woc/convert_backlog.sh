@@ -9,9 +9,11 @@
 # skips already-stored objects.
 set -u
 TYPE=${1:?type}; MIN=${2:-0}; CAPBITS=${3:-28}; NBANDS=${4:-1}
-D=/mnt/ordos/data/data/update/V2605
-GEN=/mnt/ordos/data/data/layered/V2605/${TYPE}_gen1
-BIN=/tmp/conv
+# Paths are env-overridable so this runs on da8 (build side, defaults) OR da5 (read side:
+# UPDATE_DIR=/da8_data/update/V2605 GEN_ROOT=/fast/All.blobsGen BIN=/home/audris/gentools).
+D=${UPDATE_DIR:-/mnt/ordos/data/data/update/V2605}
+GEN=${GEN_ROOT:-/mnt/ordos/data/data/layered/V2605}/${TYPE}_gen1
+BIN=${BIN:-/tmp/conv}
 EXCLUDE=${EXCLUDE:-}            # comma-sep datasets to skip (e.g. in-flight rsync)
 MINAGE=${MINAGE:-20}           # skip batches whose .idx/.bin changed < MINAGE min (in-flight)
 mkdir -p "$GEN"
