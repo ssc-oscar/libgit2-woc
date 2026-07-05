@@ -21,10 +21,16 @@ cut -d';' -f1 "$OFF" 2>/dev/null | LC_ALL=C sort -u > "$off1"
 [ -s "$off1" ] || { echo "ABORT: offender list empty/missing ($OFF) -- not sweeping $VER"; exit 1; }
 cd "$UD" 2>/dev/null || { echo "ABORT: no $UD"; exit 1; }
 scanned=0; dirty=0; cleaned=0; failed=0
+MINAGE=${MINAGE:-20}   # skip shards whose .bin/.idx changed < MINAGE min ago (mid-rsync / in-flight)
 for bi in New*${VER}.[0-9]*.[0-9]*.blob.idx; do
   [ -f "$bi" ] || continue
   pre="${bi%.blob.idx}"; scanned=$((scanned+1))
   pgrep -f "filterDeoff.pl (blob|tree) .*$pre\$" >/dev/null 2>&1 && { echo "## $pre deoff already running -- skip"; continue; }
+  # IN-FLIGHT GUARD: never touch a shard that is mid-rsync (clone0 still writing it) -- reading/
+  # rewriting a partial shard would corrupt it. Skip if any of its files changed < MINAGE min ago.
+  if find "$pre".{blob,tree,commit,tag}.{bin,idx} -maxdepth 0 -mmin -"$MINAGE" 2>/dev/null | grep -q .; then
+    echo "## $pre modified < ${MINAGE}min (in-flight rsync) -- skip"; continue
+  fi
   ob=$(awk -F';' 'NR==FNR{o[$1]=1;next} o[$5]{n++}END{print n+0}' "$off1" "$bi")
   [ "${ob:-0}" -eq 0 ] && continue
   dirty=$((dirty+1))
