@@ -44,3 +44,5 @@ zhfeng_release;legit OpenShift release-tooling fork (128.08, 385k blobs/1.1GB �
 gitlab.com_cznic_libsqlite3;legit modernc.org Go SQLite C-to-Go port (126.13, 3GB generated bindings — real widely-used pkg)
 schusterlab_slab_qick_calib;legit physics-lab QICK calibration fork (142.04, 5.4GB Jupyter — research data, keep)
 seanmacavaney_ir-datasets.com;legit widely-used ir-datasets IR tool site (142.04, 4GB, keep)
+dicklesworthstone_frankenterm;legit Rust terminal-hypervisor for AI agent swarms (143.04, 17.6GB — real project, keep)
+dicklesworthstone_frankenpandas;legit Rust pandas reimplementation (143.04, 5.4GB — real project, keep)
