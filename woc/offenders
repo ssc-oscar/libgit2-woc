@@ -3730,6 +3730,7 @@ cengizyilmaz1_mc;ghafork;2026-06-30;fork of GHA-declared offender family (connec
 cengizyilmaz1_messagecenter;ghafork;2026-06-30;fork of GHA-declared offender family (connected-component propagation round 2, expanded offender seeds, 6.96M megacluster excluded)
 cengizyilmaz1_microsoftmessagecenter;ghafork;2026-06-30;fork of GHA-declared offender family (connected-component propagation round 2, expanded offender seeds, 6.96M megacluster excluded)
 cenk_malware-domains;44.9GB-blob/0.0GB-tree/1934-blobs;auto-offsweep 2026-07-05;shard 143.00, 0.45 blob-share, trigger=size -- auto-detected dump
+cenk_nrd;32.4GB-blob;manual-largest 2026-07-05;shard 143.00 -- Newly-Registered-Domains threat feed/blocklist
 centipede5_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 centminmod_csf-firewall-aetherinox;ghafork;2026-06-30;fork of GHA-declared offender family (connected-component propagation round 2, expanded offender seeds, 6.96M megacluster excluded)
 centuri00159197_proxy;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -3787,6 +3788,7 @@ chakshu17_new-grad-positions;ghafork;2026-06-29;fork of GHA-declared offender fa
 chal19471_xiaomiromtwrpfiles__scrape;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 chaldea-center_chaldea-data;8.8GB;excluded 2026-06-28;FGO game-data dump (137.12)
 challenp_azure-ai-docs-gov-edits;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+chalmundev_nft-market-data;1.4GB-blob/45k-blobs;manual-largest 2026-07-05;shard 143.00 -- NFT market-data scraper dump
 chamodyachiran_v2ray-configs;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 champion-chenpeng_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 chanaphon123_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -3913,6 +3915,7 @@ chinjaneking_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender famil
 chinmay7016_agenta;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 chinobing_rss-gpt;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 chipoto69_knowledge;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+chipwolf_chipwolf;14.2GB-blob/37k-blobs;manual-largest 2026-07-05;shard 143.00 -- self-named profile repo, generated/data dump
 chipzoller_redhat-openshift-ecosystem-community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 chiragpalan_stock_predictions_rnn_v2;2.5GB;excluded 2026-06-07;118K bot-commits (stock-prediction spam), classify-pathological (~6.7 obj/s); blobs excluded
 chiroptical_erlang-language-platform;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
