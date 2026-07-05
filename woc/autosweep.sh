@@ -17,5 +17,6 @@ while true; do
     /home/exouser/bin/offsweepShard.sh "$m" "$l" >> /media/volume/trees/autosweep.log 2>&1
     echo "$mt" > "$mk"
   done
+  /home/exouser/bin/captureDropcommitTips.sh V2605 >> /media/volume/trees/dctips.log 2>&1
   sleep "$INT"
 done
