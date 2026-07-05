@@ -1,4 +1,5 @@
 #!/bin/bash
+WOCDIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 k=$1
 ver=$2
 DT=$3
@@ -8,14 +9,14 @@ cd $dir
 # unified lifecycle marker in the repo folder:
 #   cloning -> listed -> grabbing -> rsynced -> verified
 echo "cloning $(date '+%F %T')" > STAGE
-cat $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
-tac $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
-cat $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
-tac $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
+cat $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
+tac $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
+cat $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
+tac $pre.$k | sed 's|a:a@||' | while read i; do j=$(echo $i|perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"'); r=$(echo $i|sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'); [[ -d $j ]] || git clone --mirror $r $j; done &
 wait
 
 cat $pre.$k | sed 's|a:a@||' | while read i; 
-do r=$(echo $i|perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'); \
+do r=$(echo $i|perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"'); \
 	[[ -d $r ]] && echo $r; done > ${pre}1.$k
 
 #cat $pre.$k | perl -ane '$a=$_;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;s|\n$||;print "$_;$a"' | \

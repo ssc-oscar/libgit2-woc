@@ -1,4 +1,5 @@
 #!/bin/bash
+WOCDIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 # fetchExoP1.sh <m> <ver> <DT> [out] [filter]      e.g. fetchExoP1.sh 071 V2605 202605 out blob:none
 #
 # PHASE 1 of two-phase, deferred-blob extraction (opt-in; the normal full path is
@@ -44,11 +45,9 @@ echo "[p1 $ver.$m] building backfill want-list (blobs referenced by trees, not i
 echo "[p1 $ver.$m] backfill blobs pending: $(pigz -dc "$DST/backfill.$m.gz" | wc -l)"
 
 # mangled-name -> URL map so phase 2 can rebuild the right URL for any forge
-sed 's|a:a@||' "$ver.$m/$pre.$m" | perl -ne '
+sed 's|a:a@||' "$ver.$m/$pre.$m" | perl -I"$WOCDIR" -MWocCore -ne '
     chomp; my $i=$_;
-    my $j=$i; $j=~s|^gh:([^/]+)/|$1_|; $j=~s|^bb:([^/]+)/|bitbucket.org_$1_|;
-    $j=~s|^gl:([^/]+)/|gitlab.com_$1_|; $j=~s|^dr:([^/]+)/|drupal.com_$1_|;
-    $j=~s|^https://([^/]*)/([^/]*)/|$1_$2_|; $j=~s|^https://([^/]*)/|$1_|;
+    my $j = url2woc($i, 1);
     my $u=$i; $u=~s|^gh:|https://github.com/|; $u=~s|^bb:|https://bitbucket.org/|;
     $u=~s|^gl:|https://gitlab.com/|; $u=~s|^dr:|https://drupal.com/|;
     print "$j\t$u\n" if $j ne "";' | pigz > "$DST/urls.$m.gz"

@@ -1,4 +1,5 @@
 #!/bin/bash
+WOCDIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 # doOtrVerFetch.sh <k> <ver> <DT>     e.g.  doOtrVerFetch.sh 050 V2605 202605
 #
 # Fetch-aware variant of doOtrVer.sh. Behaves identically (full `git clone
@@ -47,7 +48,7 @@ OFFBLOB=${OFFBLOB:-$HOME/bin/offenders.blobSkip}
 
 do_one(){
   local i=$1 t=$2 j r url filt
-  j=$(printf '%s' "$i" | perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print')
+  j=$(printf '%s' "$i" | perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"')
   [ -z "$j" ] && return
   # offender override: tree-garbage -> tree:0, else blob-garbage -> blob:none,
   # else the run-wide FILTER (empty by default).
@@ -87,7 +88,7 @@ rm -f .lt.$k
 
 # present repo dirs (mangled names that exist) -> ${pre}1.$k  (same as doOtrVer.sh)
 cat "$pre.$k" | sed 's|a:a@||' | while read i;
-do r=$(printf '%s' "$i" | perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print');
+do r=$(printf '%s' "$i" | perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"');
   [[ -d $r ]] && echo $r; done > "${pre}1.$k"
 
 echo "listing $(date '+%F %T')" > STAGE

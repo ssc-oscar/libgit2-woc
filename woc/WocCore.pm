@@ -26,6 +26,15 @@ our %WOC_HOST_REWRITE = (
   "kde.org"              => "anongit.kde.org",
 );
 
+# WoC short forge prefixes used on the clone side (git `insteadOf` scheme, e.g. `gh:owner/repo`).
+# Maps the short code -> forge host that the name embeds. github collapses to bare (host dropped).
+# Matches the legacy mirrorUpdate.sh mangle() for gh/bb/gl/dr; adds hf/gl_gnome/deb it missed.
+our %WOC_SHORT = (
+  gh => "github.com", bb => "bitbucket.org", gl => "gitlab.com",
+  dr => "drupal.com",                       # legacy mangle used drupal.com_ (fixP1 normalizes later)
+  hf => "hf.co", gl_gnome => "gitlab.gnome.org", deb => "salsa.debian.org",
+);
+
 # url2woc: repository URL -> WoC project name (the canonical rule, user 2026-06-15):
 #   1. drop scheme (https|http|git|ssh|git+...); scp form git@host:owner/repo -> host/owner/repo
 #   2. strip trailing '/' and trailing '.git'  (STRIP_SLASH / STRIP_GIT env, default on)
@@ -35,18 +44,23 @@ our %WOC_HOST_REWRITE = (
 # e.g. https://github.com/Torvalds/Linux -> torvalds_linux ;
 #      https://gitlab.com/grp/sub/repo    -> gitlab.com_grp_sub/repo
 sub url2woc {
-  my $p = $_[0];
+  my ($p, $preserve_case) = @_;             # preserve_case=1 skips the lowercase step (clone-dir naming)
   return $p unless defined $p && length $p;
   my $strip_git   = defined $ENV{STRIP_GIT}   ? $ENV{STRIP_GIT}   : 1;
   my $strip_slash = defined $ENV{STRIP_SLASH} ? $ENV{STRIP_SLASH} : 1;
+  # 0. expand a WoC short forge prefix (git insteadOf scheme): code:owner/repo -> host/owner/repo.
+  #    Only a KNOWN code followed by a non-slash (so real schemes `https://` and scp `git@` are left).
+  if ($p =~ /^([a-z][a-z0-9_]*):([^\/].*)$/ && exists $WOC_SHORT{$1}) {
+    $p = "$WOC_SHORT{$1}/$2";
+  }
   $p =~ s|^[a-z][a-z0-9+.\-]*://||i;          # drop scheme://
   $p =~ s|^git\@([^:]+):|$1/|;                # scp-form git@host:owner/repo -> host/owner/repo
   $p =~ s|/+$|| if $strip_slash;              # trailing slash
   $p =~ s|\.git$|| if $strip_git;             # trailing .git
   $p =~ s|/|_|;                               # first slash
   $p =~ s|/|_|;                               # second slash
-  $p = lc $p;
-  $p =~ s|^github\.com_||;                     # github -> bare owner_repo (classic WoC form)
+  $p = lc $p unless $preserve_case;
+  $p =~ s|^github\.com_||i;                    # github -> bare owner_repo (ci: name may be un-lc'd)
   return $p;
 }
 

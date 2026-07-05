@@ -1,4 +1,5 @@
 #!/bin/bash
+WOCDIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 # Clone (--mirror) any listed project URL that is ABSENT, using the woc/doOtrVer
 # folder convention: drop protocol, replace the first two '/' with '_', deeper
 # path components stay as nested subfolders
@@ -9,7 +10,7 @@ set -u
 dir=${1:?usage: mirrorCloneList.sh <dir> <url-list> [parallel]}
 LIST=${2:?}; PAR=${3:-12}
 cd "$dir" || exit 1
-mangle(){ perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'; }
+mangle(){ perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"'; }
 clone1(){
   local u=$1 j r
   j=$(printf '%s' "$u" | mangle)

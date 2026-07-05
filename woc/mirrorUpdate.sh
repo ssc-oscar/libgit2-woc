@@ -1,4 +1,5 @@
 #!/bin/bash
+WOCDIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 # Refresh a directory of --mirror clones and extract only the NEW objects.
 #  * existing mirrors: snapshot ref tips, `git remote update --prune` (mirror
 #    fetch pulls only new objects), then list objects reachable from the new
@@ -48,7 +49,7 @@ export dir WORK
 cd "$dir" || exit 1
 
 # URL -> directory name (same scheme as doOtrVer.sh, fully flattened)
-mangle(){ perl -ane 's|^gh:([^/]+)/|$1_|;s|^bb:([^/]+)/|bitbucket.org_$1_|;s|^gl:([^/]+)/|gitlab.com_$1_|;s|^dr:([^/]+)/|drupal.com_$1_|;s|^https://([^/]*)/([^/]*)/|$1_$2_|;s|^https://([^/]*)/|$1_|;print'; }
+mangle(){ perl -I"$WOCDIR" -MWocCore -ne 'chomp; print url2woc($_,1),"\n"'; }
 mkurl(){ sed 's|^https://|https://a:a@|;s|^https://a:a@git.launchpad.net/|lp:|'; }
 
 # clone phase: add newly-listed projects that are absent (all their objects new)
