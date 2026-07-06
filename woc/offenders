@@ -23487,3 +23487,6 @@ zzzzcat_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (co
 zzzzes_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 tahmaseb73_configscavenger;24.6GB-blob/111049-blobs;manual-triage 2026-07-06;shard 146.08, proxy-config scraper dump (count-band)
 taksssss_epg;13.2GB-blob/10641-blobs;manual-triage 2026-07-06;shard 146.08, EPG/IPTV data dump
+striblab_crimedash;22.0GB-blob/40315-blobs;manual-triage 2026-07-06;shard 146.05, crime-data dashboard dump
+stolostron_community-operators-submission-fork;7.4GB-blob/10144-blobs;manual-triage 2026-07-06;shard 146.05, operator-catalog fork (binary-heavy bundles)
+stub-the-stubble_data-pipeline;6.1GB-blob/91269-blobs;manual-triage 2026-07-06;shard 146.05, generated data-pipeline dump (count-band)
