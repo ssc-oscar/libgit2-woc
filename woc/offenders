@@ -23587,3 +23587,5 @@ cyberdudebivash_cyberdudebivash-threat-intel-platform;21.2GB-blob/909388-blobs;m
 cyberiskvision_dls-monitor;20.9GB-blob/395653-blobs;manual-triage 2026-07-07;shard 156.00, data-leak-site monitor auto-data (count-bomb)
 d0rbz_we2rain;10.8GB-blob/132053-blobs;manual-triage 2026-07-07;shard 156.00, generated dump (count-band)
 cybrid-app_cybrid-api-bank-ruby;6.5GB-blob/820851-blobs;manual-triage 2026-07-07;shard 156.00, generated API SDK (count-bomb 821k)
+lukeinternational_mahis-release;5.9GB-blob/281999-blobs;manual-triage 2026-07-07;shard 151.06, generated release artifacts (count-bomb)
+lshaoo_cimiclaw;6.5GB-blob/234897-blobs;manual-triage 2026-07-07;shard 151.06, count-band generated dump (vague name)
