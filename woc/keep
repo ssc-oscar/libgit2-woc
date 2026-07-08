@@ -48,3 +48,5 @@ dicklesworthstone_frankenterm;legit Rust terminal-hypervisor for AI agent swarms
 dicklesworthstone_frankenpandas;legit Rust pandas reimplementation (143.04, 5.4GB — real project, keep)
 camunda-cloud_zeebe;legit Camunda Zeebe workflow engine — GHA-fork false-positive, held back from fork lists
 smalruby_smalruby3-editor;legit Smalruby3 educational editor fork (146.00, 17GB assets/build — real project, keep)
+princeton-geniza-lab_pgp-dataset-v1;keep 2026-07-06 -- Princeton Geniza Project academic research dataset (not a dump)
+frictionlessdata_covid-tracker
