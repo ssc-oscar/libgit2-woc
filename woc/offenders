@@ -6712,13 +6712,16 @@ eumayaraneves_elidianaandrade;ghafork;2026-06-29;fork of GHA-declared offender f
 eurobsongaspar_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 eurodeus_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 euroeval_leaderboards;7.4GB-blob/0.0GB-tree/27764-blobs;auto-offsweep 2026-07-09;shard 154.14, 0.08 blob-share, trigger=keyword -- auto-detected dump
+euroeval_leaderboards;7.4GB/27874-objs;manual-triage 2026-07-08;shard 154.14, generated LLM-eval leaderboard/results dump (avg 259KB/obj; borderline)
 europower90_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 euroysx_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 eusinho1985_advisory-database;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 eusouanderson_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 eusoumanoelnetto_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 eusousena_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+eustat-des_data;27.9GB/80178-objs;manual-triage 2026-07-08;shard 154.14, bulk statistics-mirror data dump paired with _site (avg 339KB/obj; borderline)
 eustat-des_site;25.8GB-blob/0.2GB-tree/408639-blobs;auto-offsweep 2026-07-09;shard 154.14, 0.55 blob-share, trigger=size -- auto-detected dump
+eustat-des_site;26.8GB/423152-objs;manual-triage 2026-07-08;shard 154.14, generated statistics-site mirror (423K objs, avg 61KB)
 euvegano_dio-lab-open-source;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 ev0xy_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 eva-l3n4_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -6757,6 +6760,7 @@ evgeniypriezzhev_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender fam
 evi1pumpkin_registry;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 evil1morty_google-trends-keywords-scraper;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 evilandrex_raided-loa-scraper;6.9GB-blob/0.0GB-tree/1798-blobs;auto-offsweep 2026-07-09;shard 154.14, 0.15 blob-share, trigger=keyword -- auto-detected dump
+evilandrex_raided-loa-scraper;6.9GB/1804-objs;manual-triage 2026-07-08;shard 154.14, Lost-Ark raid data scraper (avg 3.75MB/obj)
 evilgodfahim_bl;36.7GB;excluded 2026-06-22;Scraper (semantic fetch) with committed cache.json/result.xml dumps
 evilhumphrey_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 evilodil_summer2024-internships;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
