@@ -6681,8 +6681,6 @@ ethanoul_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (c
 ethanw-tm_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 etheralpha_validatorqueue-com;2.7GB;detected 2026-06-30;validatorqueue.com generated site/data (eth validator queue); generated site/data
 etherealblade_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
-ethereum-push-notification-service_push-frontend;46.2GB-blob/0.2GB-tree/1403138-blobs;auto-offsweep 2026-07-09;shard 154.15, 0.72 blob-share, trigger=size -- auto-detected dump
-ethereum-push-notification-service_push-frontend;46.2GB/1403138-objs;manual-triage 2026-07-08;shard 154.15, frontend bloated with committed deps/artifacts (avg 32KB/obj; borderline)
 ethereum_execution-spec-tests;45.4GB;excluded 2026-06-25;# CLAUDE.md - Ethereum Execution Spec Tests > **CRITICAL**: This repository aims to provide excellent tooling for generating JSON test vectors that test Ethereum execution layer clients. Correctness is absolute priority. The repo prioritizes a contributor-first mindset. ## 🎯 Core Purpose - `./tests/
 ethicalbughunter_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 ethicalsecurity-agency_adroitadorkhan_antipopads-re;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
