@@ -7334,6 +7334,7 @@ forkrepoall_community-operators-prod;ghafork;2026-06-29;fork of GHA-declared off
 forkwork_cve-icu;ghafork;2026-07-05;fork of GHA-declared offender family (round-4, +914 seeds from clone0; megacluster excluded)
 formp3_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 forrest-technologies_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
+forsakenngs_logtracker_characterdata_us;4.8GB/3475-objs;manual-triage 2026-07-08;shard 154.05, game log-tracker character-data dump (avg 1.34MB/obj)
 forsakringskassan_docs-generator;6.5GB-blob/613k-blobs;manual-largest 2026-07-05;shard 143.07 -- generated docs, 613k count-bomb
 fortnibloxyt1_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 foshizzal_cvelistv5;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
@@ -7523,6 +7524,7 @@ futabario_proxy-list-1;ghafork;2026-06-29;fork of GHA-declared offender family (
 futabario_proxy-list-2;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 futabario_proxy-list;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 futuretech6_futuretech6;6.9GB-blob/0.0GB-tree/18269-blobs;auto-offsweep 2026-07-08;shard 154.05, 0.51 blob-share, trigger=size -- auto-detected dump
+futuretech6_futuretech6;6.9GB/18330-objs;manual-triage 2026-07-08;shard 154.05, self-named vanity dump (avg 368KB/obj)
 futureunreal_cloudflare-preference-ip;5.5GB-blob/0.0GB-tree/2153-blobs;auto-offsweep 2026-07-07;shard 154.05, 0.65 blob-share, trigger=size -- auto-detected dump
 futzmonitor_new-grad-positions;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
 fuuuzzy_hermes-agent;ghafork;2026-06-29;fork of GHA-declared offender family (connected-component propagation, 6.96M megacluster excluded)
