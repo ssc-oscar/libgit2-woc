@@ -105,6 +105,35 @@ NB: a *single growing LMDB* index defeats this (pre-alloc + COW), so frozen gens
 a **sorted `.sidx`** (`sha[20] | offset[u64] | len[u32]`, bsearch); the L1's active
 index may be LMDB (fast appends) but is frozen to a `.sidx` on rotation.
 
+### Operational backup — per-type gen (V2605+), how-to
+The base is already backed up and immutable, so back up **only** the `*_gen1/` dirs (+ optionally
+the offset maps). Locations: commit/tree gens on **da5** `/fast/All.blobsGen/{commit,tree}_gen1`;
+blob gen on **da8** `/mnt/ordos/data/data/layered/V2605/blob_gen1`; offset maps on **da5**
+`/fast/All.sha1o/sha1.{commit,tree,blob}_<sec>.tch`.
+
+- **Essential per sec 0–127:** `<type>_<sec>.{bin,idx}` — the actual gen data, NOT reproducible
+  without re-grabbing.
+- **Regenerable (skip if space-tight):** `.sidx` (`sidx build`), `.bf` (`build_bf`), and the offset
+  `sha1.<type>_<sec>.tch` (`{Cmt,Tree,Blob}N2OffGen`) — all rebuildable from `.bin`+`.idx`.
+- **Back up a type ONLY when its convgen/offset run is QUIESCENT for that type.** A mid-append
+  snapshot can catch a torn `.bin`/`.idx` tail (bin+idx grow together but the tail may be partial).
+  So: commit when its offsets are done; tree after `TreeN2OffGen` finishes; blob only after its
+  convgen completes (it appends in RAM-bounded sec-bands, so mid-run there are partially-filled secs).
+- **Append-only ⇒ re-running the same `rsync -a` later is incremental** (only grown bytes transfer) —
+  cheap to keep the backup in sync after each increment.
+- Commands (point `$BK` at the same target as the base backup):
+  ```
+  rsync -a /fast/All.blobsGen/commit_gen1/  $BK/V2605/commit_gen1/            # da5, quiescent
+  rsync -a /fast/All.blobsGen/tree_gen1/    $BK/V2605/tree_gen1/              # da5, after offsets
+  rsync -a da8:/mnt/ordos/data/data/layered/V2605/blob_gen1/  $BK/V2605/blob_gen1/   # after blob convgen done
+  rsync -a /fast/All.sha1o/sha1.{commit,tree,blob}_*.tch  $BK/V2605/sha1o/    # optional (derivable)
+  ```
+- **Verify:** 128/128 `.bin`/`.idx` (and `.sidx`/`.bf`) per type; `convgen.log`'s `distinct stored`
+  ≈ Σ `wc -l` of the per-sec idxs.
+- **CAUTION (concurrent producers):** isaac/da5 may `rclone`/publish from the same gen dirs (e.g.
+  isaac rclones the commit gen for c2dat/tips) — coordinate the backup window with them; `rsync -a`
+  of an append-only dir during a concurrent read is safe, but don't back up mid-**write**.
+
 ## Read amplification & tuning
 A read may consult L1 + a few gens before the base; the BF short-circuits negatives
 and the L1/gen indexes are small/RAM-resident. Compaction bounds gen count. Applies
