@@ -10,6 +10,9 @@
 use strict; use warnings;
 my ($type,$prefix,$offf,$keepf,$bof,$dcf) = @ARGV;
 die "usage: filterDeoff.pl type prefix offenders keep blobonly [dropcommit]\n" unless $type && $prefix;
+# Oversized-object guard: a single object bigger than this short-reads in convgen (and a bare
+# read() caps ~2GB), so it can never enter the gen -- drop it here. Override with MAX_BLOB env.
+my $MAXBLOB = defined $ENV{MAX_BLOB} ? $ENV{MAX_BLOB}+0 : 2147483647;   # ~2GB (2^31-1)
 
 my %off;
 if ($offf && open(my $F,'<',$offf)) { while(<$F>){chomp; my $r=(split/;/)[0]; $off{$r}=1 if defined $r && $r ne ''} close $F; }
@@ -23,7 +26,7 @@ open(my $IDX,'<',"$prefix.$type.idx") or die "open $prefix.$type.idx: $!";
 open(my $BIN,'<:raw',"$prefix.$type.bin") or die "open $prefix.$type.bin: $!";
 open(my $OIDX,'>',"$prefix.deoff.$type.idx") or die "write idx: $!";
 open(my $OBIN,'>:raw',"$prefix.deoff.$type.bin") or die "write bin: $!";
-my ($noff,$kept,$drop)=(0,0,0);
+my ($noff,$kept,$drop,$big)=(0,0,0,0);
 while (<$IDX>) {
   chomp; my @x = split(/;/, $_, -1);
   my ($o,$s,undef,undef,$repo) = @x;
@@ -32,12 +35,15 @@ while (<$IDX>) {
               || ($bo{$repo}  &&  $type eq 'blob')
               || ($dc{$repo}  &&  $type eq 'commit') );
   if ($dropit) { $drop++; next; }
-  seek($BIN,$o,0); my $buf=''; my $r=read($BIN,$buf,$s);
-  die "short read repo=$repo o=$o s=$s got=".(defined $r?$r:'undef')."\n" if !defined $r || $r != $s;
+  # oversized guard: drop objects too big to read in one go (convgen short-reads > ~2GB)
+  if ($s > $MAXBLOB) { print STDERR "OVERSIZED $type drop repo=$repo o=$o s=$s (> $MAXBLOB)\n"; $drop++; $big++; next; }
+  seek($BIN,$o,0); my $buf=''; my $got=0;   # robust read: loop until $s bytes (guards partial reads)
+  while ($got < $s) { my $r=read($BIN,my $chunk,$s-$got); last if !defined $r || $r==0; $buf.=$chunk; $got+=$r; }
+  die "short read repo=$repo o=$o s=$s got=$got\n" if $got != $s;
   print $OBIN $buf;
   $x[0] = $noff;
   print $OIDX join(';',@x)."\n";
   $noff += $s; $kept++;
 }
 close $OBIN; close $OIDX; close $IDX; close $BIN;
-print STDERR "  [$type] kept=$kept dropped=$drop newbytes=$noff\n";
+print STDERR "  [$type] kept=$kept dropped=$drop (oversized=$big) newbytes=$noff\n";
