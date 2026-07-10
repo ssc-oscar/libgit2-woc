@@ -17,6 +17,13 @@
  * env LAYERED = dir with <type>_gen<N> (gens); base = <baseBin> arg.
  *   cmputeDiffGen <offset-tch-dir> <baseBin>     < commitShas
  * build: cc -O2 -o cmputeDiffGen cmputeDiffGen.c -ltokyocabinet /usr/lib64/liblzf.so.1
+ *
+ * env STATS=1 : STATS MODE -- emit NO diff; instead for each commit recursively read its
+ *   tree and print "<commit>;<rootTreeStoredLen>;<nTreeObjs>;<maxDepth>;<nBlobEntries>;<totTreeBytes>"
+ *   (getting depth/size REQUIRES reading trees, so this pass saves no diff -- it calibrates
+ *   the size cutoff). rootTreeStoredLen is the CHEAP pre-read signal (offset .tch len, no decompress).
+ * env MAXTREE=<bytes> : SIZE GUARD -- in diff mode, skip a commit whose ROOT tree stored len
+ *   exceeds this (looked up without decompressing); logs "SKIP bigtree ..." to stderr.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +40,11 @@ extern unsigned int lzf_decompress(const void*, unsigned int, void*, unsigned in
 #define MAXSEG 16
 #define EMPTYTREE "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
 static const char *PREO, *BASEBIN, *LAYERED;
+static long long MAXTREE=0;      /* diff-mode size guard: skip root tree stored-len > this (0=off) */
+static int STATSMODE=0;          /* STATS=1: measure tree size/depth, emit stats, no diff */
+static long STAT_MAX_NODES=0;    /* stats: cap tree-objs read per commit (0=unlimited); monsters -> capped=1 */
+static int stat_capped=0;        /* set when a commit's walk hit STAT_MAX_NODES */
+#define STAT_DEPTH_CAP 400       /* recursion safety for pathological deep trees */
 
 /* ---------- Compress::LZF decompress (verified byte-exact vs Perl) ---------- */
 static long clzf(const uint8_t*in, size_t n, uint8_t*out, size_t outcap){
@@ -225,6 +237,28 @@ static void separate2T(const char*c,const char*pre,const char*tHex,const char*tp
   hfree(md);hfree(mdI);hfree(mf);hfree(mfI);hfree(pd);hfree(pdI);hfree(pf);hfree(pfI);
 }
 
+/* statTree: recursively read a tree, accumulate nTreeObjs, maxDepth, nBlobEntries, totBytes.
+ * Reading is REQUIRED to get depth -- this is the expensive pass the stats run performs. */
+static void statTree(const char*tHex,int depth,int*maxDepth,long*nTree,long*nEntry,long long*totBytes){
+  if(depth>STAT_DEPTH_CAP){ if(depth>*maxDepth)*maxDepth=depth; return; }
+  if(STAT_MAX_NODES && *nTree>=STAT_MAX_NODES){ stat_capped=1; if(depth>*maxDepth)*maxDepth=depth; return; }
+  uint8_t*buf=malloc(1<<26); if(!buf) return;
+  long n=getObj(1,tHex,buf,1<<26);
+  if(n>0){
+    (*nTree)++; (*totBytes)+=n; if(depth>*maxDepth)*maxDepth=depth;
+    long p=0;
+    while(p<n){
+      long ms=p; while(p<n&&buf[p]!=' ')p++; if(p>=n)break;
+      char mb[16];int ml=p-ms;if(ml>15)ml=15;memcpy(mb,buf+ms,ml);mb[ml]=0;int mode=strtol(mb,0,8);p++;
+      while(p<n&&buf[p]!=0)p++; if(p>=n)break; p++;
+      if(p+20>n)break; const uint8_t*sha=buf+p;p+=20;
+      if(mode==040000){ char sh2[41];tohex(sha,sh2); statTree(sh2,depth+1,maxDepth,nTree,nEntry,totBytes); }
+      else (*nEntry)++;
+    }
+  }
+  free(buf);
+}
+
 /* getCT: read commit, extract tree + ALL parents concatenated (40 hex each) into
  * `parent` (mirrors Perl getCT's $parentFull = join of every "parent" line). */
 static int getCT(const char*c,char*tree,char*parent){
@@ -244,6 +278,8 @@ int main(int argc,char**argv){
   PREO = argc>1?argv[1]:"/fast/All.sha1o";
   BASEBIN = argc>2?argv[2]:"/data/All.blobs";
   LAYERED = getenv("LAYERED");
+  { const char*m=getenv("MAXTREE"); if(m)MAXTREE=atoll(m); STATSMODE=getenv("STATS")?1:0;
+    const char*sm=getenv("STAT_MAX_NODES"); STAT_MAX_NODES = sm?atol(sm):20000; }
   load_badblob();
   char line[64], tree[41], treeP[41], curpar[41];
   static char parent[40*512+1], pp2[40*512+1];   /* all parents concatenated */
@@ -251,6 +287,18 @@ int main(int argc,char**argv){
     int L=strlen(line); while(L&&(line[L-1]=='\n'||line[L-1]=='\r'))line[--L]=0;
     if(L!=40) continue;
     if(!getCT(line,tree,parent)){ fprintf(stderr,"no commit %s\n",line); continue; }
+    if(STATSMODE){                     /* measure this commit's tree; emit stats, no diff */
+      int md=0; long nt=0,ne=0; long long tb=0, g; int rl=-1; uint8_t ts[20];
+      if(fromhex(tree,ts)){ int tsec=ts[0]%NSEC; lookup(1,tsec,ts,&g,&rl); }
+      stat_capped=0; statTree(tree,0,&md,&nt,&ne,&tb);
+      printf("%s;%d;%ld;%d;%ld;%lld;%d\n",line,rl,nt,md,ne,tb,stat_capped);
+      continue;
+    }
+    if(MAXTREE>0){                     /* cheap pre-read guard: skip oversized root trees */
+      long long g; int rl=-1; uint8_t ts[20];
+      if(fromhex(tree,ts)){ int tsec=ts[0]%NSEC;
+        if(lookup(1,tsec,ts,&g,&rl) && rl>MAXTREE){ fprintf(stderr,"SKIP bigtree %s tree=%s len=%d\n",line,tree,rl); continue; } }
+    }
     if(parent[0]){
       int plen=strlen(parent);
       memcpy(curpar,parent,40); curpar[40]=0;            /* first parent */
