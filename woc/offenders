@@ -8198,8 +8198,10 @@ gitlab.com_Case_Of_liguros-repo;1.1GB;excluded 2026-07-03;(no README/CLAUDE.md)
 gitlab.com_KellyErvin_compas;10.8GB;detected 2026-07-01;COMPAS computational database of polycyclic aromatic systems; scientific data dump
 gitlab.com_Leuca_centos-stream-10;1.2GB;excluded 2026-06-30;Linux kernel ============ There are several guides for kernel developers and users. These guides can be rendered in a number of formats, like HTML and PDF. Please read Documentation/admin-guide/README.rst first. In order to build the documentation, use ``make htmldocs`` or ``make pdfdocs``. The form
 gitlab.com_armbiant_debian-packages;32.1GB;excluded 2026-07-02;(no README/CLAUDE.md)
+gitlab.com_assignmentnvidia_jr1966705;2.3GB-blob/dump;manual-triage 2026-07-10;blob-gen convgen short-read (>2GB single blob), 118.x data dump
 gitlab.com_qqlaoxia_deepka;9.6GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 134.10, 0.58 blob-share, trigger=size -- auto-detected dump
 gitlab.com_rule-cycc_blackmirror;13.4GB-blob/0.0GB-tree;auto-offsweep 2026-07-04;shard 135.05, 0.52 blob-share, trigger=size -- auto-detected dump
+gitlab.com_silentmot_mardam;2.3GB-blob/dump;manual-triage 2026-07-10;blob-gen convgen short-read (>2GB single blob), 118.x data dump
 gitlab.com_taoml9527_blocklist-convertor-automation;36.7GB;excluded 2026-07-01;# BlockList Convertor Automation Automation for converting ABP filters to Apple format Blocking Rules. Automation process integrates the necessary components and is executed in GitLab CI environment based on a well defined pipeline. # Building & Testing - It is required to have swift installed for u
 gitlab.com_ultralytics_docs;0.0GB;excluded 2026-07-04;<a href="https://www.ultralytics.com/" target="_blank"><img src="https://raw.githubusercontent.com/ultralytics/assets/main/logo/Ultralytics_Logotype_Original.svg" width="320" alt="Ultralytics logo"></a> # 📚 Ultralytics Docs Welcome to Ultralytics Docs, your comprehensive resource for understanding a
 gitlab.com_zabbix-tools_documentation;0.9GB;excluded 2026-07-01;(no README/CLAUDE.md)
