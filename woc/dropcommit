@@ -955,3 +955,19 @@ hackerjail1_autocommit5;namebomb;2026-07-11 -- commits=31169 (name-review verdic
 hackerjail1_autocommit3;namebomb;2026-07-11 -- commits=31144 (name-review verdict)
 hackerjail1_autocommit4;namebomb;2026-07-11 -- commits=29067 (name-review verdict)
 huntergon086_lava-auto-commit;namebomb;2026-07-11 -- commits=26784 (name-review verdict)
+thedoggybrad_easylist-mirror;autodump;2026-07-11 -- auto-gen dump
+uzair1990_svn_backup_s3_artifacts;autodump;2026-07-11 -- auto-gen dump
+pashagod_hourly;autodump;2026-07-11 -- auto-gen dump
+schklom_mirror-workflows;autodump;2026-07-11 -- auto-gen dump
+g0v-data_mirror-minutely;autodump;2026-07-11 -- auto-gen dump
+git.wisellama.rocks_mirrors_easylist;autodump;2026-07-11 -- auto-gen dump
+gentoo_gentoo-portage-rsync-mirror;autodump;2026-07-11 -- auto-gen dump
+sagemath_sagetrac-mirror;autodump;2026-07-11 -- auto-gen dump
+edquist_osg-twiki-backup;autodump;2026-07-11 -- auto-gen dump
+noodled_justdomains_mirror1.malwaredomains.com;autodump;2026-07-11 -- auto-gen dump
+g0v-data_mirror-10minutely;autodump;2026-07-11 -- auto-gen dump
+dead-hosts_easyprivacy_web_easylist.to;autodump;2026-07-11 -- auto-gen dump
+easylist_easylistchina;autodump;2026-07-11 -- auto-gen dump
+easylist_ruadlist;autodump;2026-07-11 -- auto-gen dump
+dead-hosts_easylist_web_easylist.to;autodump;2026-07-11 -- auto-gen dump
+dead-hosts_just-domains_web_malwaredomains.com;autodump;2026-07-11 -- auto-gen dump
