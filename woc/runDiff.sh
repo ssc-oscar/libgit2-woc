@@ -18,9 +18,11 @@ LAYERED=${LAYERED:-/da5_fast/All.blobsGen}
 PREO=${PREO:-/fast/All.sha1o}
 BASEBIN=${BASEBIN:-/data/All.blobs}
 s=$1
+[ -f "$D/V2604V2605.$s.done" ] && { echo "sec $s already done"; exit 0; }
 zcat "$D/V2604V2605.$s.cs" \
   | LAYERED="$LAYERED" MAXTREE="$MAXTREE" "$BIN" "$PREO" "$BASEBIN" 2>"$D/V2604V2605.$s.err" \
   | gzip > "$D/V2604V2605.$s.gz"
 grep '^identical trees:' "$D/V2604V2605.$s.err" | awk '{print $5}' | gzip > "$D/cIdentFull.V2605.$s.cs"
 grep '^large tree:'      "$D/V2604V2605.$s.err" | awk '{print $5}' | gzip > "$D/cLargeFull.V2605.$s.cs"
-echo "sec $s: diffs=$(zcat "$D/V2604V2605.$s.gz"|wc -l) ident=$(zcat "$D/cIdentFull.V2605.$s.cs"|wc -l) large=$(zcat "$D/cLargeFull.V2605.$s.cs"|wc -l)"
+touch "$D/V2604V2605.$s.done"
+echo "sec $s DONE $(date): diffs=$(zcat "$D/V2604V2605.$s.gz"|wc -l) ident=$(zcat "$D/cIdentFull.V2605.$s.cs"|wc -l) large=$(zcat "$D/cLargeFull.V2605.$s.cs"|wc -l)"

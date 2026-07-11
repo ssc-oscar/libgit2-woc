@@ -165,15 +165,44 @@ static void tohex(const uint8_t*b,char*o){ static const char*h="0123456789abcdef
 static int fromhex(const char*s,uint8_t*o){ for(int i=0;i<20;i++){int a=s[2*i],b=s[2*i+1]; a=a<='9'?a-'0':(a|32)-'a'+10; b=b<='9'?b-'0':(b|32)-'a'+10; if(a<0||a>15||b<0||b>15)return 0; o[i]=(a<<4)|b;} return 1; }
 
 /* ---------- read+decompress object by 40-hex sha ---------- */
+static unsigned hkey(const uint8_t*k,int kl);   /* fwd decl (defined below in the hash section) */
+/* ---------- lazy in-RAM TREE cache (sha20 -> decompressed tree bytes) ----------
+ * The bottleneck is random base-tree reads off HDD /data (~43 IOPS). Trees are re-read heavily
+ * (parent trees across a repo's commit chain, shared subtrees). Cache decompressed trees in RAM;
+ * cap by bytes (env TREECACHE_GB, 0=off). When full, stop inserting (still correct — reads disk).
+ * Stats (hit/miss/bytes/distinct) print at exit = the working-set size, which decides whether RAM
+ * alone suffices or we stage the base-tree subset on SSD. Trees only (t==1); commits read once. */
+typedef struct TCE { uint8_t sha[20]; uint8_t*buf; int len; struct TCE*next; } TCE;
+static TCE **TCACHE; static unsigned long TC_NB;
+static long long TC_bytes, TC_cap; static long long TC_hit, TC_miss, TC_n, TC_full;
+static void tc_init(void){
+  const char*g=getenv("TREECACHE_GB"); TC_cap=(g?atoll(g):0)*(1LL<<30);
+  if(!TC_cap) return; TC_NB=1UL<<23; TCACHE=calloc(TC_NB,sizeof(TCE*));
+}
+static uint8_t* tc_get(const uint8_t*sha,int*len){
+  if(!TC_cap) return 0; unsigned long i=hkey(sha,20)&(TC_NB-1);
+  for(TCE*e=TCACHE[i];e;e=e->next) if(!memcmp(e->sha,sha,20)){ TC_hit++; *len=e->len; return e->buf; }
+  TC_miss++; return 0;
+}
+static void tc_put(const uint8_t*sha,const uint8_t*buf,int len){
+  if(!TC_cap) return;
+  if(TC_bytes+len>TC_cap){ TC_full++; return; }        /* cap reached: stop caching (still correct) */
+  unsigned long i=hkey(sha,20)&(TC_NB-1);
+  TCE*e=malloc(sizeof(TCE)); if(!e) return; memcpy(e->sha,sha,20);
+  e->buf=malloc(len); if(!e->buf){ free(e); return; } memcpy(e->buf,buf,len); e->len=len;
+  e->next=TCACHE[i]; TCACHE[i]=e; TC_bytes+=len; TC_n++;
+}
+
 static long getObj(int t,const char*sha40,uint8_t*out,size_t cap){
   uint8_t sha[20]; if(!fromhex(sha40,sha)) return -1;
+  if(t==1 && TC_cap){ int cl; uint8_t*cb=tc_get(sha,&cl); if(cb){ if((size_t)cl>cap) return -1; memcpy(out,cb,cl); return cl; } }
   int sec=((sha[0]<<8|sha[1]) ) % NSEC;   /* hex(substr,0,2)%128 == (b0*256+b1)%128 == b1%128 ... but Perl hex(2 hex)=b0 */
   sec=sha[0]%NSEC;                         /* Perl: hex(substr($h,0,2)) = first byte; %128 */
   long long goff; int len;
   if(lookup(t,sec,sha,&goff,&len)){
     static uint8_t cbuf[1<<26];
     long r=readObj(t,sec,goff,len,cbuf,sizeof cbuf);
-    if(r>=0) return clzf(cbuf,r,out,cap);
+    if(r>=0){ long d=clzf(cbuf,r,out,cap); if(t==1 && d>0) tc_put(sha,out,(int)d); return d; }
   }
   /* DiffT fallback (da5): a base commit with no offset map -> read from the content map
    * (COMMIT_CONTENT=All.sha1c); its value is the same stored LZF bytes. Commits only (t==0). */
@@ -335,6 +364,7 @@ int main(int argc,char**argv){
   BASEBIN = argc>2?argv[2]:"/data/All.blobs";
   LAYERED = getenv("LAYERED");
   CCONTENT = getenv("COMMIT_CONTENT");   /* set on da5 (DiffT): base commit content dir (All.sha1c) */
+  tc_init();                             /* lazy tree cache (env TREECACHE_GB) */
   { const char*m=getenv("MAXTREE"); if(m)MAXTREE=atoll(m); STATSMODE=getenv("STATS")?1:0;
     const char*sm=getenv("STAT_MAX_NODES"); STAT_MAX_NODES = sm?atol(sm):20000; }
   load_badblob();
@@ -373,5 +403,8 @@ int main(int argc,char**argv){
       separate2T(line,"",tree,treeP);
     } else { static uint8_t tb[1<<26]; long tn=getObj(1,tree,tb,sizeof tb); printTR(line,tb,tn,"",1); }
   }
+  if(TC_cap){ long long tot=TC_hit+TC_miss;
+    fprintf(stderr,"TREECACHE: hit=%lld miss=%lld hit%%=%.1f distinct=%lld bytes=%.2fGB cap%s\n",
+      TC_hit,TC_miss, tot? 100.0*TC_hit/tot:0.0, TC_n, TC_bytes/1073741824.0, TC_full?"-HIT(working set > cap)":"-ok(working set fits)"); }
   return 0;
 }
