@@ -33,13 +33,14 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <tchdb.h>
 extern unsigned int lzf_decompress(const void*, unsigned int, void*, unsigned int);
 
 #define NSEC 128
 #define MAXSEG 16
 #define EMPTYTREE "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
-static const char *PREO, *BASEBIN, *LAYERED;
+static const char *PREO, *BASEBIN, *LAYERED, *CCONTENT;
 static long long MAXTREE=0;      /* diff-mode size guard: skip root tree stored-len > this (0=off) */
 static int STATSMODE=0;          /* STATS=1: measure tree size/depth, emit stats, no diff */
 static long STAT_MAX_NODES=0;    /* stats: cap tree-objs read per commit (0=unlimited); monsters -> capped=1 */
@@ -104,14 +105,59 @@ static void open_tch(int t,int sec){
   if(!tchdbopen(h,p,HDBOREADER|HDBONOLCK)){ tchdbdel(h); TCH[t][sec]=(TCHDB*)-1; return; }
   TCH[t][sec]=h;
 }
+/* DiffT (da5): base commits stored as CONTENT (LZF value) in CCONTENT/commit_<sec>.tch. */
+static TCHDB *CCTCH[NSEC];
+static void open_cctch(int sec){
+  if(CCTCH[sec]) return;
+  char p[600]; snprintf(p,sizeof p,"%s/commit_%d.tch",CCONTENT,sec);
+  TCHDB*h=tchdbnew();
+  if(!tchdbopen(h,p,HDBOREADER|HDBONOLCK)){ tchdbdel(h); CCTCH[sec]=(TCHDB*)-1; return; }
+  CCTCH[sec]=h;
+}
 static const uint8_t* berdec(const uint8_t*p,const uint8_t*e,unsigned long*v){
   unsigned long x=0; while(p<e){ x=(x<<7)|(*p&0x7f); if(!(*p++&0x80)) break; } *v=x; return p;
 }
+/* ---------- gen sidx (frozen sorted sha20+off(u64le)+len(u32le), 32B recs) ----------
+ * LAYERED offset lookup: the base sha->goff comes from the base offset tch (All.sha1o,
+ * frozen); the GEN sha->goff comes from the gen .sidx (in the gen dir, never mixed into
+ * base). We mmap+bsearch each gen segment's sidx; its stored off is gen-LOCAL, so the
+ * global offset = (that gen segment's cumulative base) + local off. */
+typedef struct { const uint8_t*p; long nrec; int tried; } Sidx;
+static Sidx SIDX[2][NSEC][MAXSEG];
+static void open_sidx(int t,int sec,int g){
+  Sidx*S=&SIDX[t][sec][g]; if(S->tried) return; S->tried=1;
+  if(!LAYERED) return;
+  char path[700]; snprintf(path,sizeof path,"%s/%s_gen%d/%s_%d.sidx",LAYERED,TYPES[t],g,TYPES[t],sec);
+  int fd=open(path,O_RDONLY); if(fd<0) return;
+  struct stat st; if(fstat(fd,&st)!=0 || st.st_size<32){ close(fd); return; }
+  void*m=mmap(NULL,st.st_size,PROT_READ,MAP_PRIVATE,fd,0); close(fd);
+  if(m==MAP_FAILED) return; S->p=m; S->nrec=st.st_size/32;
+}
+static int sidx_lookup(int t,int sec,const uint8_t*sha20,long long*goff,int*len){
+  build_segs(t,sec); SecSegs*S=&SEG[t][sec];
+  for(int g=1; g<S->n; g++){                 /* gen segments (seg 0 = base, no sidx) */
+    open_sidx(t,sec,g); Sidx*sx=&SIDX[t][sec][g]; if(!sx->p) continue;
+    long lo=0, hi=sx->nrec-1;
+    while(lo<=hi){ long mid=(lo+hi)/2; const uint8_t*rec=sx->p+(long long)mid*32;
+      int c=memcmp(sha20,rec,20);
+      if(c==0){ uint64_t off; uint32_t l; memcpy(&off,rec+20,8); memcpy(&l,rec+28,4);
+        *goff = S->s[g].base + (long long)off; *len=(int)l; return 1; }
+      if(c<0) hi=mid-1; else lo=mid+1; }
+  }
+  return 0;
+}
 static int lookup(int t,int sec,const uint8_t*sha20,long long*goff,int*len){
-  open_tch(t,sec); TCHDB*h=TCH[t][sec]; if(h==(TCHDB*)-1||!h) return 0;
-  int sz; void*v=tchdbget(h,sha20,20,&sz); if(!v) return 0;
-  unsigned long o,l; const uint8_t*p=v,*e=(uint8_t*)v+sz;
-  p=berdec(p,e,&o); berdec(p,e,&l); *goff=o; *len=(int)l; free(v); return 1;
+  /* GEN sidx FIRST (fresh, post-dedup -> only gen-only objects). A host's precomputed base
+   * commit/tree tch may be a STALE base+gen COMBINED map (pre-compaction gen offsets); checking
+   * sidx first means gen objects always resolve via the fresh sidx and those stale entries are
+   * never used. Base objects are NOT in the gen sidx (dedup guarantees clean∩base=0), so they
+   * miss the sidx and fall through to the base tch's (correct, frozen) base entries. */
+  if(sidx_lookup(t,sec,sha20,goff,len)) return 1;
+  open_tch(t,sec); TCHDB*h=TCH[t][sec];
+  if(h && h!=(TCHDB*)-1){ int sz; void*v=tchdbget(h,sha20,20,&sz);
+    if(v){ unsigned long o,l; const uint8_t*p=v,*e=(uint8_t*)v+sz;
+      p=berdec(p,e,&o); berdec(p,e,&l); *goff=o; *len=(int)l; free(v); return 1; } }
+  return 0;
 }
 
 /* ---------- hex ---------- */
@@ -123,10 +169,20 @@ static long getObj(int t,const char*sha40,uint8_t*out,size_t cap){
   uint8_t sha[20]; if(!fromhex(sha40,sha)) return -1;
   int sec=((sha[0]<<8|sha[1]) ) % NSEC;   /* hex(substr,0,2)%128 == (b0*256+b1)%128 == b1%128 ... but Perl hex(2 hex)=b0 */
   sec=sha[0]%NSEC;                         /* Perl: hex(substr($h,0,2)) = first byte; %128 */
-  long long goff; int len; if(!lookup(t,sec,sha,&goff,&len)) return -1;
-  static uint8_t cbuf[1<<26];
-  long r=readObj(t,sec,goff,len,cbuf,sizeof cbuf); if(r<0) return -1;
-  return clzf(cbuf,r,out,cap);
+  long long goff; int len;
+  if(lookup(t,sec,sha,&goff,&len)){
+    static uint8_t cbuf[1<<26];
+    long r=readObj(t,sec,goff,len,cbuf,sizeof cbuf);
+    if(r>=0) return clzf(cbuf,r,out,cap);
+  }
+  /* DiffT fallback (da5): a base commit with no offset map -> read from the content map
+   * (COMMIT_CONTENT=All.sha1c); its value is the same stored LZF bytes. Commits only (t==0). */
+  if(t==0 && CCONTENT){
+    open_cctch(sec); TCHDB*h=CCTCH[sec];
+    if(h && h!=(TCHDB*)-1){ int sz; void*v=tchdbget(h,sha,20,&sz);
+      if(v){ long r=clzf(v,sz,out,cap); free(v); return r; } }
+  }
+  return -1;
 }
 
 /* ---------- minimal chained hash: key bytes -> Names list or sha ---------- */
@@ -278,6 +334,7 @@ int main(int argc,char**argv){
   PREO = argc>1?argv[1]:"/fast/All.sha1o";
   BASEBIN = argc>2?argv[2]:"/data/All.blobs";
   LAYERED = getenv("LAYERED");
+  CCONTENT = getenv("COMMIT_CONTENT");   /* set on da5 (DiffT): base commit content dir (All.sha1c) */
   { const char*m=getenv("MAXTREE"); if(m)MAXTREE=atoll(m); STATSMODE=getenv("STATS")?1:0;
     const char*sm=getenv("STAT_MAX_NODES"); STAT_MAX_NODES = sm?atol(sm):20000; }
   load_badblob();
@@ -297,7 +354,7 @@ int main(int argc,char**argv){
     if(MAXTREE>0){                     /* cheap pre-read guard: skip oversized root trees */
       long long g; int rl=-1; uint8_t ts[20];
       if(fromhex(tree,ts)){ int tsec=ts[0]%NSEC;
-        if(lookup(1,tsec,ts,&g,&rl) && rl>MAXTREE){ fprintf(stderr,"SKIP bigtree %s tree=%s len=%d\n",line,tree,rl); continue; } }
+        if(lookup(1,tsec,ts,&g,&rl) && rl>MAXTREE){ fprintf(stderr,"large tree: %s for %s len=%d\n",tree,line,rl); continue; } }
     }
     if(parent[0]){
       int plen=strlen(parent);
@@ -311,7 +368,7 @@ int main(int argc,char**argv){
           getCT(curpar,treeP,pp2);             /* on miss, getCT clears treeP => differs from tree */
           if(strcmp(treeP,tree)) break;
         }
-        if(!strcmp(tree,treeP)){ fprintf(stderr,"identical trees %s for %s\n",tree,line); continue; }
+        if(!strcmp(tree,treeP)){ fprintf(stderr,"identical trees: %s for %s and parent %s\n",tree,line,curpar); continue; }
       }
       separate2T(line,"",tree,treeP);
     } else { static uint8_t tb[1<<26]; long tn=getObj(1,tree,tb,sizeof tb); printTR(line,tb,tn,"",1); }

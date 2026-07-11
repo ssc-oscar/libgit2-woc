@@ -45,12 +45,21 @@ lifecycle:
 - **Complete (frozen):** when `V` is declared done, its gen is **frozen** — immutable
   thereafter, exactly like the base. It then folds into the frozen set for `V+1`.
 
-Because segments are append-only-then-frozen, the sha→offset maps are **extended in
-place**, never rebuilt: `{Cmt,Tree}N2OffGen` add only the new shas (global offset =
-`cumBase + local`; `cumBase` = base/prior-gen sizes, which never change). A read tool
-(`cmputeDiffGen`, `genlayer`) picks up a grown segment automatically — it `stat`s the
-`.bin` size at run time. The one invariant to protect: **never rewrite/compact a
-frozen segment** in place, or every offset above it shifts and the maps are invalidated.
+**Reading sha→object is LAYERED, not a combined/extended map** (corrected 2026-07-10 — see
+`DIFF_PROCESS.md`, [[layered-map-architecture]]). Each layer keeps its OWN index and the reader
+consults them in order:
+- **base (frozen):** commit CONTENT `/fast/All.sha1c`, tree/commit OFFSET `/fast/All.sha1o`.
+- **gen:** the per-shard **`.sidx`** inside `gen<N>/` (sha20+off+len, `sidx.c`), **created as
+  objects are added** by `convert_backlog.sh`. This IS the gen offset index.
+- The read tool (`cmputeDiffGen`) does **sidx-first**: gen `.sidx` (fresh) → base map. So a stale
+  *combined* base+gen offset tch on some host is harmless (its gen entries are never consulted);
+  base objects miss the sidx and fall to the correct base map. Requires the gen be deduped so
+  `gen ∩ base == 0`.
+- The old `{Cmt,Tree}N2OffGen` "extend a combined `sha1.<type>_<sec>.tch` in place" path is NOT used
+  by the diff reader and goes STALE if a gen is ever compacted — do not rely on it.
+Invariants: **never rewrite/compact a frozen segment** (offsets above shift); if you must compact a
+gen (e.g. remove base-dups, `genMinusBase`), **rebuild that gen's `.sidx`+`.bf`** (`rebuildGenIndex.sh`)
+and take fresh watermarks. Never rebuild/mix the frozen BASE maps — restore from a da3/da4 copy if lost.
 
 ## BF dedup vs. the gen lifecycle (release-completion rebuild)
 The grab-time dedup gate (`hasObjBF` over `/fast/<type>Filters`, see `lookup/FILTER.md`)
