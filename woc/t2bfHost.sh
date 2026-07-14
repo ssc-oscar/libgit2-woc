@@ -16,7 +16,9 @@ GEN=${GEN:-/fast/All.blobsGen/tree_gen1}
 BIN=${BIN:-/da5_fast/bin/t2bfBuild}
 export OUT BASE GEN BIN
 echo "=== t2bfHost P=$P $(date) OUT=$OUT ==="
-FLOOR_KB=${FLOOR_KB:-2000000000}; export FLOOR_KB   # skip a section if < ~1.9T free (resumable); t2bf ~18.5T
+FLOOR_KB=${FLOOR_KB:-4000000000}; export FLOOR_KB   # ~3.7T: don't START a section under this; P concurrent
+                                                    # sections each write ~285G AFTER this check, so the
+                                                    # floor must exceed P*285G (16*285G=4.5T) worth of headroom
 one(){
   s=$1
   [ -f "$OUT/t2bf.$s.done" ] && { echo "sec $s already done"; return 0; }
