@@ -125,14 +125,38 @@ static int lookup(int t,int sec,const uint8_t*sha20,long long*goff,int*len){
 static void tohex(const uint8_t*b,char*o){ static const char*h="0123456789abcdef"; for(int i=0;i<20;i++){o[2*i]=h[b[i]>>4];o[2*i+1]=h[b[i]&15];} o[40]=0; }
 static int fromhex(const char*s,uint8_t*o){ for(int i=0;i<20;i++){int a=s[2*i],b=s[2*i+1]; a=a<='9'?a-'0':(a|32)-'a'+10; b=b<='9'?b-'0':(b|32)-'a'+10; if(a<0||a>15||b<0||b>15)return 0; o[i]=(a<<4)|b;} return 1; }
 
+/* ---------- GEN sidx lookup: LAYERED/<type>_gen1/<type>_<sec>.sidx (sha20 + off u64le +
+ * len u32le, sorted by sha; off is LOCAL into the gen1 bin). Binary search; returns GLOBAL
+ * offset (base_size + local) so readObj's base+gen segment chain reads the gen bin. This is
+ * how the reader resolves gen trees now that gen offsets are NOT grafted into base sha1o. */
+static int GSFD[2][NSEC]; static long GSN[2][NSEC];
+static int gen_lookup(int t,int sec,const uint8_t*sha20,long long*goff,int*len){
+  if(!LAYERED) return 0;
+  if(GSFD[t][sec]==0){
+    char p[600]; snprintf(p,sizeof p,"%s/%s_gen1/%s_%d.sidx",LAYERED,TYPES[t],TYPES[t],sec);
+    int fd=open(p,O_RDONLY); struct stat st;
+    if(fd<0||fstat(fd,&st)!=0){ GSFD[t][sec]=-1; return 0; }
+    GSFD[t][sec]=fd; GSN[t][sec]=st.st_size/32;
+  }
+  if(GSFD[t][sec]==-1) return 0;
+  int fd=GSFD[t][sec]; long lo=0,hi=GSN[t][sec]-1; uint8_t rec[32];
+  while(lo<=hi){ long mid=(lo+hi)/2; if(pread(fd,rec,32,(off_t)mid*32)!=32) return 0;
+    int c=memcmp(rec,sha20,20);
+    if(c==0){ unsigned long long o; unsigned int l; memcpy(&o,rec+20,8); memcpy(&l,rec+28,4);
+      build_segs(t,sec); long long bs=(SEG[t][sec].n>0)?SEG[t][sec].s[0].size:0;
+      *goff=(long long)o+bs; *len=(int)l; return 1; }
+    if(c<0) lo=mid+1; else hi=mid-1; }
+  return 0;
+}
+
 /* ---------- unified read: SSD content subset first, then HDD offset fallback ---------- */
 static long getObj(int t,const char*sha40,uint8_t*out,size_t cap){
   uint8_t sha[20]; if(!fromhex(sha40,sha)) return -1;
   int sec=sha[0]%NSEC;                     /* Perl: hex(substr($h,0,2)) = first byte; %128 */
   long r=getContent(t,sec,sha,out,cap);    /* primary: hash-indexed content, SSD */
   if(r>=0 || !HAVEFB) return r;
-  long long goff; int len;                 /* fallback: regular offset store, HDD */
-  if(!lookup(t,sec,sha,&goff,&len)) return -1;
+  long long goff; int len;                 /* fallback: base offset (sha1o), then gen sidx */
+  if(!lookup(t,sec,sha,&goff,&len) && !gen_lookup(t,sec,sha,&goff,&len)) return -1;
   static uint8_t cbuf[1<<26];
   long rr=readObj(t,sec,goff,len,cbuf,sizeof cbuf); if(rr<0) return -1;
   rr=clzf(cbuf,rr,out,cap);
