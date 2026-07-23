@@ -30,6 +30,8 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/resource.h>
+#include <errno.h>
 #include <tchdb.h>
 extern unsigned int lzf_decompress(const void*, unsigned int, void*, unsigned int);
 
@@ -135,7 +137,8 @@ static int gen_lookup(int t,int sec,const uint8_t*sha20,long long*goff,int*len){
   if(GSFD[t][sec]==0){
     char p[600]; snprintf(p,sizeof p,"%s/%s_gen1/%s_%d.sidx",LAYERED,TYPES[t],TYPES[t],sec);
     int fd=open(p,O_RDONLY); struct stat st;
-    if(fd<0||fstat(fd,&st)!=0){ GSFD[t][sec]=-1; return 0; }
+    if(fd<0){ if(errno==EMFILE||errno==ENFILE){ fprintf(stderr,"FATAL: fd limit hit opening %s -- raise RLIMIT_NOFILE (miss would be silently mis-read as no-parent)\n",p); exit(3);} GSFD[t][sec]=-1; return 0; }
+    if(fstat(fd,&st)!=0){ close(fd); GSFD[t][sec]=-1; return 0; }
     GSFD[t][sec]=fd; GSN[t][sec]=st.st_size/32;
   }
   if(GSFD[t][sec]==-1) return 0;
@@ -281,6 +284,12 @@ static int getCT(const char*c,char*tree,char*parent){
 
 int main(int argc,char**argv){
   if(argc<2){ fprintf(stderr,"usage: %s <contentTchDir> [<offTchDir> <baseBin>] < commitShas\n",argv[0]); return 1; }
+  /* Store-resident mode caches an fd per (type,section) for content-tch + offset-tch + sidx +
+   * base-bin + gen-bins -- ~1400 fds across 128 sections x 2 types. The default soft limit (1024)
+   * is exceeded ~part-way through, after which open() returns EMFILE and gen_lookup/build_segs
+   * silently treat it as "object absent" -> bogus "no parent" (~44% of gen commits dropped).
+   * Raise NOFILE to the hard max. Harmless for content-only mode (it opens only ~256 tch fds). */
+  { struct rlimit rl; if(getrlimit(RLIMIT_NOFILE,&rl)==0){ rl.rlim_cur=rl.rlim_max; setrlimit(RLIMIT_NOFILE,&rl); } }
   PREC = argv[1];
   if(argc>3){ PREO=argv[2]; BASEBIN=argv[3]; LAYERED=getenv("LAYERED"); HAVEFB=1; }
   const char*fl=getenv("WOC_FBLOG"); if(fl) FBLOG=fopen(fl,"a");
