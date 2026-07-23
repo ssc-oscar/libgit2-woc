@@ -94,6 +94,19 @@ Two content sets, both **LZF-valued** (so `getContent` in the reader decompresse
    ~256 tch fds → immune.** Diagnostic tell: "missing" fraction large + systematic ⇒ check fd/ulimit,
    not the data (the gen `sidx` off is correct: u64le, local-to-gen-bin, `goff=off+base_size`; gen bin
    is WoC-framed LZF via `clzf`). Cross-check content-only vs store-resident output to catch it.
+7. **`getCT` must bound the `parent[]` append** (fixed `66f0ca6db`). A malformed/bomb object (e.g. an
+   ~11 MB blob mis-stored as a commit) can decompress to content with **>512 lines starting `"parent "`**;
+   `getCT` appended each into the caller's fixed `parent[40*512+1]` with no bound → BSS overflow →
+   **SIGSEGV** (only under `-O2`; `-O0` dodged it via `clzf` returning −1, so it's optimization-sensitive
+   UB). Only sections containing such a bomb crashed (rc=139, `.gz.tmp` left, no `.done`). Fix: cap at
+   `pl+40<=40*512`. Debug tip: no gdb/ASan on da5 → `LD_PRELOAD=/lib64/libSegFault.so` + `addr2line`.
+8. **`diffRun.sh` PAR = queue depth (~64), NOT core count.** The content-only diff is random-read
+   I/O-bound — workers sit in D-state (`filemap_update_page`) at QD1 each; throughput ≈ workers ×
+   per-worker-IOPS. Measured (da3 4×SATA SSD, O_DIRECT randread): QD1 8k IOPS → 8-way 63k → **64-way
+   235k IOPS**. QD1 is identical across da3/da5, so a "slow" host is usually **under-parallelized, not
+   slow hardware** (da3 at PAR=8 → ~91 h for 43 sec; PAR=64 → ~25 h). Run PAR≈64 on **every** host,
+   few-core boxes included (D-state workers don't need cores). Verify per host with an O_DIRECT randread
+   scaling test. This is why the even 3-way split needs equal PAR, not PAR=cores, to balance.
 
 ---
 
