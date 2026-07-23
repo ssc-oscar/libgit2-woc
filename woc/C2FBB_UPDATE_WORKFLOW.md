@@ -85,6 +85,15 @@ Two content sets, both **LZF-valued** (so `getContent` in the reader decompresse
    trees exist, so only dropping its commits keeps them out of the diff.
 5. **Missing trees = offenders.** WoC clone `--mirror`s, so any tree absent from base+gen is an
    offender repo (excluded at grab) — not a coverage gap; never "backfill trees" for it.
+6. **Store-resident mode needs `RLIMIT_NOFILE` raised** (fixed `f63107096`). `HAVEFB=1` caches an fd
+   per (type,section) for content-tch + offset-tch + `sidx` + base-bin + gen-bins ≈ **1400 fds** (128
+   sec × 2 types); the default `ulimit -n` **1024** is exceeded partway through, after which `open()`
+   returns **EMFILE**, which `gen_lookup`/`build_segs` couldn't tell from "absent" → **silent `no
+   parent`** (~44% of gen commits dropped, *masquerading as never-ingested*). Fix: `setrlimit(NOFILE,
+   hard_max)` in `main()`; EMFILE→`exit(3)` (loud, not silent). **Content-only (`HAVEFB=0`) opens only
+   ~256 tch fds → immune.** Diagnostic tell: "missing" fraction large + systematic ⇒ check fd/ulimit,
+   not the data (the gen `sidx` off is correct: u64le, local-to-gen-bin, `goff=off+base_size`; gen bin
+   is WoC-framed LZF via `clzf`). Cross-check content-only vs store-resident output to catch it.
 
 ---
 
