@@ -276,7 +276,7 @@ static int getCT(const char*c,char*tree,char*parent){
   char *s=(char*)buf, *line=s;
   for(char*p=s;;p++){ if(*p=='\n'||*p==0){ int len=p-line;
       if(len>5 && !strncmp(line,"tree ",5)){ memcpy(tree,line+5,40); tree[40]=0; }
-      else if(len>7 && !strncmp(line,"parent ",7)){ memcpy(parent+pl,line+7,40); pl+=40; parent[pl]=0; }
+      else if(len>7 && !strncmp(line,"parent ",7)){ if(pl+40<=40*512){ memcpy(parent+pl,line+7,40); pl+=40; parent[pl]=0; } } /* cap at 512 parents = caller buffer size; a malformed/bomb commit (e.g. an 11MB blob mis-stored as a commit) can carry thousands of "parent " lines -> without this bound it overflows parent[40*512+1] (SIGSEGV under -O2). */
       if(*p==0 || (p>s && *p=='\n' && p[1]=='\n')) break; line=p+1; if(*p==0)break; }
     if(*p==0)break; }
   return tree[0]?1:0;
