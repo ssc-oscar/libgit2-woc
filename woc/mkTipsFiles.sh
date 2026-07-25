@@ -10,6 +10,14 @@
 # two '/' -> '_', leading github.com_ dropped) -- matched against the map; the
 # OUTPUT is line-aligned to the original list so doOtrVerFetch reads list+tips
 # together.
+#
+# --haves = P2tips UNION dropcommitTips (coord/clone0/dropcommit-tips-haves.md):
+# dropcommit (commit-bomb) repos are excluded from P2c and so have no p2tips rows,
+# which made every version re-fetch their full spam history. Their tips are captured
+# separately (captureDropcommitTips.sh, repo;tip_sha, same normalized key) and any
+# dropcommitTips.* file in <tips-dir> is streamed exactly like a p2tips shard.
+# Stored/analyzed sets still EXCLUDE dropcommit commits -- this only feeds git
+# negotiation so the fetch skips what we've already seen and dropped.
 set -u
 TIPS=${1:?usage: mkTipsFiles.sh <tips-dir> <ver> <DT> <k...>}; ver=${2:?}; DT=${3:?}; shift 3
 perl -e '
@@ -29,7 +37,7 @@ perl -e '
   my $uniq=scalar keys %need;
   warn "loaded $rows rows, $uniq unique keys across ".scalar(@ks)." folders; streaming tips...\n";
   # 2. stream the tips shards, accumulating tips for needed keys
-  my @sh=glob("$tips/p2tipsFull.*"); my $sn=0;
+  my @sh=(glob("$tips/p2tipsFull.*"), glob("$tips/dropcommitTips.*")); my $sn=0;
   for my $f (@sh){ open(my $fh,"-|",$GZ,"-dc",$f) or next; $sn++;
     while(<$fh>){ my $i=index($_,";"); next if $i<0; my $p=substr($_,0,$i);
       next unless exists $need{$p}; my $c=substr($_,$i+1); chomp $c; next if $c eq "";
