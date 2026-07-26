@@ -16,9 +16,14 @@ set -u
 VER="${1:-V2605}"
 DC=/media/volume/trees/dropcommit
 TREES=/media/volume/trees
-OUT="$TREES/dropcommitTips.$VER"
+OUT="$TREES/dropcommitTips.$VER.gz"       # gzipped: isaac's mkTipsFiles reader pipes through pigz -dc
+OLD="$TREES/dropcommitTips.$VER"          # legacy plain (mangled-key) capture, if present
 tmp=$(mktemp "${TMPDIR:-/tmp}/dctips.XXXXXX")
-[ -f "$OUT" ] && cp -a "$OUT" "$tmp"   # start from existing (accumulate)
+# seed from existing (accumulate). tmp holds MANGLED owner_repo keys internally (dir-lookup + the
+# idempotent dedup below both key on the mangled name); the final write normalizes to the p2tips
+# key (owner/repo) and gzips.
+if   [ -f "$OUT" ]; then zcat "$OUT" | sed 's,/,_,' > "$tmp"   # normalized gz -> back to mangled
+elif [ -f "$OLD" ]; then cp -a "$OLD" "$tmp"; fi              # legacy plain already mangled
 captured=0; gone=""
 for repo in $(grep -vE '^#|^$' "$DC" 2>/dev/null | cut -d';' -f1); do
   # already have tips for it? skip (idempotent)
@@ -35,6 +40,9 @@ for repo in $(grep -vE '^#|^$' "$DC" 2>/dev/null | cut -d';' -f1); do
     gone="$gone $repo"
   fi
 done
-LC_ALL=C sort -u "$tmp" > "$OUT"; rm -f "$tmp"
-echo "captureDropcommitTips $VER: $(wc -l < "$OUT") total tip lines, $captured newly captured"
+# normalize mangled owner_repo -> p2tips key owner/repo (first '_' -> '/'; GitHub owner has no '_'),
+# then sort by the normalized key and gzip (isaac's mkTipsFiles streams it via pigz -dc as a
+# --haves shard: P2tips U dropcommitTips). Sort AFTER normalize so order matches the p2tips keyspace.
+LC_ALL=C sed 's,_,/,' "$tmp" | LC_ALL=C sort -u | gzip -9 > "$OUT"; rm -f "$tmp"
+echo "captureDropcommitTips $VER: $(zcat "$OUT" | wc -l) total tip lines, $captured newly captured"
 [ -n "$gone" ] && echo "  CLONE GONE (tips NOT capturable here -- recover from da8/GitHub):$gone"
