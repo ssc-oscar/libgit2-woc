@@ -169,33 +169,55 @@ static long extract_commits(buf_t *pack, const char *scratch) {
     return rc;
 }
 
-/* ---- one repo: discover -> ls-refs -> fetch(filter tree:0) -> extract ------------------------ */
+/* ---- orchestration outputs (fail.txt / ok repo;head / classified counts) --------------------- */
 static long OK_CNT = 0, FAIL_CNT = 0;
-static void do_repo(const char *repo, const char *before, const char *scratch) {
+static long C_GONE = 0, C_THROTTLE = 0, C_NET = 0, C_OTHER = 0;
+static buf_t FAILBUF = {0}, OKBUF = {0};                 /* mutex-guarded line accumulators */
+static pthread_mutex_t OUTMU = PTHREAD_MUTEX_INITIALIZER;
+static void classify(long code) {                        /* GitHub HTTP -> failure bucket */
+    if (code == 429 || code == 403) __atomic_fetch_add(&C_THROTTLE,1,__ATOMIC_RELAXED);
+    else if (code == 401 || code == 404 || code == 0) __atomic_fetch_add(&C_GONE,1,__ATOMIC_RELAXED);
+    else if (code < 0) __atomic_fetch_add(&C_NET,1,__ATOMIC_RELAXED);
+    else __atomic_fetch_add(&C_OTHER,1,__ATOMIC_RELAXED);
+}
+static void note_fail(const char *repo, long code, const char *stage) {
+    __atomic_fetch_add(&FAIL_CNT,1,__ATOMIC_RELAXED); classify(code);
+    pthread_mutex_lock(&OUTMU); buf_add(&FAILBUF, repo, strlen(repo)); buf_add(&FAILBUF, "\n", 1); pthread_mutex_unlock(&OUTMU);
+    fprintf(stderr, "FAIL %s %s HTTP %ld\n", repo, stage, code);
+}
+static void note_ok(const char *repo, const char *head) {
+    __atomic_fetch_add(&OK_CNT,1,__ATOMIC_RELAXED);
+    if (head && *head) { pthread_mutex_lock(&OUTMU);
+        buf_add(&OKBUF, repo, strlen(repo)); buf_add(&OKBUF, ";", 1); buf_add(&OKBUF, head, strlen(head)); buf_add(&OKBUF, "\n", 1);
+        pthread_mutex_unlock(&OUTMU); }
+}
+
+/* ---- one repo: discover -> ls-refs -> fetch(filter tree:0) -> extract ------------------------ */
+static void do_repo(const char *repo, const char *before, const char *head, const char *scratch) {
     char url[1024], u2[1200];
     snprintf(url, sizeof url, "https://github.com/%s", repo);
     snprintf(u2, sizeof u2, "%s/info/refs?service=git-upload-pack", url);
     buf_t disc = {0}; long code = http(u2, NULL, 0, &disc); free(disc.p);
-    if (code != 200) { __atomic_fetch_add(&FAIL_CNT,1,__ATOMIC_RELAXED); fprintf(stderr, "FAIL %s discover HTTP %ld\n", repo, code); return; }
+    if (code != 200) { note_fail(repo, code, "discover"); return; }
     snprintf(u2, sizeof u2, "%s/git-upload-pack", url);
     buf_t body = {0};
     pkt(&body,"command=ls-refs\n"); pkt(&body,"object-format=sha1\n"); pkt_delim(&body);
     pkt(&body,"peel\n"); pkt(&body,"ref-prefix refs/heads/\n"); pkt(&body,"ref-prefix refs/tags/\n"); pkt_flush(&body);
     buf_t lr = {0}; code = http(u2, body.p, body.n, &lr); buf_reset(&body);
-    if (code != 200) { __atomic_fetch_add(&FAIL_CNT,1,__ATOMIC_RELAXED); fprintf(stderr,"FAIL %s ls-refs HTTP %ld\n",repo,code); free(body.p); free(lr.p); return; }
+    if (code != 200) { note_fail(repo, code, "ls-refs"); free(body.p); free(lr.p); return; }
     buf_t wants = {0}; int nref = 0; parse_refs(&lr, &wants, &nref); free(lr.p);
-    if (nref == 0) { __atomic_fetch_add(&FAIL_CNT,1,__ATOMIC_RELAXED); fprintf(stderr,"FAIL %s no refs\n",repo); free(body.p); free(wants.p); return; }
+    if (nref == 0) { note_fail(repo, 0, "no-refs"); free(body.p); free(wants.p); return; }
     pkt(&body,"command=fetch\n"); pkt(&body,"object-format=sha1\n"); pkt_delim(&body);
     for (int k = 0; k < nref; k++) { char w[64]; snprintf(w,sizeof w,"want %.40s\n", wants.p + (size_t)k*40); pkt(&body,w); }
     if (before && strlen(before) >= 40 && strncmp(before,"0000000000000000000000000000000000000000",40)) {
         char hv[64]; snprintf(hv,sizeof hv,"have %.40s\n",before); pkt(&body,hv); }
     pkt(&body,"ofs-delta\n"); pkt(&body,"no-progress\n"); pkt(&body,"filter tree:0\n"); pkt(&body,"done\n"); pkt_flush(&body);
     buf_t fr = {0}; code = http(u2, body.p, body.n, &fr); free(body.p); free(wants.p);
-    if (code != 200) { __atomic_fetch_add(&FAIL_CNT,1,__ATOMIC_RELAXED); fprintf(stderr,"FAIL %s fetch HTTP %ld\n",repo,code); free(fr.p); return; }
+    if (code != 200) { note_fail(repo, code, "fetch"); free(fr.p); return; }
     buf_t pack = {0}; parse_pack(&fr, &pack); free(fr.p);
     long nc = extract_commits(&pack, scratch); free(pack.p);
-    __atomic_fetch_add(&OK_CNT,1,__ATOMIC_RELAXED);
-    if (nc < 0) fprintf(stderr, "WARN %s index failed\n", repo);
+    if (nc < 0) { note_fail(repo, 500, "index"); return; }
+    note_ok(repo, head);
 }
 
 /* ---- worker pool: atomic work queue over the input lines ------------------------------------ */
@@ -206,10 +228,11 @@ static void *worker(void *arg) {
     mkdir(scratch, 0755);
     for (;;) {
         long i = __atomic_fetch_add(&NEXT, 1, __ATOMIC_RELAXED); if (i >= NLINES) break;
-        char *line = LINES[i]; char *repo = line, *before = NULL;
+        char *line = LINES[i]; char *repo = line, *before = NULL, *head = NULL;
         char *t = strpbrk(line, "\t;"); if (t) { *t = 0; before = t + 1;
-            char *t2 = strpbrk(before, "\t;"); if (t2) *t2 = 0; }
-        do_repo(repo, before, scratch);
+            char *t2 = strpbrk(before, "\t;"); if (t2) { *t2 = 0; head = t2 + 1;
+                char *t3 = strpbrk(head, "\t;"); if (t3) *t3 = 0; } }
+        do_repo(repo, before, head, scratch);
     }
     return NULL;
 }
@@ -276,9 +299,24 @@ int main(int argc, char **argv) {
         for (long i = 0; i < WPAR; i++) pthread_join(wt[i], NULL);
     }
     long t_all = time(NULL) - t0;
-    fprintf(stderr, "[grabCommitsRT] repos=%ld ok=%ld fail=%ld commits=%ld stored=%ld dup=%ld "
-            "fetch=%lds total=%lds par=%d wpar=%d\n", NLINES, OK_CNT, FAIL_CNT, ncommits,
-            TOT_STORED, TOT_DUP, t_fetch, t_all, PAR, WPAR);
+
+    /* orchestration outputs for the gharchiveRThour FUSED drop-in: fail.txt, ok.txt (repo;head for
+     * the p2tips 'commit' fence advance), and a manifest with the tokens gharchiveRThour parses. */
+    const char *OUTDIR = getenv("OUTDIR");
+    if (OUTDIR) {
+        char fp[1200]; FILE *f;
+        snprintf(fp, sizeof fp, "%s/fail.txt", OUTDIR); if ((f=fopen(fp,"w"))) { fwrite(FAILBUF.p,1,FAILBUF.n,f); fclose(f); }
+        snprintf(fp, sizeof fp, "%s/ok.txt",   OUTDIR); if ((f=fopen(fp,"w"))) { fwrite(OKBUF.p,1,OKBUF.n,f);   fclose(f); }
+        long uniq = getenv("UNIQUE") ? atol(getenv("UNIQUE")) : NLINES;
+        const char *tag = getenv("TAG") ? getenv("TAG") : "rt";
+        snprintf(fp, sizeof fp, "%s/manifest", OUTDIR);
+        if ((f=fopen(fp,"w"))) { fprintf(f, "%s unique=%ld fetched=%ld fail=%ld gone=%ld throttle=%ld "
+            "net=%ld other=%ld secs=%ld stored=%ld dup=%ld\n", tag, uniq, OK_CNT, FAIL_CNT,
+            C_GONE, C_THROTTLE, C_NET, C_OTHER, t_all, TOT_STORED, TOT_DUP); fclose(f); }
+    }
+    fprintf(stderr, "[grabCommitsRT] repos=%ld ok=%ld fail=%ld (gone=%ld throttle=%ld net=%ld other=%ld) "
+            "commits=%ld stored=%ld dup=%ld fetch=%lds total=%lds par=%d wpar=%d\n", NLINES, OK_CNT,
+            FAIL_CNT, C_GONE, C_THROTTLE, C_NET, C_OTHER, ncommits, TOT_STORED, TOT_DUP, t_fetch, t_all, PAR, WPAR);
     git_libgit2_shutdown(); curl_global_cleanup();
     return 0;
 }
