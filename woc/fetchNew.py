@@ -243,7 +243,9 @@ def main():
         sys.exit(f"error: cannot reach {url}: {e.reason}")
 
     outdir = a.out or tempfile.mkdtemp(prefix="fetchNew.")
-    subprocess.run(["git", "init", "-q", "--bare", outdir], check=True)
+    # empty --template => skip the 13 hooks/*.sample + info/exclude + description git copies into
+    # every new repo (~14 of the ~32 inodes/repo of pure scaffolding); we only need objects+refs.
+    subprocess.run(["git", "init", "-q", "--bare", "--template=", outdir], check=True)
     nobj = 0
     if pack and pack[:4] == b"PACK":
         p = subprocess.run(["git", "-C", outdir, "index-pack", "--stdin",
