@@ -102,22 +102,47 @@ static void parse_refs(buf_t *r, buf_t *wants, int *nref) {
         i += L;
     }
 }
-static void parse_pack(buf_t *r, buf_t *pack) {
-    size_t i = 0; int in_pack = 0;
-    while (i + 4 <= r->n) {
-        char hx[5]; memcpy(hx, r->p + i, 4); hx[4] = 0; long L = strtol(hx, NULL, 16);
-        if (L == 0 || L == 1 || L == 2) { i += 4; continue; }
-        if (L < 4 || i + (size_t)L > r->n) break;
-        char *pl = r->p + i + 4; size_t pn = L - 4;
-        if (pn >= 9 && !memcmp(pl, "packfile\n", 9)) { in_pack = 1; i += L; continue; }
-        if (pn >= 7 && (!memcmp(pl,"acknowl",7)||!memcmp(pl,"shallow",7)||!memcmp(pl,"wanted-",7))) { in_pack = 0; i += L; continue; }
-        if (in_pack && pn >= 1) {
+/* ---- STREAMING fetch: demux the sideband and feed pack bytes straight to git_indexer_append,
+ * so the whole pack is never held in RAM -- only a <64KB residual (one partial pkt-line) + curl's
+ * chunk. Requires DISK scratch (the indexer writes the pack to scratch; on tmpfs that would just
+ * move the pack into RAM). Bounds per-repo fetch memory regardless of history depth. ------------ */
+typedef struct { git_indexer *idx; git_indexer_progress *st; buf_t resid; int in_pack, got_pack, err; } fetch_ctx;
+static size_t fetch_wcb(void *data, size_t sz, size_t nm, void *u) {
+    fetch_ctx *fc = u; size_t total = sz * nm;
+    buf_add(&fc->resid, data, total);
+    size_t pos = 0;
+    while (fc->resid.n - pos >= 4) {
+        char hx[5]; memcpy(hx, fc->resid.p + pos, 4); hx[4] = 0; long L = strtol(hx, NULL, 16);
+        if (L == 0 || L == 1 || L == 2) { pos += 4; continue; }      /* flush/delim/resp-end */
+        if (L < 4) { fc->err = 1; return 0; }
+        if (fc->resid.n - pos < (size_t)L) break;                    /* wait for the rest of this pkt */
+        char *pl = fc->resid.p + pos + 4; size_t pn = L - 4;
+        if (pn >= 9 && !memcmp(pl, "packfile\n", 9)) fc->in_pack = 1;
+        else if (pn >= 7 && (!memcmp(pl,"acknowl",7)||!memcmp(pl,"shallow",7)||!memcmp(pl,"wanted-",7))) fc->in_pack = 0;
+        else if (fc->in_pack && pn >= 1) {
             unsigned char band = (unsigned char)pl[0];
-            if (band == 1) buf_add(pack, pl + 1, pn - 1);
-            else if (band == 3) fprintf(stderr, "remote error: %.*s\n", (int)(pn-1), pl+1);
+            if (band == 1) { if (git_indexer_append(fc->idx, pl+1, pn-1, fc->st)) { fc->err = 1; return 0; } fc->got_pack = 1; }
+            else if (band == 3) { fc->err = 1; return 0; }           /* remote fatal */
         }
-        i += L;
+        pos += L;
     }
+    if (pos) { memmove(fc->resid.p, fc->resid.p + pos, fc->resid.n - pos); fc->resid.n -= pos; }
+    return total;
+}
+static long http_stream(const char *url, const void *body, size_t blen, fetch_ctx *fc) {
+    CURL *c = curl_easy_init(); if (!c) return -1;
+    struct curl_slist *h = curl_slist_append(NULL, "Git-Protocol: version=2");
+    h = curl_slist_append(h, "Content-Type: application/x-git-upload-pack-request");
+    h = curl_slist_append(h, "Accept: application/x-git-upload-pack-result");
+    curl_easy_setopt(c, CURLOPT_URL, url); curl_easy_setopt(c, CURLOPT_POST, 1L);
+    curl_easy_setopt(c, CURLOPT_POSTFIELDS, body); curl_easy_setopt(c, CURLOPT_POSTFIELDSIZE, (long)blen);
+    curl_easy_setopt(c, CURLOPT_HTTPHEADER, h);
+    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, fetch_wcb); curl_easy_setopt(c, CURLOPT_WRITEDATA, fc);
+    curl_easy_setopt(c, CURLOPT_TIMEOUT, 600L); curl_easy_setopt(c, CURLOPT_USERAGENT, "git/2.43 grabCommitsRT");
+    CURLcode rc = curl_easy_perform(c);
+    long code = -1; if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
+    curl_slist_free_all(h); curl_easy_cleanup(c);
+    return rc == CURLE_OK ? code : -1;
 }
 
 /* ---- 128 shard buffers with INCREMENTAL FLUSH (bound memory regardless of hour size) --------- */
@@ -176,18 +201,26 @@ static int walk_cb(const git_oid *id, void *payload) {
     }
     git_odb_object_free(o); return 0;
 }
-static long extract_commits(buf_t *pack, const char *scratch) {
-    if (pack->n < 4 || memcmp(pack->p, "PACK", 4)) return 0;
-    git_repository *repo = NULL; git_odb *odb = NULL; git_indexer *idx = NULL;
-    if (git_repository_init(&repo, scratch, 1) != 0) return -1;
-    git_repository_odb(&odb, repo);
+/* stream-fetch a repo's commit-only pack directly into the indexer, then walk the odb for commits.
+ * Returns commit count, or -1 on fetch/index error. Never holds the whole pack in RAM. */
+static long fetch_extract(const char *fetchurl, const void *body, size_t blen, const char *scratch) {
+    git_repository *grepo = NULL; git_odb *odb = NULL; git_indexer *idx = NULL;
+    if (git_repository_init(&grepo, scratch, 1) != 0) return -1;
+    git_repository_odb(&odb, grepo);
     char packdir[1100]; snprintf(packdir, sizeof packdir, "%s/objects/pack", scratch);
-    git_indexer_progress st = {0}; long rc = 0;
-    if (git_indexer_new(&idx, packdir, 0, odb, NULL) != 0) { git_odb_free(odb); git_repository_free(repo); return -1; }
-    if (git_indexer_append(idx, pack->p, pack->n, &st) != 0 || git_indexer_commit(idx, &st) != 0) rc = -1;
-    git_indexer_free(idx);
-    if (rc == 0) { git_odb_refresh(odb); struct wctx c = { odb, 0 }; git_odb_foreach(odb, walk_cb, &c); rc = c.ncommit; }
-    git_odb_free(odb); git_repository_free(repo);
+    git_indexer_progress st = {0};
+    if (git_indexer_new(&idx, packdir, 0, odb, NULL) != 0) { git_odb_free(odb); git_repository_free(grepo); return -1; }
+    fetch_ctx fc = { idx, &st, {0}, 0, 0, 0 };
+    long code = http_stream(fetchurl, body, blen, &fc);
+    free(fc.resid.p);
+    long rc;
+    if (code < 0) rc = -1;                       /* net/transport error   -> classify net  */
+    else if (code != 200) rc = -code;            /* HTTP error (404->-404)-> classify gone  */
+    else if (fc.err) rc = -999;                  /* pack sideband / index-append error       */
+    else if (!fc.got_pack) rc = 0;               /* nothing new beyond haves (success, 0)    */
+    else if (git_indexer_commit(idx, &st) != 0) rc = -999;
+    else { git_odb_refresh(odb); struct wctx c = { odb, 0 }; git_odb_foreach(odb, walk_cb, &c); rc = c.ncommit; }
+    git_indexer_free(idx); git_odb_free(odb); git_repository_free(grepo);
     reset_scratch(scratch);
     return rc;
 }
@@ -235,11 +268,8 @@ static void do_repo(const char *repo, const char *before, const char *head, cons
     if (before && strlen(before) >= 40 && strncmp(before,"0000000000000000000000000000000000000000",40)) {
         char hv[64]; snprintf(hv,sizeof hv,"have %.40s\n",before); pkt(&body,hv); }
     pkt(&body,"ofs-delta\n"); pkt(&body,"no-progress\n"); pkt(&body,"filter tree:0\n"); pkt(&body,"done\n"); pkt_flush(&body);
-    buf_t fr = {0}; code = http(u2, body.p, body.n, &fr); free(body.p); free(wants.p);
-    if (code != 200) { note_fail(repo, code, "fetch"); free(fr.p); return; }
-    buf_t pack = {0}; parse_pack(&fr, &pack); free(fr.p);
-    long nc = extract_commits(&pack, scratch); free(pack.p);
-    if (nc < 0) { note_fail(repo, 500, "index"); return; }
+    long nc = fetch_extract(u2, body.p, body.n, scratch); free(body.p); free(wants.p);
+    if (nc < 0) { long e = -nc; note_fail(repo, e == 1 ? -1 : (e == 999 ? 500 : e), "fetch"); return; }
     note_ok(repo, head);
 }
 
@@ -289,7 +319,9 @@ int main(int argc, char **argv) {
     MAP_SIZE = (size_t)(getenv("SHARD_GB") ? atoi(getenv("SHARD_GB")) : 16) * 1024UL*1024*1024;
     /* per-shard flush threshold: total RAM cap ~= NSHARD * FLUSH_MB (default 128*16MB = 2GB) */
     FLUSH_BYTES = (size_t)(getenv("FLUSH_MB") ? atoi(getenv("FLUSH_MB")) : 16) * 1024UL*1024;
-    SCRATCH_ROOT = getenv("SCRATCH_ROOT"); if (!SCRATCH_ROOT) SCRATCH_ROOT = "/dev/shm/gcrt";
+    /* DISK scratch by default: the indexer streams the pack here, so tmpfs would defeat the
+     * streaming (pack back in RAM). Override SCRATCH_ROOT=/dev/shm only for small-pack workloads. */
+    SCRATCH_ROOT = getenv("SCRATCH_ROOT"); if (!SCRATCH_ROOT) SCRATCH_ROOT = "/media/volume/trees/.gcrt_scratch";
     mkdir(SCRATCH_ROOT, 0755);
     for (int n = 0; n < NSHARD; n++) pthread_mutex_init(&SH[n].mu, NULL);
     if (!TO_STDOUT) open_envs();                          /* keep all 128 envs open for incremental flush */
