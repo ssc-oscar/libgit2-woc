@@ -151,21 +151,29 @@ typedef struct { cobj *v; size_t n, cap, bytes; pthread_mutex_t mu; } sbuf;
 static sbuf SH[NSHARD];
 static int  TO_STDOUT = 0;
 static const char *DB_SH; static size_t MAP_SIZE; static size_t FLUSH_BYTES;
-static MDB_env *ENV[NSHARD]; static MDB_dbi DBI[NSHARD];      /* opened once, kept open, reused */
 static long TOT_STORED = 0, TOT_DUP = 0, COMMIT_CNT = 0;
 
-/* flush one shard's buffer to its LMDB env (caller holds SH[n].mu). One write txn; dedup on
- * MDB_NOOVERWRITE. Frees the copied contents and resets the buffer -> memory stays bounded. */
+/* flush one shard's buffer to its LMDB env (caller holds SH[n].mu). OPEN/write/sync/CLOSE per flush
+ * -- do NOT keep 128 envs mmap'd, or their touched pages accumulate in RSS (that + git_indexer was
+ * the 74GB in the dry-run). One writer per env at a time (shard lock), so open/close is safe.
+ * Dedup on MDB_NOOVERWRITE; frees the copied contents and resets the buffer. */
 static void flush_shard_locked(int n) {
-    sbuf *s = &SH[n]; if (s->n == 0 || !ENV[n]) return;
-    MDB_txn *txn; if (mdb_txn_begin(ENV[n], NULL, 0, &txn)) return;
+    sbuf *s = &SH[n]; if (s->n == 0 || TO_STDOUT) return;
+    char path[1024]; snprintf(path, sizeof path, "%s/shard_%03d", DB_SH, n); mkdir(path, 0755);
+    MDB_env *env; if (mdb_env_create(&env)) return;
+    mdb_env_set_mapsize(env, MAP_SIZE); mdb_env_set_maxreaders(env, 8);
+    if (mdb_env_open(env, path, 0, 0664)) { mdb_env_close(env); return; }
+    MDB_txn *txn; MDB_dbi dbi;
+    if (mdb_txn_begin(env, NULL, 0, &txn)) { mdb_env_close(env); return; }
+    mdb_dbi_open(txn, NULL, 0, &dbi);
     long stored = 0, dup = 0; int r;
     for (size_t i = 0; i < s->n; i++) {
         MDB_val k = { 20, s->v[i].sha }, v = { s->v[i].len, s->v[i].data };
-        r = mdb_put(txn, DBI[n], &k, &v, MDB_NOOVERWRITE);
+        r = mdb_put(txn, dbi, &k, &v, MDB_NOOVERWRITE);
         if (r == MDB_SUCCESS) stored++; else if (r == MDB_KEYEXIST) dup++;
     }
-    if (mdb_txn_commit(txn)) { mdb_txn_abort(txn); return; }
+    if (mdb_txn_commit(txn)) mdb_txn_abort(txn);
+    mdb_env_sync(env, 1); mdb_env_close(env);
     for (size_t i = 0; i < s->n; i++) free(s->v[i].data);
     s->n = 0; s->bytes = 0;
     __atomic_fetch_add(&TOT_STORED, stored, __ATOMIC_RELAXED);
@@ -209,7 +217,8 @@ static long fetch_extract(const char *fetchurl, const void *body, size_t blen, c
     git_repository_odb(&odb, grepo);
     char packdir[1100]; snprintf(packdir, sizeof packdir, "%s/objects/pack", scratch);
     git_indexer_progress st = {0};
-    if (git_indexer_new(&idx, packdir, 0, odb, NULL) != 0) { git_odb_free(odb); git_repository_free(grepo); return -1; }
+    git_indexer_options iopt = GIT_INDEXER_OPTIONS_INIT; iopt.verify = 0;   /* skip connectivity check */
+    if (git_indexer_new(&idx, packdir, 0, odb, &iopt) != 0) { git_odb_free(odb); git_repository_free(grepo); return -1; }
     fetch_ctx fc = { idx, &st, {0}, 0, 0, 0 };
     long code = http_stream(fetchurl, body, blen, &fc);
     free(fc.resid.p);
@@ -290,18 +299,7 @@ static void *worker(void *arg) {
     return NULL;
 }
 
-/* ---- LMDB env lifecycle + final residual flush ---------------------------------------------- */
-static void open_envs(void) {
-    for (int n = 0; n < NSHARD; n++) {
-        char path[1024]; snprintf(path, sizeof path, "%s/shard_%03d", DB_SH, n); mkdir(path, 0755);
-        MDB_env *env; if (mdb_env_create(&env)) { ENV[n]=NULL; continue; }
-        mdb_env_set_mapsize(env, MAP_SIZE); mdb_env_set_maxreaders(env, 256);
-        int r = mdb_env_open(env, path, 0, 0664);
-        if (r) { fprintf(stderr,"shard %d open: %s\n",n,mdb_strerror(r)); mdb_env_close(env); ENV[n]=NULL; continue; }
-        MDB_txn *txn; mdb_txn_begin(env, NULL, 0, &txn); mdb_dbi_open(txn, NULL, 0, &DBI[n]); mdb_txn_commit(txn);
-        ENV[n] = env;
-    }
-}
+/* ---- final residual flush (envs are opened/closed per flush, so nothing to open up front) ----- */
 static long WNEXT = 0;
 static void *final_flush(void *arg) {                   /* parallel flush of residual buffers */
     (void)arg;
@@ -309,12 +307,11 @@ static void *final_flush(void *arg) {                   /* parallel flush of res
         pthread_mutex_lock(&SH[n].mu); flush_shard_locked((int)n); pthread_mutex_unlock(&SH[n].mu); }
     return NULL;
 }
-static void close_envs(void) { for (int n = 0; n < NSHARD; n++) if (ENV[n]) { mdb_env_sync(ENV[n],1); mdb_env_close(ENV[n]); } }
 
 int main(int argc, char **argv) {
     curl_global_init(CURL_GLOBAL_DEFAULT); git_libgit2_init();
     DB_SH = getenv("DB_SH"); TO_STDOUT = (DB_SH == NULL);
-    int PAR  = getenv("PAR")  ? atoi(getenv("PAR"))  : 32;
+    int PAR  = getenv("PAR")  ? atoi(getenv("PAR"))  : 16;   /* lower default: memory ~ PAR x indexer */
     int WPAR = getenv("WPAR") ? atoi(getenv("WPAR")) : 16;
     MAP_SIZE = (size_t)(getenv("SHARD_GB") ? atoi(getenv("SHARD_GB")) : 16) * 1024UL*1024*1024;
     /* per-shard flush threshold: total RAM cap ~= NSHARD * FLUSH_MB (default 128*16MB = 2GB) */
@@ -324,7 +321,6 @@ int main(int argc, char **argv) {
     SCRATCH_ROOT = getenv("SCRATCH_ROOT"); if (!SCRATCH_ROOT) SCRATCH_ROOT = "/media/volume/trees/.gcrt_scratch";
     mkdir(SCRATCH_ROOT, 0755);
     for (int n = 0; n < NSHARD; n++) pthread_mutex_init(&SH[n].mu, NULL);
-    if (!TO_STDOUT) open_envs();                          /* keep all 128 envs open for incremental flush */
 
     /* slurp stdin -> LINES[] */
     size_t cap = 1024; LINES = malloc(cap * sizeof(char*)); char *line = NULL; size_t sz = 0; ssize_t r;
@@ -346,7 +342,6 @@ int main(int argc, char **argv) {
         pthread_t wt[64]; if (WPAR > 64) WPAR = 64;
         for (long i = 0; i < WPAR; i++) pthread_create(&wt[i], NULL, final_flush, NULL);
         for (long i = 0; i < WPAR; i++) pthread_join(wt[i], NULL);
-        close_envs();
     }
     long ncommits = COMMIT_CNT;
     long t_all = time(NULL) - t0;
