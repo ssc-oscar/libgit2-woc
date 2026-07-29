@@ -17,6 +17,7 @@
  */
 #include <git2.h>
 #include <curl/curl.h>
+#include <zlib.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -150,7 +151,7 @@ typedef struct { unsigned char sha[20]; unsigned char *data; uint32_t len; } cob
 typedef struct { cobj *v; size_t n, cap, bytes; pthread_mutex_t mu; } sbuf;
 static sbuf SH[NSHARD];
 static int  TO_STDOUT = 0;
-static const char *DB_SH; static size_t MAP_SIZE; static size_t FLUSH_BYTES;
+static const char *DB_SH; static size_t MAP_SIZE; static size_t FLUSH_BYTES; static size_t ZTHRESH = 512;
 static long TOT_STORED = 0, TOT_DUP = 0, COMMIT_CNT = 0;
 
 /* flush one shard's buffer to its LMDB env (caller holds SH[n].mu). OPEN/write/sync/CLOSE per flush
@@ -168,9 +169,17 @@ static void flush_shard_locked(int n) {
     mdb_dbi_open(txn, NULL, 0, &dbi);
     long stored = 0, dup = 0; int r;
     for (size_t i = 0; i < s->n; i++) {
-        MDB_val k = { 20, s->v[i].sha }, v = { s->v[i].len, s->v[i].data };
+        void *vd = s->v[i].data; size_t vl = s->v[i].len; unsigned char *zbuf = NULL;
+        if (vl >= ZTHRESH) {                              /* compress fat-tail values (0x01 tag) */
+            uLongf zl = compressBound(vl); zbuf = malloc(zl + 1);
+            if (zbuf && compress2(zbuf + 1, &zl, vd, vl, 6) == Z_OK && (size_t)zl + 1 < vl) {
+                zbuf[0] = 1; vd = zbuf; vl = zl + 1;
+            } else { free(zbuf); zbuf = NULL; }
+        }
+        MDB_val k = { 20, s->v[i].sha }, v = { vl, vd };
         r = mdb_put(txn, dbi, &k, &v, MDB_NOOVERWRITE);
         if (r == MDB_SUCCESS) stored++; else if (r == MDB_KEYEXIST) dup++;
+        free(zbuf);
     }
     if (mdb_txn_commit(txn)) mdb_txn_abort(txn);
     mdb_env_sync(env, 1); mdb_env_close(env);
@@ -313,9 +322,10 @@ int main(int argc, char **argv) {
     DB_SH = getenv("DB_SH"); TO_STDOUT = (DB_SH == NULL);
     int PAR  = getenv("PAR")  ? atoi(getenv("PAR"))  : 16;   /* lower default: memory ~ PAR x indexer */
     int WPAR = getenv("WPAR") ? atoi(getenv("WPAR")) : 16;
-    MAP_SIZE = (size_t)(getenv("SHARD_GB") ? atoi(getenv("SHARD_GB")) : 16) * 1024UL*1024*1024;
+    MAP_SIZE = (size_t)(getenv("SHARD_GB") ? atoi(getenv("SHARD_GB")) : 64) * 1024UL*1024*1024; /* sparse; 16->64 headroom */
     /* per-shard flush threshold: total RAM cap ~= NSHARD * FLUSH_MB (default 128*16MB = 2GB) */
     FLUSH_BYTES = (size_t)(getenv("FLUSH_MB") ? atoi(getenv("FLUSH_MB")) : 16) * 1024UL*1024;
+    if (getenv("ZTHRESH")) ZTHRESH = (size_t)atol(getenv("ZTHRESH"));   /* compress values >= this */
     /* DISK scratch by default: the indexer streams the pack here, so tmpfs would defeat the
      * streaming (pack back in RAM). Override SCRATCH_ROOT=/dev/shm only for small-pack workloads. */
     SCRATCH_ROOT = getenv("SCRATCH_ROOT"); if (!SCRATCH_ROOT) SCRATCH_ROOT = "/media/volume/trees/.gcrt_scratch";
