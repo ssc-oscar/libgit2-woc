@@ -78,9 +78,36 @@ static void set_common(CURL *c) {
     curl_easy_setopt(c, CURLOPT_USERAGENT, "git/2.43 grabCommitsRT");
     curl_easy_setopt(c, CURLOPT_TCP_KEEPALIVE, 1L);
 }
-static long http(const char *url, const void *body, size_t blen, buf_t *out) {
-    if (!TLC && !(TLC = curl_easy_init())) return -1;
-    CURL *c = TLC; curl_easy_reset(c);                          /* clears opts, KEEPS the connection */
+/* ---- self-rate-limiting: GLOBAL backoff on GitHub 403/429 (secondary rate limit) -------------
+ * A 403/429 means GitHub is throttling this IP; hammering harder gets it flagged (the 4h cutover
+ * blowup: 1346x403 + 2282x401). So ALL threads pause via a shared BACKOFF_UNTIL when any one is
+ * throttled (honor Retry-After, else exponential on the streak), and the throttled request retries
+ * after backing off. THROTTLE_STREAK resets on a 200 so backoff decays as things recover. */
+static long BACKOFF_UNTIL = 0, THROTTLE_STREAK = 0, BACKOFF_EVENTS = 0;
+static long RATE_BACKOFF = 60;      /* base backoff (s) when no Retry-After; env RATE_BACKOFF */
+static int  MAX_RETRY    = 5;       /* per-request retries on 403/429;      env MAX_RETRY     */
+static void wait_backoff(void) {
+    for (;;) {
+        long until = __atomic_load_n(&BACKOFF_UNTIL, __ATOMIC_RELAXED), now = time(NULL);
+        if (until <= now) return;
+        long d = until - now; if (d > 5) d = 5;                  /* re-check (peer may extend) */
+        sleep(d);
+    }
+}
+static void note_throttle(CURL *c) {
+    curl_off_t ra = 0; curl_easy_getinfo(c, CURLINFO_RETRY_AFTER, &ra);
+    long streak = __atomic_add_fetch(&THROTTLE_STREAK, 1, __ATOMIC_RELAXED);
+    long delay = ra > 0 ? (long)ra : RATE_BACKOFF * (streak < 4 ? streak : 4);
+    if (delay > 600) delay = 600;
+    long until = time(NULL) + delay, cur;
+    do { cur = __atomic_load_n(&BACKOFF_UNTIL, __ATOMIC_RELAXED); if (until <= cur) break; }
+    while (!__atomic_compare_exchange_n(&BACKOFF_UNTIL, &cur, until, 0, __ATOMIC_RELAXED, __ATOMIC_RELAXED));
+    if (__atomic_add_fetch(&BACKOFF_EVENTS, 1, __ATOMIC_RELAXED) % 100 == 1)
+        fprintf(stderr, "THROTTLE 403/429 -> global backoff %lds (streak=%ld)\n", delay, streak);
+}
+/* build the request on the thread's persistent handle */
+static struct curl_slist *http_setup(CURL *c, const char *url, const void *body, size_t blen) {
+    curl_easy_reset(c);
     struct curl_slist *h = curl_slist_append(NULL, "Git-Protocol: version=2");
     if (body) {
         h = curl_slist_append(h, "Content-Type: application/x-git-upload-pack-request");
@@ -91,12 +118,25 @@ static long http(const char *url, const void *body, size_t blen, buf_t *out) {
     }
     curl_easy_setopt(c, CURLOPT_URL, url);
     curl_easy_setopt(c, CURLOPT_HTTPHEADER, h);
-    curl_easy_setopt(c, CURLOPT_WRITEDATA, out);
     set_common(c);
-    CURLcode rc = curl_easy_perform(c);
-    long code = -1; if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
-    curl_slist_free_all(h);                                     /* header list is per-request; handle persists */
-    return rc == CURLE_OK ? code : -1;
+    return h;
+}
+static long http(const char *url, const void *body, size_t blen, buf_t *out) {
+    if (!TLC && !(TLC = curl_easy_init())) return -1;
+    CURL *c = TLC; long code = -1; int tries = 0;
+    for (;;) {
+        struct curl_slist *h = http_setup(c, url, body, blen);
+        curl_easy_setopt(c, CURLOPT_WRITEDATA, out);
+        buf_reset(out);                                          /* drop any partial from a retry */
+        wait_backoff();
+        CURLcode rc = curl_easy_perform(c);
+        code = -1; if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
+        curl_slist_free_all(h);
+        if (rc == CURLE_OK && (code == 403 || code == 429)) { note_throttle(c); if (++tries <= MAX_RETRY) continue; }
+        if (rc != CURLE_OK) return -1;
+        if (code == 200) __atomic_store_n(&THROTTLE_STREAK, 0, __ATOMIC_RELAXED);
+        return code;
+    }
 }
 
 /* ---- pkt-line parsers ----------------------------------------------------------------------- */
@@ -142,19 +182,23 @@ static size_t fetch_wcb(void *data, size_t sz, size_t nm, void *u) {
 }
 static long http_stream(const char *url, const void *body, size_t blen, fetch_ctx *fc) {
     if (!TLC && !(TLC = curl_easy_init())) return -1;
-    CURL *c = TLC; curl_easy_reset(c);                          /* reuse the worker's persistent handle */
-    struct curl_slist *h = curl_slist_append(NULL, "Git-Protocol: version=2");
-    h = curl_slist_append(h, "Content-Type: application/x-git-upload-pack-request");
-    h = curl_slist_append(h, "Accept: application/x-git-upload-pack-result");
-    curl_easy_setopt(c, CURLOPT_URL, url); curl_easy_setopt(c, CURLOPT_POST, 1L);
-    curl_easy_setopt(c, CURLOPT_POSTFIELDS, body); curl_easy_setopt(c, CURLOPT_POSTFIELDSIZE, (long)blen);
-    curl_easy_setopt(c, CURLOPT_HTTPHEADER, h);
-    curl_easy_setopt(c, CURLOPT_WRITEDATA, fc);
-    set_common(c); curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, fetch_wcb);   /* override wcb for streaming */
-    CURLcode rc = curl_easy_perform(c);
-    long code = -1; if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
-    curl_slist_free_all(h);                                     /* handle persists for the next request */
-    return rc == CURLE_OK ? code : -1;
+    CURL *c = TLC; long code = -1; int tries = 0;
+    for (;;) {
+        struct curl_slist *h = http_setup(c, url, body, blen);
+        curl_easy_setopt(c, CURLOPT_WRITEDATA, fc);
+        curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, fetch_wcb);  /* streaming demuxer -> git_indexer */
+        wait_backoff();
+        CURLcode rc = curl_easy_perform(c);
+        code = -1; if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
+        curl_slist_free_all(h);
+        /* 403/429 hits BEFORE any pack bytes (GitHub rejects up front) -> got_pack==0 -> safe to retry. */
+        if (rc == CURLE_OK && (code == 403 || code == 429) && !fc->got_pack) {
+            note_throttle(c); if (++tries <= MAX_RETRY) continue;
+        }
+        if (rc != CURLE_OK) return -1;
+        if (code == 200) __atomic_store_n(&THROTTLE_STREAK, 0, __ATOMIC_RELAXED);
+        return code;
+    }
 }
 
 /* ---- 128 shard buffers with INCREMENTAL FLUSH (bound memory regardless of hour size) --------- */
@@ -337,6 +381,8 @@ int main(int argc, char **argv) {
     /* per-shard flush threshold: total RAM cap ~= NSHARD * FLUSH_MB (default 128*16MB = 2GB) */
     FLUSH_BYTES = (size_t)(getenv("FLUSH_MB") ? atoi(getenv("FLUSH_MB")) : 16) * 1024UL*1024;
     if (getenv("ZTHRESH")) ZTHRESH = (size_t)atol(getenv("ZTHRESH"));   /* compress values >= this */
+    if (getenv("RATE_BACKOFF")) RATE_BACKOFF = atol(getenv("RATE_BACKOFF"));  /* 403 backoff base (s) */
+    if (getenv("MAX_RETRY"))    MAX_RETRY    = atoi(getenv("MAX_RETRY"));     /* per-request retries  */
     /* DISK scratch by default: the indexer streams the pack here, so tmpfs would defeat the
      * streaming (pack back in RAM). Override SCRATCH_ROOT=/dev/shm only for small-pack workloads. */
     SCRATCH_ROOT = getenv("SCRATCH_ROOT"); if (!SCRATCH_ROOT) SCRATCH_ROOT = "/media/volume/trees/.gcrt_scratch";
@@ -382,8 +428,8 @@ int main(int argc, char **argv) {
             C_GONE, C_THROTTLE, C_NET, C_OTHER, t_all, TOT_STORED, TOT_DUP); fclose(f); }
     }
     fprintf(stderr, "[grabCommitsRT] repos=%ld ok=%ld fail=%ld (gone=%ld throttle=%ld net=%ld other=%ld) "
-            "commits=%ld stored=%ld dup=%ld fetch=%lds total=%lds par=%d wpar=%d\n", NLINES, OK_CNT,
-            FAIL_CNT, C_GONE, C_THROTTLE, C_NET, C_OTHER, ncommits, TOT_STORED, TOT_DUP, t_fetch, t_all, PAR, WPAR);
+            "commits=%ld stored=%ld dup=%ld backoff_events=%ld fetch=%lds total=%lds par=%d wpar=%d\n", NLINES, OK_CNT,
+            FAIL_CNT, C_GONE, C_THROTTLE, C_NET, C_OTHER, ncommits, TOT_STORED, TOT_DUP, BACKOFF_EVENTS, t_fetch, t_all, PAR, WPAR);
     git_libgit2_shutdown(); curl_global_cleanup();
     return 0;
 }
