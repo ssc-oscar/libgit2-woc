@@ -67,8 +67,20 @@ static void pkt_delim(buf_t *b) { buf_add(b, "0001", 4); }
 
 /* ---- libcurl transport ---------------------------------------------------------------------- */
 static size_t wcb(void *d, size_t sz, size_t nm, void *u) { buf_add((buf_t *)u, d, sz * nm); return sz * nm; }
+/* one persistent easy handle PER WORKER THREAD, reused across every request. curl_easy_reset keeps
+ * the live connection pool + DNS cache + TLS session cache -> keep-alive to github.com, no per-request
+ * TLS handshake/DNS (was ~78k handshakes/hr = the 6h cutover blowup). */
+static __thread CURL *TLC = NULL;
+static void set_common(CURL *c) {
+    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, wcb);
+    curl_easy_setopt(c, CURLOPT_TIMEOUT, 600L);
+    curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, 20L);          /* fast-fail dead/slow repos */
+    curl_easy_setopt(c, CURLOPT_USERAGENT, "git/2.43 grabCommitsRT");
+    curl_easy_setopt(c, CURLOPT_TCP_KEEPALIVE, 1L);
+}
 static long http(const char *url, const void *body, size_t blen, buf_t *out) {
-    CURL *c = curl_easy_init(); if (!c) return -1;
+    if (!TLC && !(TLC = curl_easy_init())) return -1;
+    CURL *c = TLC; curl_easy_reset(c);                          /* clears opts, KEEPS the connection */
     struct curl_slist *h = curl_slist_append(NULL, "Git-Protocol: version=2");
     if (body) {
         h = curl_slist_append(h, "Content-Type: application/x-git-upload-pack-request");
@@ -79,13 +91,11 @@ static long http(const char *url, const void *body, size_t blen, buf_t *out) {
     }
     curl_easy_setopt(c, CURLOPT_URL, url);
     curl_easy_setopt(c, CURLOPT_HTTPHEADER, h);
-    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, wcb);
     curl_easy_setopt(c, CURLOPT_WRITEDATA, out);
-    curl_easy_setopt(c, CURLOPT_TIMEOUT, 600L);
-    curl_easy_setopt(c, CURLOPT_USERAGENT, "git/2.43 grabCommitsRT");
+    set_common(c);
     CURLcode rc = curl_easy_perform(c);
     long code = -1; if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
-    curl_slist_free_all(h); curl_easy_cleanup(c);
+    curl_slist_free_all(h);                                     /* header list is per-request; handle persists */
     return rc == CURLE_OK ? code : -1;
 }
 
@@ -131,18 +141,19 @@ static size_t fetch_wcb(void *data, size_t sz, size_t nm, void *u) {
     return total;
 }
 static long http_stream(const char *url, const void *body, size_t blen, fetch_ctx *fc) {
-    CURL *c = curl_easy_init(); if (!c) return -1;
+    if (!TLC && !(TLC = curl_easy_init())) return -1;
+    CURL *c = TLC; curl_easy_reset(c);                          /* reuse the worker's persistent handle */
     struct curl_slist *h = curl_slist_append(NULL, "Git-Protocol: version=2");
     h = curl_slist_append(h, "Content-Type: application/x-git-upload-pack-request");
     h = curl_slist_append(h, "Accept: application/x-git-upload-pack-result");
     curl_easy_setopt(c, CURLOPT_URL, url); curl_easy_setopt(c, CURLOPT_POST, 1L);
     curl_easy_setopt(c, CURLOPT_POSTFIELDS, body); curl_easy_setopt(c, CURLOPT_POSTFIELDSIZE, (long)blen);
     curl_easy_setopt(c, CURLOPT_HTTPHEADER, h);
-    curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, fetch_wcb); curl_easy_setopt(c, CURLOPT_WRITEDATA, fc);
-    curl_easy_setopt(c, CURLOPT_TIMEOUT, 600L); curl_easy_setopt(c, CURLOPT_USERAGENT, "git/2.43 grabCommitsRT");
+    curl_easy_setopt(c, CURLOPT_WRITEDATA, fc);
+    set_common(c); curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, fetch_wcb);   /* override wcb for streaming */
     CURLcode rc = curl_easy_perform(c);
     long code = -1; if (rc == CURLE_OK) curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
-    curl_slist_free_all(h); curl_easy_cleanup(c);
+    curl_slist_free_all(h);                                     /* handle persists for the next request */
     return rc == CURLE_OK ? code : -1;
 }
 
