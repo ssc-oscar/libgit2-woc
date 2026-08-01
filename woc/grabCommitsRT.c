@@ -10,8 +10,10 @@
  * (each with its own /dev/shm scratch); commits buffer into 128 shard buffers; then a parallel write
  * phase puts them into commits_sh (LMDB, dedup via MDB_NOOVERWRITE). No DB_SH => emit shas to stdout.
  *
- * build: cc -O2 -o grabCommitsRT grabCommitsRT.c -Iinclude -Lbuild -lgit2 -lcurl -lz -lpthread -llmdb
- *        (system liblmdb.so.0.0.0 = LMDB 0.9.29; on-disk format matches py-lmdb's shards)
+ * build (from libgit2-woc root): cc -O2 -o woc/grabCommitsRT woc/grabCommitsRT.c -Iinclude -Lbuild \
+ *        -lgit2 -lcurl -lz -lpthread /usr/lib64/liblmdb.so.0.0.0
+ *        (no liblmdb.so dev symlink on this box -> link the versioned lib by full path, not -llmdb;
+ *         system liblmdb.so.0.0.0 = LMDB 0.9.29; on-disk format matches py-lmdb's shards)
  * env:  DB_SH (128-shard commits_sh dir; unset=stdout), PAR (fetch threads, def 32),
  *       WPAR (shard-write threads, def 16), SHARD_GB (map size, def 16), SCRATCH_ROOT (def /dev/shm/gcrt)
  */
@@ -22,6 +24,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <dirent.h>
@@ -321,8 +324,51 @@ static void note_ok(const char *repo, const char *head) {
         pthread_mutex_unlock(&OUTMU); }
 }
 
+/* ---- giant-repo guard (parity with commit_store_sh.py) --------------------------------------- */
+/* The FUSED path bypasses commit_store_sh, so grabCommitsRT must both (a) SKIP known giants
+ * (belt-and-suspenders: gharchiveRT already filters heads.txt, but direct catchup runs and
+ * post-list detections aren't covered) and (b) DETECT new giants -- else a mega-history/commit-bomb
+ * repo is re-fetched every hour forever (nothing else ever writes giant-repos.tsv on this path).
+ * A detected giant is appended to GIANTFILE (RT skip key) + GIANTQ (mirrorClone url<TAB>mangled<TAB>N). */
+static long GIANT_COMMITS = 500000;
+static const char *GIANTFILE = NULL, *GIANTQ = NULL;
+static char **GIANTS = NULL; static long NGIANT = 0;          /* sorted, lowercased mangled names */
+static long C_GIANT_SKIP = 0, C_GIANT_NEW = 0;
+static pthread_mutex_t GIANTMU = PTHREAD_MUTEX_INITIALIZER;
+static void mangle_lc(const char *repo, char *out, size_t n) {/* owner/repo -> owner_repo, lowercased */
+    size_t i = 0; for (; repo[i] && i + 1 < n; i++) { char c = repo[i]; out[i] = (c=='/') ? '_' : (char)tolower((unsigned char)c); }
+    out[i] = 0;
+}
+static int gcmp(const void *a, const void *b) { return strcmp(*(const char *const *)a, *(const char *const *)b); }
+static void load_giants(void) {
+    if (!GIANTFILE) return; FILE *f = fopen(GIANTFILE, "r"); if (!f) return;
+    size_t cap = 0; char *ln = NULL; ssize_t r;
+    while ((r = getline(&ln, &cap, f)) >= 0) {
+        char *t = strpbrk(ln, "\t\n"); if (t) *t = 0; if (!*ln) continue;
+        for (char *p = ln; *p; p++) *p = (char)tolower((unsigned char)*p);   /* field1 is already mangled */
+        GIANTS = realloc(GIANTS, (size_t)(NGIANT + 1) * sizeof *GIANTS); GIANTS[NGIANT++] = strdup(ln);
+    }
+    free(ln); fclose(f);
+    if (NGIANT) qsort(GIANTS, (size_t)NGIANT, sizeof *GIANTS, gcmp);
+}
+static int is_giant(const char *repo) {
+    if (!NGIANT) return 0; char m[1024]; mangle_lc(repo, m, sizeof m); char *key = m;
+    return bsearch(&key, GIANTS, (size_t)NGIANT, sizeof *GIANTS, gcmp) != NULL;
+}
+static void note_giant(const char *repo, long nc) {          /* repo = owner/repo (original case) */
+    char m[1024]; size_t i = 0; for (; repo[i] && i + 1 < sizeof m; i++) m[i] = repo[i]=='/' ? '_' : repo[i]; m[i] = 0;
+    __atomic_fetch_add(&C_GIANT_NEW, 1, __ATOMIC_RELAXED);
+    pthread_mutex_lock(&GIANTMU);
+    FILE *f;
+    if (GIANTFILE && (f = fopen(GIANTFILE, "a"))) { fprintf(f, "%s\t>%ld\trt(%ld)\n", m, GIANT_COMMITS, nc); fclose(f); }
+    if (GIANTQ   && (f = fopen(GIANTQ,   "a"))) { fprintf(f, "https://github.com/%s\t%s\t>%ld\n", repo, m, GIANT_COMMITS); fclose(f); }
+    pthread_mutex_unlock(&GIANTMU);
+    fprintf(stderr, "GIANT %s nc=%ld -> skip-list + mirror queue\n", repo, nc);
+}
+
 /* ---- one repo: discover -> ls-refs -> fetch(filter tree:0) -> extract ------------------------ */
 static void do_repo(const char *repo, const char *before, const char *head, const char *scratch) {
+    if (is_giant(repo)) { __atomic_fetch_add(&C_GIANT_SKIP, 1, __ATOMIC_RELAXED); return; }  /* known giant -> mirror handles it */
     char url[1024], u2[1200];
     snprintf(url, sizeof url, "https://github.com/%s", repo);
     snprintf(u2, sizeof u2, "%s/info/refs?service=git-upload-pack", url);
@@ -343,6 +389,7 @@ static void do_repo(const char *repo, const char *before, const char *head, cons
     pkt(&body,"ofs-delta\n"); pkt(&body,"no-progress\n"); pkt(&body,"filter tree:0\n"); pkt(&body,"done\n"); pkt_flush(&body);
     long nc = fetch_extract(u2, body.p, body.n, scratch); free(body.p); free(wants.p);
     if (nc < 0) { long e = -nc; note_fail(repo, e == 1 ? -1 : (e == 999 ? 500 : e), "fetch"); return; }
+    if (nc > GIANT_COMMITS) note_giant(repo, nc);   /* flag -> skipped next run, diverted to --mirror */
     note_ok(repo, head);
 }
 
@@ -388,6 +435,10 @@ int main(int argc, char **argv) {
     SCRATCH_ROOT = getenv("SCRATCH_ROOT"); if (!SCRATCH_ROOT) SCRATCH_ROOT = "/media/volume/trees/.gcrt_scratch";
     mkdir(SCRATCH_ROOT, 0755);
     for (int n = 0; n < NSHARD; n++) pthread_mutex_init(&SH[n].mu, NULL);
+    if (getenv("GIANT_COMMITS")) GIANT_COMMITS = atol(getenv("GIANT_COMMITS"));
+    GIANTFILE = getenv("GIANTFILE"); if (!GIANTFILE) GIANTFILE = "/media/volume/trees/giant-repos.tsv";
+    GIANTQ    = getenv("GIANTQ");    if (!GIANTQ)    GIANTQ    = "/media/volume/trees/giant.mirror.urls";
+    load_giants();   /* skip known giants (mirror handles them); detect+flag new ones */
 
     /* slurp stdin -> LINES[] */
     size_t cap = 1024; LINES = malloc(cap * sizeof(char*)); char *line = NULL; size_t sz = 0; ssize_t r;
@@ -428,8 +479,9 @@ int main(int argc, char **argv) {
             C_GONE, C_THROTTLE, C_NET, C_OTHER, t_all, TOT_STORED, TOT_DUP); fclose(f); }
     }
     fprintf(stderr, "[grabCommitsRT] repos=%ld ok=%ld fail=%ld (gone=%ld throttle=%ld net=%ld other=%ld) "
-            "commits=%ld stored=%ld dup=%ld backoff_events=%ld fetch=%lds total=%lds par=%d wpar=%d\n", NLINES, OK_CNT,
-            FAIL_CNT, C_GONE, C_THROTTLE, C_NET, C_OTHER, ncommits, TOT_STORED, TOT_DUP, BACKOFF_EVENTS, t_fetch, t_all, PAR, WPAR);
+            "commits=%ld stored=%ld dup=%ld backoff_events=%ld giant_skip=%ld giant_new=%ld fetch=%lds total=%lds par=%d wpar=%d\n",
+            NLINES, OK_CNT, FAIL_CNT, C_GONE, C_THROTTLE, C_NET, C_OTHER, ncommits, TOT_STORED, TOT_DUP, BACKOFF_EVENTS,
+            C_GIANT_SKIP, C_GIANT_NEW, t_fetch, t_all, PAR, WPAR);
     git_libgit2_shutdown(); curl_global_cleanup();
     return 0;
 }
