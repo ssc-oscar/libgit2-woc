@@ -356,7 +356,7 @@ static int is_giant(const char *repo) {
     return bsearch(&key, GIANTS, (size_t)NGIANT, sizeof *GIANTS, gcmp) != NULL;
 }
 static void note_giant(const char *repo, long nc) {          /* repo = owner/repo (original case) */
-    char m[1024]; size_t i = 0; for (; repo[i] && i + 1 < sizeof m; i++) m[i] = repo[i]=='/' ? '_' : repo[i]; m[i] = 0;
+    char m[1024]; mangle_lc(repo, m, sizeof m);               /* canonical WoC mangle = all-lowercase */
     __atomic_fetch_add(&C_GIANT_NEW, 1, __ATOMIC_RELAXED);
     pthread_mutex_lock(&GIANTMU);
     FILE *f;
