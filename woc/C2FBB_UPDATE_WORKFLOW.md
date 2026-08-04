@@ -60,8 +60,12 @@ Two content sets, both **LZF-valued** (so `getContent` in the reader decompresse
 - Both are **global** (all 128 of each type) — a commit's parent/tree can land in any section.
 
 ### 5. Run the diff — two modes of the SAME binary `cmputeDiffGenFB`
-- **da5 (store-resident):** `cmputeDiffGenFB <treeContentDir> <offTchDir=/fast/All.sha1o> <baseBin=/data/All.blobs>`
-  `LAYERED=/fast/All.blobsGen` — `HAVEFB=1`. Resolves: content subset → base `sha1o` → **gen `sidx`**.
+> AD-HOC single commit(s), not a batch shard? Use `cmputeDiff.sh <sha>` (da5:~/bin) — correct default
+> paths baked in (arg1 = `/fast/All.sha1c`, the base COMMIT content dir). See STORE_QUICKREF.md.
+- **da5 (store-resident):** `cmputeDiffGenFB <contentDir=/fast/All.sha1c> <offTchDir=/fast/All.sha1o> <baseBin=/data/All.blobs>`
+  `LAYERED=/fast/All.blobsGen` — `HAVEFB=1`. arg1 = base COMMIT content (`All.sha1c`); trees resolve via the
+  offset fallback (`All.sha1o`→`All.blobs`) + gen `sidx`. (In batch, arg1 is the staged closure dir holding
+  both `commit_<sec>.tch` and `tree_<sec>.tch`.)
 - **other servers (content-only):** `cmputeDiffGenFB <contentDir>` (1 arg) — `HAVEFB=0`, pure
   `getContent` from `contentDir/{tree,commit}_<sec>.tch`. Ship both `.tch` sets to the host first.
 - Driver: `diffRun.sh` (loops 0..127, PAR-parallel, resumable via `diff.<sec>.done`). Output

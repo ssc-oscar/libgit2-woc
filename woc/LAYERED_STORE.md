@@ -48,7 +48,9 @@ lifecycle:
 **Reading sha→object is LAYERED, not a combined/extended map** (corrected 2026-07-10 — see
 `DIFF_PROCESS.md`, [[layered-map-architecture]]). Each layer keeps its OWN index and the reader
 consults them in order:
-- **base (frozen):** commit CONTENT `/fast/All.sha1c`, tree/commit OFFSET `/fast/All.sha1o`.
+- **base (frozen):** commit (also tag/tkns) CONTENT `/fast/All.sha1c`; tree/blob OFFSET `/fast/All.sha1o`
+  (→ content in `/data/All.blobs/<type>_<sec>.bin`). NOTE: commits are content-only on da5 — there is NO
+  `sha1.commit_*.tch` in `All.sha1o` here (da3/da4 precompute one for offset-mode diffs). See STORE_QUICKREF.md.
 - **gen:** the per-shard **`.sidx`** inside `gen<N>/` (sha20+off+len, `sidx.c`), **created as
   objects are added** by `convert_backlog.sh`. This IS the gen offset index.
 - The read tool (`cmputeDiffGen`) does **sidx-first**: gen `.sidx` (fresh) → base map. So a stale
