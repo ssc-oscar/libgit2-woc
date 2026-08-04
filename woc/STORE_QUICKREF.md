@@ -40,7 +40,10 @@ Same binary; per-sec `.cs` shalists staged. See DIFF_PROCESS.md / C2FBB_UPDATE_W
 `showCmt.perl / showTree.perl / showBlob.perl / catCmt.perl` read ONLY the base maps — a commit/tree/blob
 that lives in the **gen layer** (anything past the V2605 base watermark: RT/backfill objects) returns a
 FALSE "not found." Do not conclude an object is absent from a base-only reader.
-- **gen-aware readers today:** `cmputeDiffGenFB` (`getObj`, commit+tree, base∪gen) and `blobDump`
-  (blobs, offset+base∪gen). A general gen-aware `getContent <sha>` single-object dumper does NOT yet
-  exist — TODO (reuse `cmputeDiffGenFB.c:getObj`); until then, for a recent object use the diff wrapper
-  (proves presence) or read the gen `.idx`/`.bin` directly per the format above.
+- **GEN-AWARE content reader (use this, not the perl show*):** `getContent.sh <type> [-r]` (da5:~/bin,
+  binary `getObjGen`). Reads `sha[;rest]` from STDIN like showCnt; resolves base∪gen. `<type>` =
+  commit|tree|blob|tag|tkns. Default output `<sha>;<base64(content)>` (one safe line, even binary/multiline
+  blobs — the showCnt "encode to one line" option); `-r` = raw bytes (single object, cat-style). Verified:
+  a gen commit that `showCnt.perl commit` reports `no commit … in 0` IS resolved by `getContent.sh commit`.
+  (blob base content isn't on da5, so `blob` resolves only from gen here; run blob content on the blob store.)
+- other gen-aware paths: `cmputeDiffGenFB` (diff), `blobDump` (blob batch, offset+base∪gen).
