@@ -3,6 +3,19 @@
 Ground truth verified on da5, V2605 (2026-08-04). This is the canonical layout + the exact commands so
 an agent does NOT reverse-engineer paths. The #1 trap is at the bottom (base-only readers miss gen).
 
+## TL;DR — use these two wrappers (da5:~/bin), they bake in the correct paths + are GEN-AWARE
+```bash
+# logical (file-level) diff of a commit -> commit;new_path;new_blob;old_path
+echo <commit_sha> | cmputeDiff.sh              # or: cmputeDiff.sh <sha> [<sha>...]
+
+# object content (commit|tree|blob|tag|tkns), reads sha[;rest] from STDIN like showCnt
+echo <sha> | getContent.sh commit              # default: <sha>;<base64(content)> (one safe line)
+echo <sha> | getContent.sh commit -r           # -r: raw bytes (single object, cat-style)
+```
+Both resolve base ∪ gen, so they work for ANY in-store object regardless of BF-closure — unlike the
+base-only perl readers (`showCnt.perl`/`showCmt`/`showTree`/`showBlob`), which silently miss gen objects.
+Details, output formats, and the exact default paths are below.
+
 ## Base store layout (frozen, V2605) — content vs offset differs BY TYPE
 | type | primary map on da5 | kind | content bin |
 |---|---|---|---|
