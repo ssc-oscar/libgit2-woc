@@ -88,6 +88,31 @@ static int gen_lookup(int sec,const uint8_t*sha20,long long*goff,int*len){ if(!L
     if(c<0)lo=mid+1; else hi=mid-1; } return 0; }
 
 static int fromhex(const char*s,uint8_t*o){ for(int i=0;i<20;i++){int a=s[2*i],b=s[2*i+1]; a=a<='9'?a-'0':(a|32)-'a'+10; b=b<='9'?b-'0':(b|32)-'a'+10; if(a<0||a>15||b<0||b>15)return 0; o[i]=(a<<4)|b;} return 1; }
+static void tohex(const uint8_t*b,char*o){ static const char*h="0123456789abcdef"; for(int i=0;i<20;i++){o[2*i]=h[b[i]>>4];o[2*i+1]=h[b[i]&15];} o[40]=0; }
+
+/* SCAN mode: iterate the gen sidx for a sec, gen-decode every record, emit the shas that fail.
+ * Skips the base content/offset lookups (all gen recs miss those) -> just readObj+clzf per record.
+ * Output: `<decodefail|readfail>\t<sec>\t<sha>`; stderr a one-line per-sec summary. */
+static void scan_gen(int sec){
+  if(!LAYERED) return;
+  char p[600]; snprintf(p,sizeof p,"%s/%s_gen1/%s_%d.sidx",LAYERED,TYPE,TYPE,sec);
+  int fd=open(p,O_RDONLY); if(fd<0) return;
+  struct stat st; if(fstat(fd,&st)!=0){ close(fd); return; }
+  long n=st.st_size/32;
+  build_segs(sec); long long bs=(SEG[sec].n>0)?SEG[sec].s[0].size:0;
+  static uint8_t cbuf[1<<26], obuf[1<<26]; uint8_t rec[32]; char hx[41];
+  long ndec=0,nrd=0;
+  for(long i=0;i<n;i++){
+    if(pread(fd,rec,32,(off_t)i*32)!=32) continue;
+    unsigned long long o; unsigned int l; memcpy(&o,rec+20,8); memcpy(&l,rec+28,4);
+    long rr=readObj(sec,(long long)o+bs,(int)l,cbuf,sizeof cbuf);
+    tohex(rec,hx);
+    if(rr<0){ printf("readfail\t%d\t%s\n",sec,hx); nrd++; continue; }
+    if(clzf(cbuf,rr,obuf,sizeof obuf)<0){ printf("decodefail\t%d\t%s\n",sec,hx); ndec++; }
+  }
+  close(fd);
+  fprintf(stderr,"[scan] %s sec %d: %ld recs, %ld decodefail, %ld readfail\n",TYPE,sec,n,ndec,nrd);
+}
 
 /* unified read: content .tch -> base offset -> gen sidx.
  * Distinct negative codes so a caller can tell ABSENCE from a located-but-undecodable record:
@@ -114,6 +139,11 @@ int main(int argc,char**argv){
   struct rlimit rl; if(getrlimit(RLIMIT_NOFILE,&rl)==0){ rl.rlim_cur=rl.rlim_max; setrlimit(RLIMIT_NOFILE,&rl); }
   TYPE=argv[1]; PREC=argv[2]; PREO=argv[3]; BASEBIN=argv[4]; LAYERED=getenv("LAYERED");
   const char*enc=getenv("ENC"); int raw = enc && !strcmp(enc,"raw");
+  if(getenv("SCAN")){                          /* SCAN mode: iterate gen sidx, emit decode/read failures */
+    const char*se=getenv("SEC");
+    if(se) scan_gen(atoi(se)); else for(int s=0;s<NSEC;s++) scan_gen(s);
+    return 0;
+  }
   static uint8_t out[1<<26]; char line[8192];
   while(fgets(line,sizeof line,stdin)){
     char*nl=strpbrk(line,"\r\n;"); if(nl)*nl=0;                 /* sha[;rest] -> sha */
