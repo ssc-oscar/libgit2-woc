@@ -89,13 +89,18 @@ static int gen_lookup(int sec,const uint8_t*sha20,long long*goff,int*len){ if(!L
 
 static int fromhex(const char*s,uint8_t*o){ for(int i=0;i<20;i++){int a=s[2*i],b=s[2*i+1]; a=a<='9'?a-'0':(a|32)-'a'+10; b=b<='9'?b-'0':(b|32)-'a'+10; if(a<0||a>15||b<0||b>15)return 0; o[i]=(a<<4)|b;} return 1; }
 
-/* unified read: content .tch -> base offset -> gen sidx */
+/* unified read: content .tch -> base offset -> gen sidx.
+ * Distinct negative codes so a caller can tell ABSENCE from a located-but-undecodable record:
+ *   -1 = not found (not in base content, base offset, or gen sidx)
+ *   -2 = FOUND (offset resolved) but readObj failed (bad offset/segment)
+ *   -3 = FOUND + read OK but LZF decode failed (rare corrupt gen record; ~7e-4 of gen commits)   */
 static long getObj(const char*sha40,uint8_t*out,size_t cap){
   uint8_t sha[20]; if(!fromhex(sha40,sha)) return -1; int sec=sha[0]%NSEC;
-  long r=getContent(sec,sha,out,cap); if(r>=0) return r;
+  long r=getContent(sec,sha,out,cap); if(r>=0) return r;   /* base content tch (its own clzf; miss->fall through) */
   long long goff; int len; if(!lookup(sec,sha,&goff,&len) && !gen_lookup(sec,sha,&goff,&len)) return -1;
-  static uint8_t cbuf[1<<26]; long rr=readObj(sec,goff,len,cbuf,sizeof cbuf); if(rr<0) return -1;
-  return clzf(cbuf,rr,out,cap);
+  static uint8_t cbuf[1<<26]; long rr=readObj(sec,goff,len,cbuf,sizeof cbuf); if(rr<0) return -2;
+  long dr=clzf(cbuf,rr,out,cap); if(dr<0) return -3;
+  return dr;
 }
 
 static const char B64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -114,7 +119,9 @@ int main(int argc,char**argv){
     char*nl=strpbrk(line,"\r\n;"); if(nl)*nl=0;                 /* sha[;rest] -> sha */
     if(strlen(line)<40) continue;
     long n=getObj(line,out,sizeof out);
-    if(n<0){ fprintf(stderr,"no %s %s\n",TYPE,line); continue; }
+    if(n==-1){ fprintf(stderr,"no %s %s\n",TYPE,line); continue; }              /* absent */
+    if(n==-2){ fprintf(stderr,"readfail %s %s (bad offset/segment)\n",TYPE,line); continue; }
+    if(n==-3){ fprintf(stderr,"decodefail %s %s (found in gen; LZF decode failed -- corrupt record)\n",TYPE,line); continue; }
     if(raw){ fwrite(out,1,n,stdout); }
     else { fputs(line,stdout); putchar(';'); b64out(out,n); putchar('\n'); }
   }
