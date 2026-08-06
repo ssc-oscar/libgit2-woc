@@ -131,23 +131,25 @@ static int fromhex(const char*s,uint8_t*o){ for(int i=0;i<20;i++){int a=s[2*i],b
  * len u32le, sorted by sha; off is LOCAL into the gen1 bin). Binary search; returns GLOBAL
  * offset (base_size + local) so readObj's base+gen segment chain reads the gen bin. This is
  * how the reader resolves gen trees now that gen offsets are NOT grafted into base sha1o. */
-static int GSFD[2][NSEC]; static long GSN[2][NSEC];
-static int gen_lookup(int t,int sec,const uint8_t*sha20,long long*goff,int*len){
+#define MAXGEN 8
+static int GSFD[2][MAXGEN][NSEC]; static long GSN[2][MAXGEN][NSEC];
+static int gen_lookup_g(int t,int g,int sec,const uint8_t*sha20,long long*goff,int*len){
   if(!LAYERED) return 0;
-  if(GSFD[t][sec]==0){
-    char p[600]; snprintf(p,sizeof p,"%s/%s_gen1/%s_%d.sidx",LAYERED,TYPES[t],TYPES[t],sec);
+  if(GSFD[t][g][sec]==0){
+    char p[600]; snprintf(p,sizeof p,"%s/%s_gen%d/%s_%d.sidx",LAYERED,TYPES[t],g,TYPES[t],sec);
     int fd=open(p,O_RDONLY); struct stat st;
-    if(fd<0){ if(errno==EMFILE||errno==ENFILE){ fprintf(stderr,"FATAL: fd limit hit opening %s -- raise RLIMIT_NOFILE (miss would be silently mis-read as no-parent)\n",p); exit(3);} GSFD[t][sec]=-1; return 0; }
-    if(fstat(fd,&st)!=0){ close(fd); GSFD[t][sec]=-1; return 0; }
-    GSFD[t][sec]=fd; GSN[t][sec]=st.st_size/32;
+    if(fd<0){ if(errno==EMFILE||errno==ENFILE){ fprintf(stderr,"FATAL: fd limit hit opening %s -- raise RLIMIT_NOFILE (miss would be silently mis-read as no-parent)\n",p); exit(3);} GSFD[t][g][sec]=-1; return 0; }
+    if(fstat(fd,&st)!=0){ close(fd); GSFD[t][g][sec]=-1; return 0; }
+    GSFD[t][g][sec]=fd; GSN[t][g][sec]=st.st_size/32;
   }
-  if(GSFD[t][sec]==-1) return 0;
-  int fd=GSFD[t][sec]; long lo=0,hi=GSN[t][sec]-1; uint8_t rec[32];
+  if(GSFD[t][g][sec]==-1) return 0;
+  int fd=GSFD[t][g][sec]; long lo=0,hi=GSN[t][g][sec]-1; uint8_t rec[32];
   while(lo<=hi){ long mid=(lo+hi)/2; if(pread(fd,rec,32,(off_t)mid*32)!=32) return 0;
     int c=memcmp(rec,sha20,20);
     if(c==0){ unsigned long long o; unsigned int l; memcpy(&o,rec+20,8); memcpy(&l,rec+28,4);
-      build_segs(t,sec); long long bs=(SEG[t][sec].n>0)?SEG[t][sec].s[0].size:0;
-      *goff=(long long)o+bs; *len=(int)l; return 1; }
+      build_segs(t,sec);                                   /* gen g == seg[g]; goff = seg[g].base + local */
+      long long base=(g<SEG[t][sec].n)?SEG[t][sec].s[g].base:((SEG[t][sec].n>0)?SEG[t][sec].s[0].size:0);
+      *goff=(long long)o+base; *len=(int)l; return 1; }
     if(c<0) lo=mid+1; else hi=mid-1; }
   return 0;
 }
@@ -158,13 +160,18 @@ static long getObj(int t,const char*sha40,uint8_t*out,size_t cap){
   int sec=sha[0]%NSEC;                     /* Perl: hex(substr($h,0,2)) = first byte; %128 */
   long r=getContent(t,sec,sha,out,cap);    /* primary: hash-indexed content, SSD */
   if(r>=0 || !HAVEFB) return r;
-  long long goff; int len;                 /* fallback: base offset (sha1o), then gen sidx */
-  if(!lookup(t,sec,sha,&goff,&len) && !gen_lookup(t,sec,sha,&goff,&len)) return -1;
-  static uint8_t cbuf[1<<26];
-  long rr=readObj(t,sec,goff,len,cbuf,sizeof cbuf); if(rr<0) return -1;
-  rr=clzf(cbuf,rr,out,cap);
-  if(rr>=0){ FBCNT[t]++; if(FBLOG){ fprintf(FBLOG,"%s %s\n",TYPES[t],sha40); fflush(FBLOG); } }
-  return rr;
+  static uint8_t cbuf[1<<26]; long long goff; int len;
+  if(lookup(t,sec,sha,&goff,&len)){        /* base offset (sha1o) */
+    long rr=readObj(t,sec,goff,len,cbuf,sizeof cbuf);
+    if(rr>=0){ long dr=clzf(cbuf,rr,out,cap); if(dr>=0){ FBCNT[t]++; if(FBLOG){fprintf(FBLOG,"%s %s\n",TYPES[t],sha40);fflush(FBLOG);} return dr; } } }
+  build_segs(t,sec);                       /* DECODEFAIL-FALLTHROUGH: gen1..N, skip undecodable -> clean later gen wins */
+  for(int g=1; g<MAXGEN && g<SEG[t][sec].n; g++){
+    if(!gen_lookup_g(t,g,sec,sha,&goff,&len)) continue;
+    long rr=readObj(t,sec,goff,len,cbuf,sizeof cbuf); if(rr<0) continue;
+    long dr=clzf(cbuf,rr,out,cap);
+    if(dr>=0){ FBCNT[t]++; if(FBLOG){fprintf(FBLOG,"%s %s\n",TYPES[t],sha40);fflush(FBLOG);} return dr; }
+  }
+  return -1;                               /* not resolvable in any layer (absent or all decode-failed) */
 }
 
 /* ---------- minimal chained hash: key bytes -> Names list or sha ---------- */

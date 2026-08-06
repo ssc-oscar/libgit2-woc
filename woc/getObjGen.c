@@ -74,17 +74,20 @@ static void open_tch(int sec){ if(TCH[sec])return; char p[600]; snprintf(p,sizeo
 static const uint8_t* berdec(const uint8_t*p,const uint8_t*e,unsigned long*v){ unsigned long x=0; while(p<e){ x=(x<<7)|(*p&0x7f); if(!(*p++&0x80))break; } *v=x; return p; }
 static int lookup(int sec,const uint8_t*sha20,long long*goff,int*len){ open_tch(sec); TCHDB*h=TCH[sec]; if(h==(TCHDB*)-1||!h)return 0;
   int sz; void*v=tchdbget(h,sha20,20,&sz); if(!v)return 0; unsigned long o,l; const uint8_t*p=v,*e=(uint8_t*)v+sz; p=berdec(p,e,&o); berdec(p,e,&l); *goff=o; *len=(int)l; free(v); return 1; }
-/* ---------- gen sidx ---------- */
-static int GSFD[NSEC]; static long GSN[NSEC];
-static int gen_lookup(int sec,const uint8_t*sha20,long long*goff,int*len){ if(!LAYERED)return 0;
-  if(GSFD[sec]==0){ char p[600]; snprintf(p,sizeof p,"%s/%s_gen1/%s_%d.sidx",LAYERED,TYPE,TYPE,sec);
+/* ---------- gen sidx (per layer: gen1,gen2,... == seg index 1,2,... after base=seg0) ---------- */
+#define MAXGEN 8
+static int GSFD[MAXGEN][NSEC]; static long GSN[MAXGEN][NSEC];
+static int gen_lookup_g(int g,int sec,const uint8_t*sha20,long long*goff,int*len){ if(!LAYERED)return 0;
+  if(GSFD[g][sec]==0){ char p[600]; snprintf(p,sizeof p,"%s/%s_gen%d/%s_%d.sidx",LAYERED,TYPE,g,TYPE,sec);
     int fd=open(p,O_RDONLY); struct stat st;
-    if(fd<0){ if(errno==EMFILE||errno==ENFILE){ fprintf(stderr,"FATAL: fd limit -- raise RLIMIT_NOFILE\n"); exit(3);} GSFD[sec]=-1; return 0; }
-    if(fstat(fd,&st)!=0){ close(fd); GSFD[sec]=-1; return 0; } GSFD[sec]=fd; GSN[sec]=st.st_size/32; }
-  if(GSFD[sec]==-1)return 0; int fd=GSFD[sec]; long lo=0,hi=GSN[sec]-1; uint8_t rec[32];
+    if(fd<0){ if(errno==EMFILE||errno==ENFILE){ fprintf(stderr,"FATAL: fd limit -- raise RLIMIT_NOFILE\n"); exit(3);} GSFD[g][sec]=-1; return 0; }
+    if(fstat(fd,&st)!=0){ close(fd); GSFD[g][sec]=-1; return 0; } GSFD[g][sec]=fd; GSN[g][sec]=st.st_size/32; }
+  if(GSFD[g][sec]==-1)return 0; int fd=GSFD[g][sec]; long lo=0,hi=GSN[g][sec]-1; uint8_t rec[32];
   while(lo<=hi){ long mid=(lo+hi)/2; if(pread(fd,rec,32,(off_t)mid*32)!=32)return 0; int c=memcmp(rec,sha20,20);
     if(c==0){ unsigned long long o; unsigned int l; memcpy(&o,rec+20,8); memcpy(&l,rec+28,4);
-      build_segs(sec); long long bs=(SEG[sec].n>0)?SEG[sec].s[0].size:0; *goff=(long long)o+bs; *len=(int)l; return 1; }
+      build_segs(sec);                                     /* gen g == seg[g]; goff = seg[g].base + local */
+      long long base=(g<SEG[sec].n)?SEG[sec].s[g].base:((SEG[sec].n>0)?SEG[sec].s[0].size:0);
+      *goff=(long long)o+base; *len=(int)l; return 1; }
     if(c<0)lo=mid+1; else hi=mid-1; } return 0; }
 
 static int fromhex(const char*s,uint8_t*o){ for(int i=0;i<20;i++){int a=s[2*i],b=s[2*i+1]; a=a<='9'?a-'0':(a|32)-'a'+10; b=b<='9'?b-'0':(b|32)-'a'+10; if(a<0||a>15||b<0||b>15)return 0; o[i]=(a<<4)|b;} return 1; }
@@ -122,10 +125,16 @@ static void scan_gen(int sec){
 static long getObj(const char*sha40,uint8_t*out,size_t cap){
   uint8_t sha[20]; if(!fromhex(sha40,sha)) return -1; int sec=sha[0]%NSEC;
   long r=getContent(sec,sha,out,cap); if(r>=0) return r;   /* base content tch (its own clzf; miss->fall through) */
-  long long goff; int len; if(!lookup(sec,sha,&goff,&len) && !gen_lookup(sec,sha,&goff,&len)) return -1;
-  static uint8_t cbuf[1<<26]; long rr=readObj(sec,goff,len,cbuf,sizeof cbuf); if(rr<0) return -2;
-  long dr=clzf(cbuf,rr,out,cap); if(dr<0) return -3;
-  return dr;
+  static uint8_t cbuf[1<<26]; long long goff; int len, seen=0;
+  if(lookup(sec,sha,&goff,&len)){ seen=1; long rr=readObj(sec,goff,len,cbuf,sizeof cbuf);   /* base offset */
+    if(rr>=0){ long dr=clzf(cbuf,rr,out,cap); if(dr>=0) return dr; } }                        /* decodefail -> fall through */
+  build_segs(sec);                                          /* DECODEFAIL-FALLTHROUGH: try gen1..N, skip undecodable */
+  for(int g=1; g<MAXGEN && g<SEG[sec].n; g++){              /*   -> a clean later gen (or V2608 fix layer) overrides   */
+    if(!gen_lookup_g(g,sec,sha,&goff,&len)) continue; seen=1;   /*     a corrupt earlier gen record.                   */
+    long rr=readObj(sec,goff,len,cbuf,sizeof cbuf); if(rr<0) continue;
+    long dr=clzf(cbuf,rr,out,cap); if(dr>=0) return dr;
+  }
+  return seen ? -3 : -1;    /* -3 = found but no layer decoded; -1 = not found in any layer; -2 folded into -3 */
 }
 
 static const char B64[]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
