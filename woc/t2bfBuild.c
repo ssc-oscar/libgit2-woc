@@ -33,7 +33,7 @@ static long clzf(const uint8_t*in,size_t n,uint8_t*out,size_t outcap){
 static void tohex(const uint8_t*b,char*o){ static const char*h="0123456789abcdef"; for(int i=0;i<20;i++){o[2*i]=h[b[i]>>4];o[2*i+1]=h[b[i]&15];} o[40]=0; }
 
 int main(int argc,char**argv){
-  if(argc<3){ fprintf(stderr,"usage: t2bfBuild <idx> <bin> [t2ct-complement-out]\n"); return 1; }
+  if(argc<3){ fprintf(stderr,"usage: t2bfBuild <idx> <bin> [t2ct-complement-out] [unknown-out] [gitlink-out]\n"); return 1; }
   FILE*I=fopen(argv[1],"r"); if(!I){ perror(argv[1]); return 2; }
   int b=open(argv[2],O_RDONLY); if(b<0){ perror(argv[2]); return 2; }
   /* optional: subtree edges with a NON-canonical tree mode (type 0040000 but not exactly 040000) --
@@ -44,6 +44,9 @@ int main(int argc,char**argv){
    * -> parent;sha;mode;name, so their true object type can be resolved against the store (are they
    * blobs?) instead of guessed. Non-standard modes from imported/malformed trees land here. */
   FILE*UF = (argc>4) ? fopen(argv[4],"a") : 0;
+  /* optional: GITLINK-only stream (type bits 0160000, incl 160xxx variants) -> parent;child_sha;name.
+   * The glSet gitlink pass runs with stdout -> /dev/null so ONLY this tiny stream is written. */
+  FILE*GL = (argc>5) ? fopen(argv[5],"a") : 0;
   posix_fadvise(b,0,0,POSIX_FADV_SEQUENTIAL);   /* per-tree preads then hit readahead cache */
   static uint8_t cbuf[1<<26], out[1<<26];
   char *ob=malloc(1<<22); if(ob) setvbuf(stdout,ob,_IOFBF,1<<22);
@@ -70,7 +73,10 @@ int main(int argc,char**argv){
       }
       else if(typ==0100000){ if(mode==0100755) m_exec++; else m_file++; }
       else if(typ==0120000) m_link++;
-      else if(typ==0160000) m_gitlink++;        /* gitlink -> a COMMIT, not a blob */
+      else if(typ==0160000){ m_gitlink++;       /* gitlink -> a COMMIT, not a blob */
+        if(GL){ tohex(sha,chex); fputs(phex,GL); putc(';',GL); fputs(chex,GL); putc(';',GL);
+          if(memchr(out+ns,'\n',nl)||memchr(out+ns,'\r',nl)){ for(long i=ns;i<ns+nl;i++){int ch=out[i];putc((ch=='\n'||ch=='\r')?'?':ch,GL);} }
+          else fwrite(out+ns,1,nl,GL); putc('\n',GL); } }
       else { m_other++;                         /* UNKNOWN type mask -> resolve via store, don't guess */
         if(UF){ tohex(sha,chex); fputs(phex,UF); putc(';',UF); fputs(chex,UF); fprintf(UF,";%06o;",mode);
           if(memchr(out+ns,'\n',nl)||memchr(out+ns,'\r',nl)){ for(long i=ns;i<ns+nl;i++){int ch=out[i];putc((ch=='\n'||ch=='\r')?'?':ch,UF);} }
@@ -88,7 +94,7 @@ int main(int argc,char**argv){
       }
     }
   }
-  fclose(I); close(b); if(CF) fclose(CF); if(UF) fclose(UF);
+  fclose(I); close(b); if(CF) fclose(CF); if(UF) fclose(UF); if(GL) fclose(GL);
   fprintf(stderr,"t2bfBuild %s: trees=%lld blobentries=%lld | modes: file=%lld exec=%lld symlink=%lld"
           " | subtree_canonical=%lld subtree_noncanonical(t2ct-missed)=%lld gitlink=%lld other/unknown=%lld\n",
           argv[1],nt,ne,m_file,m_exec,m_link,m_tree,m_treenc,m_gitlink,m_other);
