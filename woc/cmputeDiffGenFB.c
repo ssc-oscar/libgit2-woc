@@ -43,6 +43,7 @@ static const char *PREO, *BASEBIN, *LAYERED;   /* fallback: offset store (HDD fu
 static int HAVEFB=0;
 static unsigned long FBCNT[2];             /* fallback reads: [0]=commit [1]=tree */
 static FILE *FBLOG=0;
+static FILE *GL=0;   /* WOC_C2GL: gitlink (submodule mode 160000) diff stream -> c2gl, kept OUT of c2fbb (stdout) */
 static const char *TYPES[2]={"commit","tree"};
 
 /* ---------- Compress::LZF decompress (verified byte-exact vs Perl) ---------- */
@@ -202,7 +203,7 @@ static int badblob(const uint8_t*sha20){ return BADBLOB && hget(BADBLOB,sha20,20
 static void sanit(char*s){ for(;*s;s++){ if(*s=='\r')*s='_'; else if(*s=='\n')*s='_'; else if(*s==';')*s=':'; } }
 
 /* parse tree content -> maps: mapd(dirsha->names)+mapdI(name->sha); mapf(filesha->names)+mapfI(name->sha) */
-static void getTR(const uint8_t*t,long n,Hash*mapd,Hash*mapdI,Hash*mapf,Hash*mapfI){
+static void getTR(const uint8_t*t,long n,Hash*mapd,Hash*mapdI,Hash*mapf,Hash*mapfI,Hash*mapg,Hash*mapgI){
   long p=0;
   while(p<n){
     long ms=p; while(p<n && t[p]!=' ') p++; if(p>=n)break; /* mode */
@@ -211,6 +212,7 @@ static void getTR(const uint8_t*t,long n,Hash*mapd,Hash*mapdI,Hash*mapf,Hash*map
     char nm[4096]; int nl=p-ns; if(nl>4095)nl=4095; memcpy(nm,t+ns,nl); nm[nl]=0; sanit(nm); p++;
     if(p+20>n) break; const uint8_t*sha=t+p; p+=20;
     if(mode==040000){ HE*e=hput(mapd,sha,20); addname(e,nm); HE*ei=hput(mapdI,(uint8_t*)nm,strlen(nm)); memcpy(ei->sha,sha,20); ei->hassha=1; }
+    else if((mode&0170000)==0160000){ HE*e=hput(mapg,sha,20); addname(e,nm); HE*ei=hput(mapgI,(uint8_t*)nm,strlen(nm)); memcpy(ei->sha,sha,20); ei->hassha=1; }  /* gitlink (submodule) -> c2gl, NOT files/c2fbb */
     else { HE*e=hput(mapf,sha,20); addname(e,nm); HE*ei=hput(mapfI,(uint8_t*)nm,strlen(nm)); memcpy(ei->sha,sha,20); ei->hassha=1; }
   }
 }
@@ -230,6 +232,8 @@ static void printTR(const char*c,const uint8_t*tree,long n,const char*prefix,int
        iterating `tree` (corrupts deep trees -> early loop exit -> under-production). */
       char sh2[41]; tohex(sha,sh2); uint8_t*sub=malloc(1<<26);
       if(sub){ long sn=getObj(1,sh2,sub,1<<26); char npre[8192]; snprintf(npre,sizeof npre,"%s/%s",prefix,nm); printTR(c,sub,sn,npre,created); free(sub); } }
+    else if((mode&0170000)==0160000){ /* gitlink (submodule) -> c2gl, NOT c2fbb */
+      if(GL){ if(created) fprintf(GL,"%s;%s/%s;%s;\n",c,prefix,nm,hx); else fprintf(GL,"%s;%s/%s;;%s\n",c,prefix,nm,hx); } }
     else { if(created) printf("%s;%s/%s;%s;\n",c,prefix,nm,hx); else printf("%s;%s/%s;;%s\n",c,prefix,nm,hx); }
   }
 }
@@ -241,8 +245,9 @@ static void separate2T(const char*c,const char*pre,const char*tHex,const char*tp
   if(tn<0 && strcmp(tHex,EMPTYTREE)) return;
   if(pn<0 && strcmp(tpHex,EMPTYTREE)) return;
   Hash *md=hnew(),*mdI=hnew(),*mf=hnew(),*mfI=hnew(), *pd=hnew(),*pdI=hnew(),*pf=hnew(),*pfI=hnew();
-  if(tn>0) getTR(tb,tn,md,mdI,mf,mfI);
-  if(pn>0) getTR(pb,pn,pd,pdI,pf,pfI);
+  Hash *mg=hnew(),*mgI=hnew(),*pg=hnew(),*pgI=hnew();   /* gitlink buckets -> c2gl */
+  if(tn>0) getTR(tb,tn,md,mdI,mf,mfI,mg,mgI);
+  if(pn>0) getTR(pb,pn,pd,pdI,pf,pfI,pg,pgI);
   /* files in child */
   for(int i=0;i<mf->nb;i++) for(HE*e=mf->b[i];e;e=e->next){ char kH[41]; tohex(e->k,kH);
     HE*pe=hget(pf,e->k,20);
@@ -270,7 +275,17 @@ static void separate2T(const char*c,const char*pre,const char*tHex,const char*tp
   /* deleted dirs */
   for(int i=0;i<pd->nb;i++) for(HE*e=pd->b[i];e;e=e->next){ if(hget(md,e->k,20))continue; char v0H[41];tohex(e->k,v0H);
     for(Name*n=e->names;n;n=n->next){ if(!hget(mdI,(uint8_t*)n->s,strlen(n->s))){ static uint8_t sub[1<<26]; long sn=getObj(1,v0H,sub,sizeof sub); char npre[8192]; snprintf(npre,sizeof npre,"%s/%s",pre,n->s); printTR(c,sub,sn,npre,0); } } }
+  /* gitlinks (submodule pointers) -> c2gl, NOT c2fbb. name-based diff (add/change/delete by path). */
+  if(GL){
+    for(int i=0;i<mg->nb;i++) for(HE*e=mg->b[i];e;e=e->next){ char kH[41];tohex(e->k,kH);
+      for(Name*n=e->names;n;n=n->next){ HE*x=hget(pgI,(uint8_t*)n->s,strlen(n->s));
+        if(x){ if(memcmp(x->sha,e->k,20)){ char oh[41];tohex(x->sha,oh); fprintf(GL,"%s;%s/%s;%s;%s\n",c,pre,n->s,kH,oh);} }
+        else fprintf(GL,"%s;%s/%s;%s;\n",c,pre,n->s,kH); } }
+    for(int i=0;i<pg->nb;i++) for(HE*e=pg->b[i];e;e=e->next){ char kH[41];tohex(e->k,kH);
+      for(Name*n=e->names;n;n=n->next){ if(!hget(mgI,(uint8_t*)n->s,strlen(n->s))) fprintf(GL,"%s;%s/%s;;%s\n",c,pre,n->s,kH); } }
+  }
   hfree(md);hfree(mdI);hfree(mf);hfree(mfI);hfree(pd);hfree(pdI);hfree(pf);hfree(pfI);
+  hfree(mg);hfree(mgI);hfree(pg);hfree(pgI);
 }
 
 /* getCT: read commit, extract tree + ALL parents concatenated (40 hex each). With the
@@ -300,6 +315,7 @@ int main(int argc,char**argv){
   PREC = argv[1];
   if(argc>3){ PREO=argv[2]; BASEBIN=argv[3]; LAYERED=getenv("LAYERED"); HAVEFB=1; }
   const char*fl=getenv("WOC_FBLOG"); if(fl) FBLOG=fopen(fl,"a");
+  const char*gl=getenv("WOC_C2GL"); if(gl) GL=fopen(gl,"a");   /* gitlink diff -> c2gl (submodule pointers), so c2fbb stays gitlink-free */
   load_badblob();
   char line[64], tree[41], treeP[41], curpar[41];
   static char parent[40*512+1], pp2[40*512+1];   /* all parents concatenated */
