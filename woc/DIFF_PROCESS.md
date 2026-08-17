@@ -83,8 +83,11 @@ so left in c2fbb it pollutes the blob axis (b2f/bb2cf/…). Behavior:
 - **without** `WOC_C2GL` → gitlinks are simply DROPPED. **c2fbb is gitlink-free either way.**
 - Validated: non-gitlink commits produce byte-identical c2fbb; the routed sha cross-checks against
   `glSet` (the retro gitlink set on da8). Together: **glSet** cleans already-built tables,
-  **c2gl router** keeps new diffs clean at the source. (The older `cmputeDiff3.perl` printTR does NOT
-  yet drop gitlinks — apply the same `(mode&0170000)==0160000` skip there if it's used for production.)
+  **c2gl router** keeps new diffs clean at the source.
+- `cmputeDiffGenFB` is the SOLE production diff engine and handles both host modes (content-primary
+  `.tch` for the SSD increment subdatabase, offset→goff,len→pread fallback for the da5 full store), so
+  the fix covers all of production. (`cmputeDiff3.perl` is legacy — only `mostShared.sh` + commented
+  slurm examples reference it, never the c2fbb path — so it needs no change.)
 
 ## 5. Distribute shards + drive
 
