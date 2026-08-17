@@ -75,6 +75,17 @@ grep '^large tree:'      .err | awk '{print $5}' | gzip > cLargeFull.V.<sec>.cs 
   to `cLarge` for a separate later pass. Threshold picked from the size/depth distribution
   (`cmputeDiffGen STATS` + `distQuant.sh`; size, not depth, is the cost driver).
 
+## 4b. Gitlinks → c2gl (source-fix router; keeps c2fbb gitlink-free)
+`cmputeDiffGenFB` routes tree entries with git type-bits `0160000` (gitlinks / submodule pointers,
+incl `160xxx` variants) **out of the c2fbb increment**. A gitlink's "blob" is really a *commit* sha,
+so left in c2fbb it pollutes the blob axis (b2f/bb2cf/…). Behavior:
+- `WOC_C2GL=<path>` → gitlink diffs are written there as `commit;path;newGL;oldGL` (a parallel c2gl axis).
+- **without** `WOC_C2GL` → gitlinks are simply DROPPED. **c2fbb is gitlink-free either way.**
+- Validated: non-gitlink commits produce byte-identical c2fbb; the routed sha cross-checks against
+  `glSet` (the retro gitlink set on da8). Together: **glSet** cleans already-built tables,
+  **c2gl router** keeps new diffs clean at the source. (The older `cmputeDiff3.perl` printTR does NOT
+  yet drop gitlinks — apply the same `(mode&0170000)==0160000` skip there if it's used for production.)
+
 ## 5. Distribute shards + drive
 
 128 shards across da3(×3)/da4(×5)/da5(×7), pre-assigned by measured single-stream speed (da5 fastest,
