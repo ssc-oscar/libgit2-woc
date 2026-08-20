@@ -23,7 +23,7 @@ Usage:
     --list         after indexing, list the new object oids+types+sizes
 Prints a one-line summary: wants/haves/pack-bytes/new-objects.
 """
-import sys, os, argparse, subprocess, tempfile, urllib.request, urllib.error, base64, urllib.parse
+import sys, os, argparse, subprocess, tempfile, urllib.request, urllib.error, base64, urllib.parse, random
 
 # ---- WoC P2tips helpers ------------------------------------------------------
 def repo_to_url(repo):
@@ -78,8 +78,30 @@ def _split_auth(url):
         return clean, userinfo
     return url, None
 
+_TOKEN = None
+def _gh_token():
+    """One token per process from a pool (GH_TOKENS_FILE, one per line) or GH_TOKEN.
+    A pool distributes across repos (each fetchNew process = one repo) to raise the
+    aggregate GitHub ceiling (per-token 5000/hr vs 60/hr unauth per-IP)."""
+    global _TOKEN
+    if _TOKEN is not None:
+        return _TOKEN or None
+    toks = []
+    tf = os.environ.get("GH_TOKENS_FILE")
+    if tf and os.path.exists(tf):
+        toks = [l.strip() for l in open(tf) if l.strip() and not l.startswith("#")]
+    if os.environ.get("GH_TOKEN"):
+        toks.append(os.environ["GH_TOKEN"].strip())
+    _TOKEN = random.choice(toks) if toks else ""
+    return _TOKEN or None
+
 def _req(url, data=None, ctype=None):
     clean, userinfo = _split_auth(url)
+    # centralized auth: if no explicit creds and this is github.com, inject a pooled token
+    if (not userinfo or userinfo == "a:a") and urllib.parse.urlsplit(clean).netloc.endswith("github.com"):
+        tok = _gh_token()
+        if tok:
+            userinfo = "x-access-token:" + tok
     headers = {"Git-Protocol": "version=2", "User-Agent": "git/2.43.5 fetchNew"}
     if data is not None:
         headers["Content-Type"] = ctype
